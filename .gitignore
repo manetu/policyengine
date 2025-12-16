@@ -4,3 +4,4 @@ target/
 .test
 *.out
 .vscode
+.claude

@@ -47,7 +47,8 @@ type Factory struct {
 
 // Backend ...
 type Backend struct {
-	compiler *opa.Compiler
+	compiler       *opa.Compiler
+	mapperCompiler *opa.Compiler
 }
 
 // NewFactory creates a new Factory for the mock backend.
@@ -58,8 +59,11 @@ func NewFactory() backend.Factory {
 // NewBackend creates a new mock Backend with the specified compiler.
 func (f *Factory) NewBackend(compiler *opa.Compiler) (backend.Service, error) {
 	logger.Warn(mockAgent, "Init", "RUNNING IN MOCK MODE. SHOULD NOT BE USED IN PRODUCTION")
+	// Create a separate OPA compiler for mappers, since they don't want/need unsafe builtin exclusions like the policy compiler does
+	mapperCompiler := compiler.Clone(opa.WithDefaultCapabilities())
 	return &Backend{
-		compiler: compiler,
+		compiler:       compiler,
+		mapperCompiler: mapperCompiler,
 	}, nil
 }
 
@@ -368,7 +372,72 @@ func (b *Backend) GetOperation(ctx context.Context, mrn string) (*model.PolicyRe
 	return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, fmt.Sprintf("operation not found: %s", mrn))
 }
 
-// GetMapper retrieves a mapper for the specified domain (not supported in mock backend).
+// GetMapper retrieves a mapper for the specified domain from the mock backend configuration.
 func (b *Backend) GetMapper(ctx context.Context, domainName string) (*model.Mapper, *common.PolicyError) {
-	return nil, common.NewError(events.AccessRecord_BundleReference_UNKNOWN_ERROR, "not supported")
+	mapperConfig := config.VConfig.Get(fmt.Sprintf("%s.mappers", mockDomainCfg))
+	if mapperConfig == nil {
+		return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "no mappers found in mock domain")
+	}
+
+	// Handle both []interface{} (from YAML config) and []map[string]interface{} (from programmatic config)
+	var mapperMap map[string]interface{}
+	switch v := mapperConfig.(type) {
+	case []interface{}:
+		if len(v) == 0 {
+			return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "no mappers found in mock domain")
+		}
+		mapperMap = v[0].(map[string]interface{})
+	case []map[string]interface{}:
+		if len(v) == 0 {
+			return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "no mappers found in mock domain")
+		}
+		mapperMap = v[0]
+	default:
+		return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, fmt.Sprintf("invalid mapper config type: %T", mapperConfig))
+	}
+
+	// Get mapper name and rego
+	mapperName, ok := mapperMap["name"]
+	if !ok {
+		return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "mapper name not found")
+	}
+
+	regoCode, ok := mapperMap["rego"]
+	if !ok {
+		// Try rego_filename
+		regoFilename, ok := mapperMap["rego_filename"]
+		if !ok {
+			return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "mapper rego not found")
+		}
+		// Read from file
+		configfilename := config.VConfig.ConfigFileUsed()
+		dir := filepath.Dir(configfilename)
+		filedata, err := os.ReadFile(filepath.Clean(dir + string(filepath.Separator) + regoFilename.(string)))
+		if err != nil {
+			return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, fmt.Sprintf("failed to read mapper file: %s", err))
+		}
+		regoCode = string(filedata)
+	}
+
+	regoStr := regoCode.(string)
+	if len(regoStr) == 0 {
+		return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "mapper rego is empty")
+	}
+
+	// Compile the mapper
+	mapperID := fmt.Sprintf("mapper.%s", mapperName.(string))
+	modules := map[string]string{
+		mapperID: regoStr,
+	}
+
+	ast, err := b.mapperCompiler.Compile(mapperID, modules)
+	if err != nil {
+		return nil, common.NewError(events.AccessRecord_BundleReference_COMPILATION_ERROR, fmt.Sprintf("compilation failed: %s", err))
+	}
+
+	// Use empty domain name for mock (domainName parameter is ignored in mock mode)
+	return &model.Mapper{
+		Domain: "",
+		Ast:    ast,
+	}, nil
 }

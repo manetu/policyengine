@@ -6,11 +6,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/build"
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/lint"
+	"github.com/manetu/policyengine/cmd/mpe/subcommands/serve"
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/test"
 	"github.com/manetu/policyengine/internal/logging"
 	"github.com/urfave/cli/v3"
@@ -117,6 +119,48 @@ func main() {
 						Action: test.ExecuteEnvoy,
 					},
 				},
+			},
+			{
+				Name:  "serve",
+				Usage: "Creates a decision-point service",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:  "port",
+						Usage: "The TCP port to serve on.",
+						Value: 9000,
+					},
+					&cli.StringFlag{
+						Name:    "protocol",
+						Aliases: []string{"p"},
+						Usage:   "The protocol to serve.  Must be one of 'generic' or 'envoy'",
+						Value:   "generic",
+						Action: func(ctx context.Context, command *cli.Command, s string) error {
+							if s != "generic" && s != "envoy" {
+								return fmt.Errorf("unsupported protocol: %s", s)
+							}
+							return nil
+						},
+					},
+					&cli.StringSliceFlag{
+						Name:    "bundle",
+						Aliases: []string{"b"},
+						Usage:   "Load PolicyDomain bundle from `FILE`.  Can be specified multiple times.",
+					},
+					&cli.StringFlag{
+						Name:    "name",
+						Aliases: []string{"n"},
+						Usage:   "Domain name to use when multiple bundles are provided",
+					},
+					&cli.StringFlag{
+						Name:  "opa-flags",
+						Usage: "Additional flags to pass to Rego mapper execution (default: --v0-compatible). Can also be set via MPE_CLI_OPA_FLAGS environment variable.",
+					},
+					&cli.BoolFlag{
+						Name:  "no-opa-flags",
+						Usage: "Disable all OPA flags (overrides --opa-flags and MPE_CLI_OPA_FLAGS).",
+					},
+				},
+				Action: serve.Execute,
 			},
 			{
 				Name:  "lint",
