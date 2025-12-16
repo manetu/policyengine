@@ -1,0 +1,34 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: v0-mapper-test
+  domain: v0-mapper-test
+spec:
+  mappers:
+    - mrn: "mrn:iam:mapper:test"
+      name: test-mapper
+      rego: |
+        package mapper
+
+        # Simple v0 syntax mapper that transforms Envoy input to PORC
+        # Note: v0 syntax does NOT require 'if' keyword before rule body
+        
+        porc = output {
+          output := {
+            "context": input.context,
+            "operation": input.operation,
+            "principal": input.principal,
+            "resource": input.resource
+          }
+        }
+
+        # Helper rule using v0 syntax (no 'if' keyword)
+        get_principal_name = name {
+          name := input.principal.subject
+        }
+
+        # Another helper rule
+        get_operation = op {
+          op := input.operation
+        }
+

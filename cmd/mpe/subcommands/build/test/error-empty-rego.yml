@@ -1,0 +1,11 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: error-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:empty-filename"
+      name: empty-filename
+      description: "This has an empty rego_filename - should error"
+      rego_filename: ""
+

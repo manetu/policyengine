@@ -1,0 +1,14 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: error-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:both-error"
+      name: both-error
+      description: "This has both rego and rego_filename - should error"
+      rego: |
+        package authz
+        default allow = true
+      rego_filename: "test/mainapi.rego"
+

@@ -367,3 +367,8 @@ func (b *Backend) GetOperation(ctx context.Context, mrn string) (*model.PolicyRe
 
 	return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, fmt.Sprintf("operation not found: %s", mrn))
 }
+
+// GetMapper retrieves a mapper for the specified domain (not supported in mock backend).
+func (b *Backend) GetMapper(ctx context.Context, domainName string) (*model.Mapper, *common.PolicyError) {
+	return nil, common.NewError(events.AccessRecord_BundleReference_UNKNOWN_ERROR, "not supported")
+}

@@ -28,4 +28,5 @@ type Service interface {
 	GetResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError)
 	GetResourceGroup(ctx context.Context, mrn string) (*model.PolicyReference, *common.PolicyError)
 	GetOperation(ctx context.Context, mrn string) (*model.PolicyReference, *common.PolicyError)
+	GetMapper(ctx context.Context, domainName string) (*model.Mapper, *common.PolicyError)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/manetu/policyengine/internal/core/backend/mock"
 	"github.com/manetu/policyengine/internal/logging"
 	"github.com/manetu/policyengine/pkg/core/accesslog"
+	"github.com/manetu/policyengine/pkg/core/backend"
 	"github.com/manetu/policyengine/pkg/core/config"
 	"github.com/manetu/policyengine/pkg/core/options"
 	"github.com/manetu/policyengine/pkg/core/types"
@@ -23,6 +24,7 @@ var agent = "policyengine"
 // PolicyEngine represents a public Policy Engine instance, suitable for use by clients
 type PolicyEngine interface {
 	Authorize(ctx context.Context, porc types.AnyPORC, authzOptions ...options.AuthzOptionsFunc) (bool, error)
+	GetBackend() backend.Service
 }
 
 // PolicyEngineImpl implements the PolicyEngine interface, suitable for wrapping for context management, etc
@@ -74,4 +76,9 @@ func (pe *PolicyEngineImpl) Authorize(ctx context.Context, porc types.AnyPORC, a
 	logger.Debugf(agent, "Authorize", "returned from authorize(): %t", authz)
 
 	return authz, nil
+}
+
+// GetBackend returns the backend service used by this policy engine.
+func (pe *PolicyEngineImpl) GetBackend() backend.Service {
+	return pe.instance.GetBackend()
 }

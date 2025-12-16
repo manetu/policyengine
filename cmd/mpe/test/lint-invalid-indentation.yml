@@ -1,0 +1,8 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+name: test-domain
+  spec:
+    policy-libraries:
+      - mrn: "mrn:iam:library:test"
+

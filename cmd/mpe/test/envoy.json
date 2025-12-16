@@ -1,0 +1,20 @@
+{
+    "destination": {
+        "principal": "spiffe://cluster.local/ns/manetu/sa/petstore"
+    },
+    "request": {
+        "http": {
+            "method": "GET",
+            "path": "/favicon.ico",
+            "headers": {
+                ":method": "GET",
+                ":path": "/favicon.ico"
+            }
+        }
+    },
+    "metadata_context": {},
+    "route_metadata_context": {},
+    "source": {
+        "principal": "spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+    }
+}

@@ -1,11 +1,24 @@
 # Copyright Manetu Inc. All Rights Reserved.
 
 PROJECT_NAME := manetu-go-policyengine
+BINARY_NAME := mpe
+GO_FILES := $(shell find . -name '*.go')
 OUTPUTDIR := target
 
 .PHONY: all clean test goimports staticcheck tests sec-scan protos
 
-all: test test_fips race staticcheck goimports sec-scan
+all: test test_fips race staticcheck goimports sec-scan build
+
+build: $(OUTPUTDIR)/$(BINARY_NAME)
+
+$(OUTPUTDIR)/$(BINARY_NAME): $(GO_FILES) Makefile
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@mkdir -p $(OUTPUTDIR)
+	@GOOS=${GOOS} GOARCH=${GOARCH} go build ${LDFLAGS} -o $@ ./cmd/mpe
+
+lint: ## Lint the files
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@golint -set_exit_status ./...
 
 test: ## Run unittests
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"

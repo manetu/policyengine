@@ -1,0 +1,114 @@
+apiVersion: iamlite.manetu.io/v1alpha4
+kind: PolicyDomain
+metadata:
+  name: v1alpha4-test
+spec:
+  policies:
+    - mrn: &allow-all "mrn:iam:policy:allow-all"
+      name: allow-all
+      description: "This policy allows full access"
+      rego: |
+        package authz
+        default allow = true
+
+    - mrn: &no-access "mrn:iam:policy:no-access"
+      name: no-access
+      description: "This policy denies all access requests"
+      rego: |
+        package authz
+        default allow = false
+
+    - mrn: &read-only "mrn:iam:policy:read-only"
+      name: read-only
+      description: "This policy has read-only access"
+      rego: |
+        package authz
+
+        default allow = false
+
+        allow {
+            input.operation == "read"
+        }
+
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      description: "This role is appropriate for an administrator"
+      policy: *allow-all
+
+  groups:
+    - mrn: "mrn:iam:group:admin"
+      name: admin
+      description: "This group is appropriate for administrators"
+      roles:
+        - "mrn:iam:role:admin"
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:default"
+      name: default
+      description: "Default resource group"
+      default: true
+      policy: *allow-all
+
+    - mrn: "mrn:iam:resource-group:sensitive"
+      name: sensitive
+      description: "Sensitive resources requiring clearance"
+      policy: *read-only
+
+    - mrn: "mrn:iam:resource-group:restricted"
+      name: restricted
+      description: "Restricted resources with no access"
+      policy: *no-access
+
+  resources:
+    - name: sensitive-data
+      description: "Sensitive data resources"
+      selector:
+        - "mrn:data:sensitive:.*"
+      group: "mrn:iam:resource-group:sensitive"
+      annotations:
+        - name: classification
+          value: "\"HIGH\""
+
+    - name: restricted-data
+      description: "Restricted data resources"
+      selector:
+        - "mrn:data:restricted:.*"
+        - "mrn:secret:.*"
+      group: "mrn:iam:resource-group:restricted"
+      annotations:
+        - name: classification
+          value: "\"MAXIMUM\""
+        - name: audit_required
+          value: "true"
+
+  scopes:
+    - mrn: "mrn:iam:scope:api"
+      name: api
+      description: "Full API access"
+      policy: *allow-all
+
+  operations:
+    - name: api
+      selector:
+        - ".*"
+      policy: *allow-all
+
+  mappers:
+    - name: test-mapper
+      selector:
+        - ".*"
+      rego: |
+        package mapper
+
+        import rego.v1
+
+        porc := {
+             "principal": {},
+             "operation": "test",
+             "resource": {
+                "id": "test-resource",
+                "group": "mrn:iam:resource-group:default"
+              },
+             "context": input,
+        }
