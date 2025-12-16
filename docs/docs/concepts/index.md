@@ -77,6 +77,12 @@ These features span multiple phases and entity types.
 
 Annotations are flexible key-value pairs that can be attached to many entity types including roles, groups, scopes, resource groups, and resources. They support an inheritance hierarchy where more specific definitions override less specific ones, enabling powerful attribute-based access control patterns.
 
+## Audit & Observability
+
+- **[Audit & Access Records](/concepts/audit)**: Every decision generates a normalized AccessRecord
+
+Every PDP decision produces an **AccessRecord** that captures the input PORC, the top-level decision, and details about each policy evaluated (MRN, cryptographic fingerprint, outcome, and phase). This normalized output enables compliance reporting, anomaly detection, forensic analysis, and policy replay across distributed systems.
+
 ## Special-Purpose Features
 
 - **[Mappers](/concepts/mappers)**: Transform external inputs to PORC expressions (only needed for Envoy/Istio integration or other fixed-protocol systems)
@@ -136,6 +142,7 @@ flowchart TB
    - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
    - Phase 4: Scope policies (access-method constraints)
 5. **Decision returned**: GRANT or DENY
+6. **[AccessRecord](/concepts/audit) emitted**: Captures PORC, decision, and all evaluated policies
 
 ## Key Principles
 
