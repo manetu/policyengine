@@ -4,8 +4,9 @@ PROJECT_NAME := manetu-go-policyengine
 BINARY_NAME := mpe
 GO_FILES := $(shell find . -name '*.go')
 OUTPUTDIR := target
+DOCKER_IMAGE ?= ghcr.io/manetu/policyengine
 
-.PHONY: all clean test goimports staticcheck tests sec-scan protos
+.PHONY: all clean test goimports staticcheck tests sec-scan protos docker
 
 all: test test_fips race staticcheck goimports sec-scan build
 
@@ -15,6 +16,14 @@ $(OUTPUTDIR)/$(BINARY_NAME): $(GO_FILES) Makefile
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@mkdir -p $(OUTPUTDIR)
 	@GOOS=${GOOS} GOARCH=${GOARCH} go build ${LDFLAGS} -o $@ ./cmd/mpe
+
+docker: ## Build and publish Docker container using ko (requires DOCKER_IMAGE env var, e.g., DOCKER_IMAGE=ghcr.io/manetu/policyengine)
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@if [ -z "$(DOCKER_IMAGE)" ]; then \
+		echo "Error: DOCKER_IMAGE is required (e.g., DOCKER_IMAGE=ghcr.io/manetu/policyengine)"; \
+		exit 1; \
+	fi
+	@KO_DOCKER_REPO=$(DOCKER_IMAGE) ko build --platform=linux/amd64,linux/arm64 --bare --push github.com/manetu/policyengine/cmd/mpe
 
 lint: ## Lint the files
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"

@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Manetu Policy Decision Point Service
+  description: API Specification for Policy Decisions
+  version: 0.0.1
+paths:
+  /decision:
+    post:
+      summary: Invokes a policy decision
+      operationId: decision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/decision"
+components:
+  schemas:
+    decision:
+      properties:
+        allow:
+          type: boolean
