@@ -11,9 +11,9 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 VERSION_PKG := github.com/manetu/policyengine/cmd/mpe/version
 LDFLAGS := -ldflags "-X $(VERSION_PKG).Version=$(VERSION)"
 
-.PHONY: all clean test goimports staticcheck tests sec-scan protos docker
+.PHONY: all clean test goimports staticcheck tests sec-scan protos docker docs-lint
 
-all: test test_fips race staticcheck goimports sec-scan build
+all: test test_fips race staticcheck goimports sec-scan build docs-lint
 
 build: $(OUTPUTDIR)/$(BINARY_NAME)
 
@@ -78,10 +78,15 @@ clean: ## Remove previous build
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@go clean -testcache
 	-@rm -rf target
+	@$(MAKE) -C docs clean
 
 sec-scan: ## Run gosec; see https://github.com/securego/gosec
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@gosec --exclude-dir=pkg/protos ./...
+
+docs-lint: ## Lint and build the documentation site
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@$(MAKE) -C docs lint
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

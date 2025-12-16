@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Logo 6: Concentric Policy Rings
+       Concept: Combines the layered concept from Logo 1 with the radial
+       symmetry from Logo 5. Four concentric arcs represent the policy
+       phases, all protecting a central decision core. The broken rings
+       suggest controlled access points.
+  -->
+
+  <!-- Outer ring - Phase 1 (Operations) -->
+  <path d="M100 20 A80 80 0 0 1 180 100"
+        stroke="#00C4AB"
+        stroke-width="10"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Second ring - Phase 2 (Identity) -->
+  <path d="M180 100 A80 80 0 0 1 100 180"
+        stroke="#03A3ED"
+        stroke-width="10"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Third ring - Phase 3 (Resources) -->
+  <path d="M100 180 A80 80 0 0 1 20 100"
+        stroke="#F6921E"
+        stroke-width="10"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Fourth ring - Phase 4 (Scopes) -->
+  <path d="M20 100 A80 80 0 0 1 100 20"
+        stroke="#1A145F"
+        stroke-width="10"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Inner ring layer -->
+  <circle cx="100" cy="100" r="50"
+          fill="none"
+          stroke="#1A145F"
+          stroke-width="6"
+          opacity="0.3"/>
+
+  <!-- Central core -->
+  <circle cx="100" cy="100" r="32" fill="#1A145F"/>
+
+  <!-- Inner accent ring -->
+  <circle cx="100" cy="100" r="24"
+          fill="none"
+          stroke="#03A3ED"
+          stroke-width="2"/>
+
+  <!-- Checkmark - GRANT decision -->
+  <path d="M84 100 L94 110 L116 88"
+        stroke="#00C4AB"
+        stroke-width="5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"/>
+</svg>

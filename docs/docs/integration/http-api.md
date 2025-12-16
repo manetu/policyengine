@@ -1,0 +1,453 @@
+---
+sidebar_position: 3
+---
+
+# HTTP API
+
+The HTTP API provides a language-agnostic interface for policy decisions. Choose this approach when:
+
+- **Non-Go language** — Your application is written in Python, Java, TypeScript, or another language
+- **Separate PDP service** — You prefer running the PolicyEngine as an independent service rather than embedding it
+- **Premium compatibility** — You want to integrate with the Premium Edition, or keep the option open for future migration
+
+## Using `mpe serve`
+
+The `mpe serve` command runs a standalone HTTP server for policy decisions:
+
+```bash
+mpe serve -b my-domain.yml --port 9000
+```
+
+This works for both **local development** and **production deployments**:
+
+| Use Case | Description |
+|----------|-------------|
+| **Development** | Test HTTP-based PEP integration locally before deploying |
+| **Production (OSS)** | Run as a production PDP when Premium features aren't needed |
+| **Premium migration** | Develop against the same API that Premium exposes |
+
+The server exposes an HTTP endpoint at `POST /decision`. A SwaggerUI interface is available at http://localhost:9000/swagger-ui/ for interactive testing.
+
+See [mpe serve](/reference/cli/serve) for full server configuration options.
+
+## API Specification
+
+### Endpoint
+
+```
+POST /decision
+Content-Type: application/json
+```
+
+### Request Body
+
+A PORC expression as JSON:
+
+```json
+{
+  "principal": {
+    "sub": "user@example.com",
+    "mroles": ["mrn:iam:example.com:role:developer"],
+    "mclearance": "MODERATE"
+  },
+  "operation": "api:documents:read",
+  "resource": "mrn:app:example:document:12345",
+  "context": {
+    "source_ip": "192.168.1.100"
+  }
+}
+```
+
+### Response Body
+
+```json
+{
+  "allow": true
+}
+```
+
+## Client Examples
+
+### cURL  
+
+```bash
+curl -X POST http://localhost:9000/decision \
+  -H "Content-Type: application/json" \
+  -d '{
+    "principal": {
+      "sub": "user@example.com",
+      "mroles": ["mrn:iam:example.com:role:developer"]
+    },
+    "operation": "api:documents:read",
+    "resource": "mrn:app:example:document:12345",
+    "context": {}
+  }'
+```
+
+### Go
+
+```go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+)
+
+type PDPClient struct {
+    baseURL    string
+    httpClient *http.Client
+}
+
+func NewPDPClient(baseURL string) *PDPClient {
+    return &PDPClient{
+        baseURL:    baseURL,
+        httpClient: &http.Client{},
+    }
+}
+
+type DecisionResponse struct {
+    Allow bool `json:"allow"`
+}
+
+func (c *PDPClient) Authorize(porc map[string]interface{}) (bool, error) {
+    body, err := json.Marshal(porc)
+    if err != nil {
+        return false, fmt.Errorf("failed to marshal PORC: %w", err)
+    }
+
+    req, err := http.NewRequest("POST", c.baseURL+"/decision", bytes.NewReader(body))
+    if err != nil {
+        return false, fmt.Errorf("failed to create request: %w", err)
+    }
+    req.Header.Set("Content-Type", "application/json")
+
+    resp, err := c.httpClient.Do(req)
+    if err != nil {
+        return false, fmt.Errorf("failed to call PDP: %w", err)
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        body, _ := io.ReadAll(resp.Body)
+        return false, fmt.Errorf("PDP returned status %d: %s", resp.StatusCode, string(body))
+    }
+
+    var decision DecisionResponse
+    if err := json.NewDecoder(resp.Body).Decode(&decision); err != nil {
+        return false, fmt.Errorf("failed to decode response: %w", err)
+    }
+
+    return decision.Allow, nil
+}
+
+func main() {
+    client := NewPDPClient("http://localhost:9000")
+
+    porc := map[string]interface{}{
+        "principal": map[string]interface{}{
+            "sub":    "user@example.com",
+            "mroles": []string{"mrn:iam:example.com:role:developer"},
+        },
+        "operation": "api:documents:read",
+        "resource":  "mrn:app:example:document:12345",
+        "context":   map[string]interface{}{},
+    }
+
+    allowed, err := client.Authorize(porc)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    fmt.Printf("Decision: %v\n", allowed)
+}
+```
+
+### Python
+
+```python
+import requests
+from typing import Any
+
+class PDPClient:
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.session = requests.Session()
+
+    def authorize(self, porc: dict[str, Any]) -> bool:
+        """
+        Call the PDP to authorize a request.
+
+        Args:
+            porc: A PORC expression dictionary
+
+        Returns:
+            True if access is granted, False otherwise
+
+        Raises:
+            requests.RequestException: If the HTTP request fails
+        """
+        response = self.session.post(
+            f"{self.base_url}/decision",
+            json=porc,
+            headers={"Content-Type": "application/json"}
+        )
+        response.raise_for_status()
+        return response.json().get("allow", False)
+
+
+# Example usage
+if __name__ == "__main__":
+    client = PDPClient("http://localhost:9000")
+
+    porc = {
+        "principal": {
+            "sub": "user@example.com",
+            "mroles": ["mrn:iam:example.com:role:developer"],
+            "mclearance": "MODERATE"
+        },
+        "operation": "api:documents:read",
+        "resource": "mrn:app:example:document:12345",
+        "context": {
+            "source_ip": "192.168.1.100"
+        }
+    }
+
+    try:
+        allowed = client.authorize(porc)
+        print(f"Access {'GRANTED' if allowed else 'DENIED'}")
+    except requests.RequestException as e:
+        print(f"PDP error: {e}")
+```
+
+### JavaScript/TypeScript
+
+```typescript
+interface Principal {
+  sub: string;
+  mroles?: string[];
+  mgroups?: string[];
+  scopes?: string[];
+  mclearance?: string;
+  mannotations?: Record<string, unknown>;
+}
+
+interface PORC {
+  principal: Principal;
+  operation: string;
+  resource: string | Record<string, unknown>;
+  context?: Record<string, unknown>;
+}
+
+interface DecisionResponse {
+  allow: boolean;
+}
+
+class PDPClient {
+  constructor(private baseUrl: string) {}
+
+  async authorize(porc: PORC): Promise<boolean> {
+    const response = await fetch(`${this.baseUrl}/decision`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(porc),
+    });
+
+    if (!response.ok) {
+      throw new Error(`PDP returned status ${response.status}`);
+    }
+
+    const decision: DecisionResponse = await response.json();
+    return decision.allow;
+  }
+}
+
+// Example usage
+async function main() {
+  const client = new PDPClient('http://localhost:9000');
+
+  const porc: PORC = {
+    principal: {
+      sub: 'user@example.com',
+      mroles: ['mrn:iam:example.com:role:developer'],
+      mclearance: 'MODERATE',
+    },
+    operation: 'api:documents:read',
+    resource: 'mrn:app:example:document:12345',
+    context: {
+      source_ip: '192.168.1.100',
+    },
+  };
+
+  try {
+    const allowed = await client.authorize(porc);
+    console.log(`Access ${allowed ? 'GRANTED' : 'DENIED'}`);
+  } catch (error) {
+    console.error('PDP error:', error);
+  }
+}
+
+main();
+```
+
+### Java
+
+```java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+
+public class PDPClient {
+    private final String baseUrl;
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
+
+    public PDPClient(String baseUrl) {
+        this.baseUrl = baseUrl;
+        this.httpClient = HttpClient.newHttpClient();
+        this.objectMapper = new ObjectMapper();
+    }
+
+    public boolean authorize(Map<String, Object> porc) throws Exception {
+        String body = objectMapper.writeValueAsString(porc);
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + "/decision"))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build();
+
+        HttpResponse<String> response = httpClient.send(
+            request,
+            HttpResponse.BodyHandlers.ofString()
+        );
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("PDP returned status " + response.statusCode());
+        }
+
+        Map<String, Object> decision = objectMapper.readValue(
+            response.body(),
+            Map.class
+        );
+
+        return Boolean.TRUE.equals(decision.get("allow"));
+    }
+
+    public static void main(String[] args) throws Exception {
+        PDPClient client = new PDPClient("http://localhost:9000");
+
+        Map<String, Object> porc = Map.of(
+            "principal", Map.of(
+                "sub", "user@example.com",
+                "mroles", java.util.List.of("mrn:iam:example.com:role:developer"),
+                "mclearance", "MODERATE"
+            ),
+            "operation", "api:documents:read",
+            "resource", "mrn:app:example:document:12345",
+            "context", Map.of(
+                "source_ip", "192.168.1.100"
+            )
+        );
+
+        boolean allowed = client.authorize(porc);
+        System.out.println("Access " + (allowed ? "GRANTED" : "DENIED"));
+    }
+}
+```
+
+## Production Considerations
+
+### Connection Pooling
+
+Reuse HTTP connections for better performance:
+
+```python
+# Python - reuse session
+client = PDPClient("http://localhost:9000")
+# session is reused across calls
+
+# Go - configure transport
+httpClient := &http.Client{
+    Transport: &http.Transport{
+        MaxIdleConns:        100,
+        MaxIdleConnsPerHost: 100,
+    },
+}
+```
+
+### Timeouts
+
+Configure appropriate timeouts:
+
+```go
+httpClient := &http.Client{
+    Timeout: 500 * time.Millisecond,
+}
+```
+
+### Retries
+
+Consider retry logic for transient failures:
+
+```python
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+session = requests.Session()
+retries = Retry(total=3, backoff_factor=0.1)
+session.mount('http://', HTTPAdapter(max_retries=retries))
+```
+
+## Comparing Integration Options
+
+| Consideration | [Embedded Go Library](/integration/go-library) | HTTP API with `mpe serve` | HTTP API with Premium |
+|---------------|------------------------------------------------|---------------------------|------------------------|
+| **Language support** | Go only | Any language | Any language |
+| **Deployment model** | In-process | Standalone service | Flexible (standalone or sidecar) |
+| **Latency** | Sub-millisecond | Network round-trip | Depends on deployment |
+| **Scaling** | Scales with application | Independent | Flexible |
+| **Premium features** | Not available | Not available | Available |
+
+### Premium Deployment Options
+
+The Premium Edition can be deployed in multiple configurations:
+
+| Deployment | Latency | Scaling | Best For |
+|------------|---------|---------|----------|
+| **Kubernetes sidecar** | Localhost round-trip | 1:1 with application (Operator-managed) | K8s environments wanting automated scaling |
+| **Standalone service** | Network round-trip | Independent | Non-K8s environments, shared PDP |
+
+Regardless of deployment model, Premium features like centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
+
+### Quick Decision Guide
+
+**Choose the embedded Go library when:**
+- Your application is Go-based
+- You need the absolute lowest latency
+- You don't need Premium features
+- You prefer a simpler deployment without external dependencies
+
+**Choose HTTP API with `mpe serve` when:**
+- Your application is not written in Go
+- You want to share a PDP across multiple services
+- You need to scale the PDP independently of applications
+- You're developing locally before deploying to Premium
+
+**Choose HTTP API with Premium when:**
+- You need Premium features (centralized audit, decision replay, external resolution, policy coordination)
+- You want flexibility in deployment model (sidecar or standalone)
+- You're running in Kubernetes and want Operator-managed sidecar automation (optional)
+
+:::tip Seamless Migration Path
+All HTTP-based options use the same API. You can develop locally with `mpe serve`, then deploy to Premium—whether as a sidecar or standalone service—by updating your endpoint URL. No code changes required.
+:::
