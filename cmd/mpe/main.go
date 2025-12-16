@@ -14,6 +14,7 @@ import (
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/lint"
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/serve"
 	"github.com/manetu/policyengine/cmd/mpe/subcommands/test"
+	"github.com/manetu/policyengine/cmd/mpe/version"
 	"github.com/manetu/policyengine/internal/logging"
 	"github.com/urfave/cli/v3"
 )
@@ -200,6 +201,14 @@ func main() {
 					},
 				},
 				Action: build.Execute,
+			},
+			{
+				Name:  "version",
+				Usage: "Print the version of mpe",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					fmt.Println(version.GetVersion())
+					return nil
+				},
 			},
 		},
 	}

@@ -1,0 +1,248 @@
+name: Release Go
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Verify go.mod
+        run: |
+          echo "Verifying go.mod syntax..."
+          go mod verify
+          go mod tidy
+          if [ -n "$(git diff go.mod go.sum)" ]; then
+            echo "Error: go.mod or go.sum has uncommitted changes"
+            git diff go.mod go.sum
+            exit 1
+          fi
+
+      - name: Check module name
+        run: |
+          MODULE=$(grep '^module' go.mod | awk '{print $2}')
+          echo "Module name: $MODULE"
+          if [ -z "$MODULE" ]; then
+            echo "Error: Could not determine module name from go.mod"
+            exit 1
+          fi
+
+      - name: Validate tag format
+        if: github.event_name == 'release'
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "Release tag: $TAG"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Warning: Tag '$TAG' does not follow semantic versioning (vX.Y.Z)"
+            echo "For pkg.go.dev discovery, tags should follow semantic versioning"
+          fi
+
+      - name: Test module can be downloaded
+        run: |
+          MODULE=$(grep '^module' go.mod | awk '{print $2}')
+          if [ "${{ github.event_name }}" == "release" ]; then
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=$TAG
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          echo "Testing module can be downloaded at version: $VERSION"
+          # Note: This will only work if the tag exists and is pushed
+          # For new releases, the tag should already be created by GitHub
+          go list -m -versions $MODULE@$VERSION || echo "Note: Version may not be available until tag is fully propagated"
+
+  publish-module-info:
+    name: Publish Module Information
+    runs-on: ubuntu-latest
+    needs: validate-release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Get module information
+        id: module-info
+        run: |
+          MODULE=$(grep '^module' go.mod | awk '{print $2}')
+          if [ "${{ github.event_name }}" == "release" ]; then
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=$TAG
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          
+          echo "module=$MODULE" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          echo "Module: $MODULE"
+          echo "Version: $VERSION"
+          echo ""
+          echo "This module will be available on pkg.go.dev at:"
+          echo "https://pkg.go.dev/$MODULE@$VERSION"
+          echo ""
+          echo "Note: It may take a few minutes for pkg.go.dev to index the new version."
+
+      - name: Create release summary
+        run: |
+          MODULE=${{ steps.module-info.outputs.module }}
+          VERSION=${{ steps.module-info.outputs.version }}
+          
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Go Module Release
+          
+          **Module:** \`$MODULE\`
+          **Version:** \`$VERSION\`
+          
+          ### Usage
+          
+          To use this module in your Go project:
+          
+          \`\`\`bash
+          go get $MODULE@$VERSION
+          \`\`\`
+          
+          ### Documentation
+          
+          Documentation will be available on [pkg.go.dev](https://pkg.go.dev/${MODULE}@${VERSION}) once indexed.
+          
+          Note: It may take a few minutes for pkg.go.dev to index the new version.
+          EOF
+
+  build-binaries:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    needs: validate-release
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          # Strip 'v' prefix for artifact naming
+          VERSION_NUM=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_num=$VERSION_NUM" >> $GITHUB_OUTPUT
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          VERSION_NUM=${{ steps.version.outputs.version_num }}
+          VERSION_PKG=github.com/manetu/policyengine/cmd/mpe/version
+          LDFLAGS="-X ${VERSION_PKG}.Version=${VERSION}"
+
+          mkdir -p dist
+          BINARY_NAME=mpe
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            BINARY_NAME=mpe.exe
+          fi
+
+          go build -ldflags "${LDFLAGS}" -o dist/${BINARY_NAME} ./cmd/mpe
+
+      - name: Create archive
+        run: |
+          VERSION_NUM=${{ steps.version.outputs.version_num }}
+          cd dist
+
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            ARCHIVE_NAME="mpe_${VERSION_NUM}_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
+            zip "${ARCHIVE_NAME}" mpe.exe
+          else
+            ARCHIVE_NAME="mpe_${VERSION_NUM}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
+            tar -czvf "${ARCHIVE_NAME}" mpe
+          fi
+
+          echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpe_${{ steps.version.outputs.version_num }}_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: dist/mpe_${{ steps.version.outputs.version_num }}_${{ matrix.goos }}_${{ matrix.goarch }}.*
+
+  upload-release-assets:
+    name: Upload Release Assets
+    runs-on: ubuntu-latest
+    needs: build-binaries
+    if: github.event_name == 'release'
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION_NUM=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_num=$VERSION_NUM" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate checksums
+        run: |
+          VERSION_NUM=${{ steps.version.outputs.version_num }}
+          cd artifacts
+
+          # Collect all archives into one directory
+          mkdir -p ../release
+          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} ../release/ \;
+
+          cd ../release
+          sha256sum * > mpe_${VERSION_NUM}_checksums.txt
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

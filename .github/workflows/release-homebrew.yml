@@ -1,0 +1,146 @@
+name: Release to Homebrew
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  update-homebrew-formula:
+    name: Update Homebrew Formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          # Strip 'v' prefix for Homebrew version
+          VERSION_NUM=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_num=$VERSION_NUM" >> $GITHUB_OUTPUT
+          echo "Version tag: $VERSION"
+          echo "Version number: $VERSION_NUM"
+
+      - name: Download source tarball and calculate SHA256
+        id: sha256
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          TARBALL_URL="https://github.com/manetu/policyengine/archive/refs/tags/${VERSION}.tar.gz"
+          echo "Downloading source tarball from: $TARBALL_URL"
+
+          curl -sL "$TARBALL_URL" -o source.tar.gz
+          SHA256=$(sha256sum source.tar.gz | awk '{print $1}')
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "SHA256: $SHA256"
+
+      - name: Generate Homebrew formula
+        id: formula
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          VERSION_NUM=${{ steps.version.outputs.version_num }}
+          SHA256=${{ steps.sha256.outputs.sha256 }}
+
+          cat > mpe.rb << 'FORMULA_EOF'
+          # typed: false
+          # frozen_string_literal: true
+
+          # Homebrew formula for Manetu Policy Engine CLI
+          # This formula builds from source using Go
+          class Mpe < Formula
+            desc "CLI for the Manetu Policy Engine - policy authoring, testing, and serving"
+            homepage "https://github.com/manetu/policyengine"
+            url "https://github.com/manetu/policyengine/archive/refs/tags/VERSION_PLACEHOLDER.tar.gz"
+            sha256 "SHA256_PLACEHOLDER"
+            license "Apache-2.0"
+            head "https://github.com/manetu/policyengine.git", branch: "master"
+
+            depends_on "go" => :build
+
+            def install
+              ldflags = %W[
+                -s -w
+                -X github.com/manetu/policyengine/cmd/mpe/version.Version=#{version}
+              ]
+              system "go", "build", *std_go_args(ldflags:), "./cmd/mpe"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/mpe version")
+            end
+          end
+          FORMULA_EOF
+
+          # Replace placeholders with actual values
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" mpe.rb
+          sed -i "s/SHA256_PLACEHOLDER/${SHA256}/g" mpe.rb
+
+          echo "Generated formula:"
+          cat mpe.rb
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: manetu/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update formula in tap
+        run: |
+          cp mpe.rb homebrew-tap/Formula/mpe.rb
+
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Check if there are changes
+          if git diff --quiet Formula/mpe.rb; then
+            echo "No changes to formula"
+            exit 0
+          fi
+
+          VERSION=${{ steps.version.outputs.version }}
+          git add Formula/mpe.rb
+          git commit -m "Update mpe to ${VERSION}"
+          git push
+
+      - name: Create release summary
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          VERSION_NUM=${{ steps.version.outputs.version_num }}
+          SHA256=${{ steps.sha256.outputs.sha256 }}
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Homebrew Formula Update
+
+          **Version:** \`${VERSION}\`
+          **SHA256:** \`${SHA256}\`
+
+          ### Installation
+
+          Users can install mpe via Homebrew:
+
+          \`\`\`bash
+          brew tap manetu/tap
+          brew install mpe
+          \`\`\`
+
+          Or upgrade an existing installation:
+
+          \`\`\`bash
+          brew upgrade mpe
+          \`\`\`
+
+          ### Formula Location
+
+          The updated formula is available at:
+          https://github.com/manetu/homebrew-tap/blob/main/Formula/mpe.rb
+          EOF
