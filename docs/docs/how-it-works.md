@@ -189,8 +189,8 @@ sequenceDiagram
     PEP->>PEP: Build PORC expression
     PEP->>PDP: Authorize(PORC)
     Note over PDP: Lookup operation policy<br/>Lookup role policies<br/>Evaluate Rego rules
-    PDP-->>PEP: GRANT
     PDP->>Audit: AccessRecord
+    PDP-->>PEP: GRANT
     PEP-->>App: Authorized
     App-->>User: Document updated
 ```
@@ -199,9 +199,13 @@ sequenceDiagram
 2. Your application's PEP intercepts it and builds a PORC expression
 3. The PEP sends the PORC to the PolicyEngine (PDP)
 4. The PDP uses its loaded PolicyDomain to look up the relevant policies and evaluate them
-5. The PDP returns GRANT or DENY
-6. The PDP emits an AccessRecord capturing the decision and all evaluated policies
+5. The PDP writes an AccessRecord capturing the decision and all evaluated policies
+6. The PDP returns GRANT or DENY to the PEP
 7. The PEP enforces the decision
+
+:::info
+The ordering of steps 5 and 6 is intentional: the audit trail is committed **before** the decision is returned. This ensures a complete record exists prior to any action being taken on the outcome.
+:::
 
 ## What You'll Learn Next
 
