@@ -1,0 +1,87 @@
+/*
+Copyright Manetu Inc. All Rights Reserved.
+*/
+
+syntax = "proto3";
+
+package manetu.policyengine.events.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "manetu/policyengine/events/v1;events";
+
+message AccessRecord {
+  enum Decision {
+    UNSPECIFIED = 0;
+    GRANT       = 1;
+    DENY        = 2;
+  }
+
+  message Metadata {
+    google.protobuf.Timestamp timestamp = 1;
+    map<string, string>       env       = 2; // optional contextual name/value pairs e.g. "k8s-pod" = "mcp-attribute-serviec-gw-123123"
+    string                    id        = 3; // a UUID for this record
+  }
+
+  message Principal {
+    string subject = 1;
+    string realm   = 2;
+  }
+
+  message PolicyReference {
+    string   mrn         = 1;  // mrn+fingerprint uniquely identify the policy document
+    bytes    fingerprint = 2;
+  }
+
+  message BundleReference {
+    enum Phase {
+      UNSPECIFIED = 0;
+      SYSTEM      = 1;
+      IDENTITY    = 2;
+      RESOURCE    = 3;
+      SCOPE       = 4;
+    }
+    enum ReasonCode {
+      POLICY_OUTCOME        = 0;
+      COMPILATION_ERROR     = 1;   // Policy compilation error
+      NOTFOUND_ERROR        = 2;   // One or more policy references could not be found
+      NETWORK_ERROR         = 3;   // A network error prevented the resolution of policy
+      EVALUATION_ERROR      = 4;   // An error reported by OPA Policy evaluator (excluding compilation error)
+      INVALPARAM_ERROR      = 5;   // Invalid parameter or identifier
+      UNKNOWN_ERROR         = 100; // An unspecified error was encountered
+    }
+
+    string                   id          = 1;  // operation or role-mrn
+    repeated PolicyReference policies    = 2;
+    Decision                 decision    = 3;  // The outcome of this specific policy-bundle
+    Phase                    phase       = 4;  // The conjunction phase
+    ReasonCode               reason_code = 5;
+    string                   reason      = 6;  // optional reason description, typically used for exception scenarios such as COMPILATION_ERROR
+  }
+
+  enum BypassGrantReason {
+    NOT_GRANTED = 0;
+    PUBLIC = 1;
+    VISITOR = 2;
+    ANTI_LOCKOUT = 3;
+  }
+
+  enum BypassDenyReason {
+    NOT_DENIED = 0;
+    JWT_REQUIRED = 1;
+    OPERATOR_REQUIRED = 2;
+  }
+
+  Metadata  metadata                  = 1;
+  Principal principal                 = 2;
+  string    operation                 = 3;   // from PORC, e.g. "http-post", "graphql-mutate", etc
+  string    resource                  = 4;   // MRN from PORC e.g. "mrn:http:/foo"
+  Decision  decision                  = 5;   // At least one policy must return allow=true to GRANT
+  repeated BundleReference references = 6;   // The list of any policy-bundles consulted in formulating outcome
+  string    porc                      = 7;   // fully realized porc.json
+  bool      system_override           = 8;   // System/phase1 decision bypass
+  oneof     override_reason {
+    BypassGrantReason grant_reason    = 9;
+    BypassDenyReason  deny_reason     = 10;
+  }
+}

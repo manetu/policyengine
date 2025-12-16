@@ -1,0 +1,13 @@
+version: v2
+clean: true
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/manetu/policyengine/pkg/protos
+plugins:
+  - local: protoc-gen-go
+    out: pkg/protos
+    opt: paths=source_relative
+inputs:
+  - directory: protos
