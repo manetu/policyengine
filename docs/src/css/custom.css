@@ -1,0 +1,124 @@
+/**
+ * Manetu PolicyEngine Documentation
+ * Custom CSS overrides for Infima
+ */
+
+/* Import Manetu branding fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Manetu branding fonts */
+  --ifm-font-family-base: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  --ifm-heading-font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  --ifm-font-weight-base: 600;
+  /* Manetu corporate colors:
+   * Navy: rgba(26, 20, 95, 1) = #1a145f
+   * Cyan: rgba(3, 163, 237, 1) = #03a3ed
+   */
+
+  /* Primary color scale based on Manetu cyan (#03a3ed) */
+  --ifm-color-primary: #03a3ed;
+  --ifm-color-primary-dark: #0393d6;
+  --ifm-color-primary-darker: #038aca;
+  --ifm-color-primary-darkest: #0272a6;
+  --ifm-color-primary-light: #1cadef;
+  --ifm-color-primary-lighter: #4dc0f3;
+  --ifm-color-primary-lightest: #7ed3f7;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(26, 20, 95, 0.1);
+
+  /* Improved typography */
+  --ifm-heading-font-weight: 600;
+  --ifm-font-weight-semibold: 500;
+
+  /* Manetu navy accent */
+  --manetu-navy: #1a145f;
+  --manetu-cyan: #03a3ed;
+}
+
+[data-theme='dark'] {
+  /* Lighter cyan variants for dark mode visibility */
+  --ifm-color-primary: #33b5f1;
+  --ifm-color-primary-dark: #03a3ed;
+  --ifm-color-primary-darker: #0393d6;
+  --ifm-color-primary-darkest: #038aca;
+  --ifm-color-primary-light: #5cc5f4;
+  --ifm-color-primary-lighter: #85d5f7;
+  --ifm-color-primary-lightest: #aee5fa;
+  --docusaurus-highlighted-code-line-bg: rgba(3, 163, 237, 0.2);
+}
+
+/* Body text weight - Montserrat renders better at 500 */
+body,
+.markdown p,
+.markdown li,
+.theme-doc-sidebar-menu {
+  font-weight: 500;
+}
+
+/* Code blocks */
+.prism-code {
+  font-size: 0.9rem;
+}
+
+/* Sidebar */
+.theme-doc-sidebar-menu {
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Tables */
+table {
+  display: table;
+  width: 100%;
+}
+
+table th {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+[data-theme='dark'] table th {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+/* Table section header rows - subtle primary color tint */
+table tr:has(.table-section) {
+  background-color: rgba(3, 163, 237, 0.05);
+}
+
+[data-theme='dark'] table tr:has(.table-section) {
+  background-color: rgba(51, 181, 241, 0.08);
+}
+
+/* Admonitions */
+.admonition {
+  border-left-width: 4px;
+}
+
+/* Footer - using Manetu navy */
+.footer {
+  background-color: #1a145f;
+  color: #ffffff;
+}
+
+.footer__link-item {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer__link-item:hover {
+  color: #03a3ed;
+}
+
+.footer__title {
+  color: #ffffff;
+}
+
+.footer__copyright {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='dark'] .footer {
+  background-color: var(--ifm-color-emphasis-200);
+}
