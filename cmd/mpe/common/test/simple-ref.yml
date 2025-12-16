@@ -1,0 +1,11 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: test
+  domain: test
+spec:
+  policy-libraries:
+    - mrn: "mrn:iam:library:test"
+      name: test
+      rego_filename: "test/simple.rego"
+

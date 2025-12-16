@@ -1,0 +1,11 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: error-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:missing-file"
+      name: missing-file
+      description: "This references a non-existent file - should error"
+      rego_filename: "/nonexistent/path/missing.rego"
+

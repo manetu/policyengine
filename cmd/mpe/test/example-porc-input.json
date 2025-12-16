@@ -1,0 +1,15 @@
+{
+  "principal": {
+    "sub": "foo",
+    "mroles": ["mrn:iam:role:admin"],
+    "mannotations": {
+      "custom_key": "custom_value",
+      "another_key": "another_value"
+    }
+  },
+  "operation": "foo:bar",
+  "resource": {
+    "owner": "foo",
+    "group":  "mrn:iam:resource-group:share-by-clearance"
+  }
+}

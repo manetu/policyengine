@@ -1,0 +1,26 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: fail-opa-check-example
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:bad-policy"
+      name: bad-policy
+      description: "Policy that compiles but fails opa check linting"
+      rego: |
+        package authz
+        
+        default allow = false
+        
+        # OPA check will catch: undefined function
+        allow {
+          result := undefined_function(input.user)
+          result == true
+        }
+        
+        # OPA check will catch: unused variable
+        deny {
+          unused_var := input.resource
+          input.action == "delete"
+        }
+

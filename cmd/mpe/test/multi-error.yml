@@ -1,0 +1,43 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: multi-error
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:broken1"
+      name: broken1
+      dependencies:
+        - "mrn:iam:library:missing1"
+        - "mrn:iam:library:missing2"
+      rego: |
+        package authz
+        default allow = false
+
+    - mrn: "mrn:iam:policy:broken2"
+      name: broken2
+      dependencies:
+        - "other-domain/mrn:iam:library:external"
+      rego: |
+        package authz
+        default allow = false
+
+  roles:
+    - mrn: "mrn:iam:role:broken1"
+      name: broken1
+      policy: "mrn:iam:policy:missing1"
+
+    - mrn: "mrn:iam:role:broken2"
+      name: broken2
+      policy: "mrn:iam:policy:missing2"
+
+  groups:
+    - mrn: "mrn:iam:group:broken"
+      name: broken
+      roles:
+        - "mrn:iam:role:missing1"
+        - "mrn:iam:role:missing2"
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:broken"
+      name: broken
+      policy: "mrn:iam:policy:missing3"

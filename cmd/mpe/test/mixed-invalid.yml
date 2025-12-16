@@ -1,0 +1,17 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: invalid
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:broken"
+      name: broken
+      dependencies:
+        - "mrn:iam:library:missing"
+      rego: |
+        package authz
+        default allow = false
+  roles:
+    - mrn: "mrn:iam:role:broken"
+      name: broken
+      policy: "mrn:iam:policy:missing"

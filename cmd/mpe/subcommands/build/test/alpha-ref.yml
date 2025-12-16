@@ -1,0 +1,19 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: alpha
+  # This is a test comment that should be preserved
+spec:
+  policy-libraries:
+    - mrn: &utils "mrn:iam:library:utils"
+      name: utils
+      description: "Utility functions common to multiple policies"
+      rego_filename: "test/utils.rego"
+
+    - mrn: &helpers "mrn:iam:library:helpers"
+      name: helpers
+      description: "Helper functions common to multiple policies"
+      dependencies:
+        - *utils
+      rego_filename: "test/helpers.rego"
+

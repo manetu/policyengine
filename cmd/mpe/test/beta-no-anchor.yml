@@ -1,0 +1,225 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: beta
+spec:
+  policies:
+    - mrn: &mainapi "mrn:iam:policy:mainapi"
+      name: mainapi
+      description: "This policy is the main rego for apis which handles jwt and more"
+      rego: |
+        package authz
+        
+        #allow = -1 or 1 decision made, no more policy processing
+        #         0 proceed to phase 2
+        #
+        #policy filters for allow==1 or -1 and lets everything else to be passed through
+        #for further processing
+        #  1 - public ops, graphql,
+        #      admin not performing prohibted ops (this for preventing lockout)
+        # -1 - user ops and operator ops not with corresponding roles
+        default allow = 0
+        
+        #------------ jwt checks ---------------
+        jwt_ok {
+        	input.principal != {}
+        }
+        
+        #<<<<<<<<<<<<<< Rules >>>>>>>>>>>>>>>>>>>>>>
+        
+        #------------ not allowed ----------------
+        allow = -1 {
+            not jwt_ok
+        }        
+
+    - mrn: &allow-all "mrn:iam:policy:allow-all"
+      name: allow-all
+      description: "This policy allows full access"
+      rego: |
+        package authz
+        default allow = true        
+
+    - mrn: &no-access "mrn:iam:policy:no-access"
+      name: no-access
+      description: "This policy denies all access requests"
+      rego: |
+        package authz       
+        default allow = false        
+
+    - mrn: &read-only "mrn:iam:policy:read-only"
+      name: read-only
+      description: "This policy has read-only access to the entire realm"
+      dependencies:
+        - "alpha/mrn:iam:library:helpers"
+      rego: |
+        package authz
+        import data.helpers
+        
+        default allow = false
+        
+        allow {
+                helpers.match_any(permitted_operations, input.operation)
+        }
+        
+        permitted_operations := {
+                "*:get",
+                "*:head",
+        }  
+
+    - mrn: &share-by-clearance "mrn:iam:policy:share-by-clearance"
+      name: share-by-clearance
+      description: "Resource policy for sharing resources based on the caller's security clearance"
+      dependencies:
+        - "alpha/mrn:iam:library:helpers"
+      rego: |
+        package authz
+        import data.helpers
+        import data.utils
+        
+        default allow = false
+        
+        allow {
+            is_readonly
+            has_clearance
+        }
+        
+        allow {
+            is_owner
+        }
+        
+        ratings := {"LOW": 1, "MODERATE": 2, "HIGH": 3, "MAXIMUM": 4, "UNASSIGNED": 5}
+        
+        has_clearance {
+        	ratings[input.principal.mclearance] >= ratings[input.resource.classification]
+        }
+        
+        is_readonly {
+            helpers.match_any(utils.ro_operations, input.operation)
+        }
+        
+        is_owner {
+            input.principal.sub == input.resource.owner
+        }
+
+  roles:
+    - mrn: &admin-role "mrn:iam:role:admin"
+      name: admin
+      description: "This role is appropriate for an administrator"
+      policy: *allow-all
+      annotations:
+        - name: foo
+          value: "42"
+        - name: bar
+          value: "[1, 2, 3]"
+        - name: baz
+          value: "{\"bat\": 42}"
+    - mrn: "mrn:iam:role:no-access"
+      name: no-access
+      description: "This role will deny all access"
+      policy: *no-access
+  
+  groups:
+    - mrn: "mrn:iam:group:admin"
+      name: admin
+      description: "This group is appropriate for administrators"
+      roles:
+        - *admin-role
+      annotations:
+        - name: foo
+          value: "42"
+        - name: bar
+          value: "[1, 2, 3]"
+        - name: baz
+          value: "{\"bat\": 42}"
+  
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:allow-all"
+      name: allow-all
+      description: "Resources in this group may be fully controlled by any authenticated user"
+      default: true                                                          # this is the resource-group to use as the default if the resource does not specify
+      policy: *allow-all
+      annotations:
+        - name: foo
+          value: "42"
+        - name: bar
+          value: "[1, 2, 3]"
+        - name: baz
+          value: "{\"bat\": 42}"
+
+    - mrn: "mrn:iam:resource-group:share-by-clearance"
+      name: share-by-clearance
+      description: "Resources in this group are shared (read-only) based on classification and security clearance"
+      policy: *share-by-clearance
+  
+  scopes:
+    - mrn: "mrn:iam:scope:api"
+      name: api
+      description: "This scope grants the user complete read/write access to the API up to the resource-owners entitlement level"
+      policy: *allow-all
+      annotations:
+        - name: foo
+          value: "42"
+        - name: bar
+          value: "[1, 2, 3]"
+        - name: baz
+          value: "{\"bat\": 42}"
+    - mrn: "mrn:iam:scope:read-api"
+      name: read_api
+      description: "This scope grants the user read-only access to the API up to the resource-owners entitlement level"
+      policy: *read-only
+  
+  # Operations and mappings are evaluated in order: first match
+  # will return the associated policies.
+  # A selector must be a valid regex https://github.com/google/re2.
+  # Within an operation, the selectors are OR'ed together to create
+  # a regexp for matching.
+  operations:
+    - name: alpha
+      selector:
+        - "alpha:.*"
+      policy: *no-access
+    - name: beta
+      selector:
+        - "beta:.*"
+      policy: *read-only
+    - name: api
+      selector:
+        - ".*"
+      policy: *mainapi
+    - name: omega
+      selector:
+        - "omega:.*"
+      policy: *no-access
+  
+  mappers:
+    - name: common-mapper
+      selector:
+        - ".*"  # matches service-account name of the calling pod
+      rego: |
+        package mapper
+        
+        import rego.v1
+        
+        default claims := {}
+        default service := "unknown"
+        
+        get_default(val, key, _) := val[key]
+        get_default(val, key, fallback) := fallback if not val[key]
+        
+        method := lower(get_default(input.request.http, "method", "GET"))
+        dest := split(input.destination.principal, "/") # "spiffe://cluster.local/ns/default/sa/petstore"
+        service := dest[count(dest) - 1]
+        path := get_default(input.request.http, "path", "/")
+        auth := input.request.http.headers.authorization
+        token := split(auth, "Bearer ")[1]
+        claims := io.jwt.decode(token)[1]
+        
+        porc := {
+             "principal": claims,
+             "operation": sprintf("%s:http:%s", [service, method]),
+             "resource": {
+                "id": sprintf("http://%s%s", [service, path]),
+                "group": "mrn:iam:resource-group:allow-all"
+              },
+             "context": input,
+        }

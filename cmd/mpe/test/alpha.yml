@@ -1,0 +1,32 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: alpha
+spec:
+  policy-libraries:
+    - mrn: &utils "mrn:iam:library:utils"
+      name: utils
+      description: "Utility functions common to multiple policies"
+      rego: |
+        package utils
+          
+        ro_operations := {
+          "*:get",
+          "*:read",
+          "*:list",
+          "*:subscribe",
+          "*:query",
+        }
+
+    - mrn: &helpers "mrn:iam:library:helpers"
+      name: helpers
+      description: "Helper functions common to multiple policies"
+      dependencies:
+        - *utils
+      rego: |
+        package helpers
+          
+        match_any(candidates, value) {
+          glob.match(candidates[_], [], value)
+        }
+

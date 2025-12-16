@@ -41,3 +41,9 @@ type Resource struct {
 	Annotations    Annotations `json:"annotations,omitempty"` // A map of json-based annotations
 	Classification string      `json:"classification,omitempty"`
 }
+
+// Mapper represents a principal mapper with its compiled OPA AST.
+type Mapper struct {
+	Domain string
+	Ast    *opa.Ast
+}

@@ -442,6 +442,11 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 	return true
 }
 
+// GetBackend returns the backend service used by this policy engine.
+func (pe *PolicyEngine) GetBackend() backend.Service {
+	return pe.backend
+}
+
 // IsAllBundles returns whether the policy engine is configured to include all bundles (needed for debugging).
 func (pe *PolicyEngine) IsAllBundles() bool {
 	return pe.includeAllBundles
