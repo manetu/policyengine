@@ -55,21 +55,26 @@ Roles → Groups → Scopes → Principal Claims
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      department: "engineering"    # Precedence 1
-      access_level: "standard"
+      - name: "department"
+        value: "\"engineering\""   # Precedence 1
+      - name: "access_level"
+        value: "\"standard\""
 
 # Group definition
 groups:
   - mrn: "mrn:iam:group:platform-team"
     annotations:
-      department: "platform"       # Precedence 2 - overrides role
-      team: "infrastructure"
+      - name: "department"
+        value: "\"platform\""      # Precedence 2 - overrides role
+      - name: "team"
+        value: "\"infrastructure\""
 
 # Scope definition (if applicable)
 scopes:
   - mrn: "mrn:iam:scope:elevated"
     annotations:
-      access_level: "elevated"     # Precedence 3 - overrides role
+      - name: "access_level"
+        value: "\"elevated\""      # Precedence 3 - overrides role
 
 # Principal JWT claims
 principal:
@@ -106,16 +111,21 @@ Resource Group → Resource
 resource-groups:
   - mrn: "mrn:iam:resource-group:customer-data"
     annotations:
-      data_classification: "confidential"
-      retention_days: "365"
-      requires_audit: "true"
+      - name: "data_classification"
+        value: "\"confidential\""
+      - name: "retention_days"
+        value: "365"
+      - name: "requires_audit"
+        value: "true"
 
 # Resource with override
 resource:
   mrn: "mrn:data:customer:12345"
   annotations:
-    retention_days: "730"          # Overrides resource group
-    special_handling: "true"       # Additional annotation
+    - name: "retention_days"
+      value: "730"                 # Overrides resource group
+    - name: "special_handling"
+      value: "true"                # Additional annotation
 ```
 
 **Resulting `input.resource.annotations`**:
@@ -139,14 +149,17 @@ Define baseline annotations at a general level and override for specific cases:
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      max_data_size: "1GB"
-      can_export: "false"
+      - name: "max_data_size"
+        value: "\"1GB\""
+      - name: "can_export"
+        value: "false"
 
 # Platform team members can export
 groups:
   - mrn: "mrn:iam:group:platform-team"
     annotations:
-      can_export: "true"           # Override for this group
+      - name: "can_export"
+        value: "true"              # Override for this group
 ```
 
 #### Layered Security Classifications
@@ -157,19 +170,51 @@ Apply cumulative security requirements:
 resource-groups:
   - mrn: "mrn:iam:resource-group:pii"
     annotations:
-      classification: "PII"
-      encryption_required: "true"
+      - name: "classification"
+        value: "\"PII\""
+      - name: "encryption_required"
+        value: "true"
 
 # Specific high-value resource
 resource:
   annotations:
-    classification: "PII-HIGH"     # More specific classification
-    two_person_rule: "true"        # Additional requirement
+    - name: "classification"
+      value: "\"PII-HIGH\""        # More specific classification
+    - name: "two_person_rule"
+      value: "true"                # Additional requirement
 ```
 
 ## Annotation Structure
 
-Keys must be strings. Values can be any valid JSON:
+Annotations are defined as a list of `{name, value}` objects. Keys must be strings. Values must be **JSON-encoded strings**.
+
+:::tip[Values Are JSON-Encoded]
+The `value` field must contain a valid JSON value encoded as a string. This is a common source of confusion:
+
+| Type | Correct | Incorrect |
+|------|---------|-----------|
+| String | `"\"engineering\""` | `"engineering"` |
+| Number | `"12345"` | `12345` |
+| Boolean | `"true"` | `true` |
+| Array | `'["read", "write"]'` | `["read", "write"]` |
+| Object | `'{"region": "us-west", "priority": 1}'` | `{region: us-west}` |
+
+**String values require nested quotes.** The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value. Without the inner quotes, a value like `"engineering"` would be interpreted as a JSON identifier (which is invalid), not a JSON string.
+
+```yaml
+# Correct - string value with nested quotes
+annotations:
+  - name: "department"
+    value: "\"engineering\""    # Parsed as JSON string: "engineering"
+
+# Incorrect - missing inner quotes
+annotations:
+  - name: "department"
+    value: "engineering"        # Invalid JSON - not a string literal
+```
+:::
+
+Values can be any valid JSON type:
 
 ```json
 {
@@ -266,8 +311,10 @@ spec:
     - mrn: "mrn:iam:role:regional-admin"
       name: regional-admin
       annotations:
-        region: "us-west"
-        permissions: '["read", "write", "admin"]'
+        - name: "region"
+          value: "\"us-west\""
+        - name: "permissions"
+          value: '["read", "write", "admin"]'
       policy: "mrn:iam:policy:regional-access"
 ```
 
@@ -279,8 +326,10 @@ spec:
     - mrn: "mrn:iam:group:finance"
       name: finance
       annotations:
-        department: "finance"
-        cost_center: "12345"
+        - name: "department"
+          value: "\"finance\""
+        - name: "cost_center"
+          value: "12345"
       roles:
         - "mrn:iam:role:finance-user"
 ```
@@ -293,9 +342,12 @@ spec:
     - mrn: "mrn:iam:resource-group:pii-data"
       name: pii-data
       annotations:
-        data_classification: "PII"
-        retention_days: "365"
-        requires_audit: "true"
+        - name: "data_classification"
+          value: "\"PII\""
+        - name: "retention_days"
+          value: "365"
+        - name: "requires_audit"
+          value: "true"
       policy: "mrn:iam:policy:pii-access"
 ```
 

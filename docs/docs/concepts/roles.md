@@ -275,8 +275,10 @@ roles:
     name: regional-admin
     policy: "mrn:iam:policy:regional-access"
     annotations:
-      region: "us-west"
-      access_level: "admin"
+      - name: "region"
+        value: "\"us-west\""
+      - name: "access_level"
+        value: "\"admin\""
 ```
 
 Role annotations have the lowest precedence in the identity annotation hierarchy (Roles → Groups → Scopes → Principal). This makes them ideal for establishing default metadata that can be overridden by more specific sources.

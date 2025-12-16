@@ -14,7 +14,9 @@ spec:
       description: string   # Optional: Description
       default: boolean      # Optional: Is default group (default: false)
       policy: string        # Required: Policy MRN
-      annotations: object   # Optional: Key-value metadata
+      annotations:          # Optional: Key-value metadata
+        - name: string
+          value: string     # JSON-encoded value
 ```
 
 ## Fields
@@ -26,7 +28,7 @@ spec:
 | `description` | string | No | Resource group description |
 | `default` | boolean | No | Use as default for unassigned resources |
 | `policy` | string | Yes | MRN of policy to apply |
-| `annotations` | object | No | Custom metadata |
+| `annotations` | array | No | List of name/value objects for custom metadata |
 
 ## Usage
 
@@ -64,9 +66,12 @@ resource-groups:
     description: "Personally identifiable information"
     policy: "mrn:iam:policy:pii-access"
     annotations:
-      compliance: "GDPR"
-      retention_days: "365"
-      audit_required: "true"
+      - name: "compliance"
+        value: "\"GDPR\""
+      - name: "retention_days"
+        value: "365"
+      - name: "audit_required"
+        value: "true"
 ```
 
 ### Using YAML Anchors

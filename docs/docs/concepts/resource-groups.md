@@ -103,9 +103,12 @@ resource-groups:
     description: "Personally identifiable information"
     policy: "mrn:iam:policy:pii-access"
     annotations:
-      compliance: "GDPR"
-      audit_required: "true"
-      retention_days: "365"
+      - name: "compliance"
+        value: "\"GDPR\""
+      - name: "audit_required"
+        value: "true"
+      - name: "retention_days"
+        value: "365"
 ```
 
 Use annotations in policies:
