@@ -112,13 +112,16 @@ claims := io.jwt.decode(token)[1] if token
 porc := {
     "principal": claims,
     "operation": sprintf("%s:http:%s", [service, method]),
-    "resource": {
-        "id": sprintf("http://%s%s", [service, path]),
-        "group": "mrn:iam:resource-group:default"
-    },
+    "resource": sprintf("mrn:http:%s%s", [service, path]),
     "context": input
 }
 ```
+
+:::tip[Resource Format]
+This example uses the simple **MRN string** format, which is the recommended approach. The PolicyEngine's [Resource Resolution](/integration/resource-resolution) enriches resources with metadata at evaluation time.
+
+Use the **Fully Qualified Descriptor** format only when the PEP has context that the backend cannot determine.
+:::
 
 ## Testing Mappers
 

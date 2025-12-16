@@ -195,13 +195,14 @@ Mappers transform external inputs (like Envoy) into [PORC](/concepts/porc) expre
         porc := {
             "principal": claims,
             "operation": sprintf("api:http:%s", [method]),
-            "resource": {
-                "id": path,
-                "group": "mrn:iam:resource-group:default"
-            },
+            "resource": sprintf("mrn:api:%s", [path]),
             "context": input
         }
 ```
+
+:::tip[Resource Format]
+This uses the simple MRN string format, which is the recommended approach. See [Resource Resolution](/integration/resource-resolution) for details on how the PolicyEngine enriches resources with metadata.
+:::
 
 ## Complete Example
 

@@ -111,10 +111,7 @@ mappers:
               "mannotations": claims.annotations
           },
           "operation": sprintf("%s:http:%s", [service, method]),
-          "resource": {
-              "id": sprintf("http://%s%s", [service, path]),
-              "group": "mrn:iam:resource-group:default"
-          },
+          "resource": sprintf("mrn:http:%s%s", [service, path]),
           "context": {
               "source_ip": input.source.address,
               "timestamp": time.now_ns(),
@@ -122,6 +119,10 @@ mappers:
           }
       }
 ```
+
+:::tip[Resource Format]
+This example uses the simple MRN string format, which is the recommended approach. The PolicyEngine's [Resource Resolution](/integration/resource-resolution) enriches resources with metadata at evaluation time. Use the Fully Qualified Descriptor format only when the mapper has context the backend cannot determine.
+:::
 
 ## Istio Integration
 
