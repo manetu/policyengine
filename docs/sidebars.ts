@@ -45,6 +45,7 @@ const sidebars: SidebarsConfig = {
         'concepts/scopes',
         'concepts/annotations',
         'concepts/mappers',
+        'concepts/audit',
       ],
     },
     {
@@ -93,6 +94,7 @@ const sidebars: SidebarsConfig = {
           ],
         },
         'reference/configuration',
+        'reference/access-record',
       ],
     },
     {

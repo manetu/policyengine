@@ -137,7 +137,8 @@
     "includeall",
     "unsafebuiltins",
     "XVCJ",
-    "apikey"
+    "apikey",
+    "INVALPARAM"
   ],
   "flagWords": [],
   "dictionaries": [

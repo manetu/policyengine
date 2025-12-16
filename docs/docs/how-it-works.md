@@ -34,8 +34,11 @@ The **PDP** is the PolicyEngine itself. It:
 - Receives authorization requests
 - Evaluates them against policies
 - Returns GRANT or DENY decisions
+- Emits an [AccessRecord](/concepts/audit) for every decision
 
 The PDP is stateless—it doesn't know your application's business logic. It only knows the policies you've defined and the information you send with each request.
+
+Every decision generates a normalized **AccessRecord** that captures the complete evaluation context: the input PORC, the final decision, and details about each policy evaluated. This audit trail enables compliance reporting, anomaly detection, and forensic analysis. See [Audit & Access Records](/concepts/audit) for details.
 
 ### Policy Enforcement Point (PEP)
 
@@ -177,6 +180,7 @@ sequenceDiagram
     participant PEP as PEP (in App)
     participant PDP as PolicyEngine (PDP)
     participant PD as PolicyDomain
+    participant Audit as Audit Stream
 
     PD-->>PDP: (loaded)
 
@@ -186,6 +190,7 @@ sequenceDiagram
     PEP->>PDP: Authorize(PORC)
     Note over PDP: Lookup operation policy<br/>Lookup role policies<br/>Evaluate Rego rules
     PDP-->>PEP: GRANT
+    PDP->>Audit: AccessRecord
     PEP-->>App: Authorized
     App-->>User: Document updated
 ```
@@ -195,7 +200,8 @@ sequenceDiagram
 3. The PEP sends the PORC to the PolicyEngine (PDP)
 4. The PDP uses its loaded PolicyDomain to look up the relevant policies and evaluate them
 5. The PDP returns GRANT or DENY
-6. The PEP enforces the decision
+6. The PDP emits an AccessRecord capturing the decision and all evaluated policies
+7. The PEP enforces the decision
 
 ## What You'll Learn Next
 
