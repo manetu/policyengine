@@ -15,7 +15,9 @@ spec:
       name: string          # Required: Human-readable name
       description: string   # Optional: Description
       policy: string        # Required: Policy MRN
-      annotations: object   # Optional: Key-value metadata
+      annotations:          # Optional: Key-value metadata
+        - name: string
+          value: string     # JSON-encoded value
 ```
 
 ## Fields
@@ -26,7 +28,7 @@ spec:
 | `name` | string | Yes | Human-readable scope name |
 | `description` | string | No | Scope description |
 | `policy` | string | Yes | MRN of policy to apply |
-| `annotations` | object | No | Custom metadata |
+| `annotations` | array | No | List of name/value objects for custom metadata |
 
 ## Usage
 
@@ -68,8 +70,10 @@ scopes:
     description: "Access to PII data"
     policy: "mrn:iam:policy:pii-access"
     annotations:
-      sensitivity: "high"
-      audit: "true"
+      - name: "sensitivity"
+        value: "\"high\""
+      - name: "audit"
+        value: "true"
 ```
 
 ### Using YAML Anchors

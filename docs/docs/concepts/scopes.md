@@ -217,9 +217,12 @@ scopes:
     description: "Elevated access for sensitive operations"
     policy: "mrn:iam:policy:elevated-check"
     annotations:
-      access_level: "elevated"
-      audit_required: "true"
-      session_type: "privileged"
+      - name: "access_level"
+        value: "\"elevated\""
+      - name: "audit_required"
+        value: "true"
+      - name: "session_type"
+        value: "\"privileged\""
 ```
 
 In the inheritance hierarchy (Roles → Groups → **Scopes** → Principal), scope annotations override any conflicting values from roles or groups. This allows you to apply context-specific metadata based on how the principal is accessing the system.

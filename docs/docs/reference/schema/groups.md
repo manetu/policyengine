@@ -13,7 +13,9 @@ spec:
       name: string          # Required: Human-readable name
       description: string   # Optional: Description
       roles: []             # Required: List of role MRNs
-      annotations: object   # Optional: Key-value metadata
+      annotations:          # Optional: Key-value metadata
+        - name: string
+          value: string     # JSON-encoded value
 ```
 
 ## Fields
@@ -24,7 +26,7 @@ spec:
 | `name` | string | Yes | Human-readable name |
 | `description` | string | No | Group description |
 | `roles` | array | Yes | List of role MRNs |
-| `annotations` | object | No | Custom metadata |
+| `annotations` | array | No | List of name/value objects for custom metadata |
 
 ## Usage
 
@@ -60,8 +62,10 @@ groups:
     roles:
       - "mrn:iam:role:finance-user"
     annotations:
-      department: "finance"
-      cost_center: "12345"
+      - name: "department"
+        value: "\"finance\""
+      - name: "cost_center"
+        value: "12345"
 ```
 
 ### Using YAML Anchors

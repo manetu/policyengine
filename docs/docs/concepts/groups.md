@@ -348,9 +348,12 @@ groups:
     roles:
       - "mrn:iam:role:finance-user"
     annotations:
-      department: "finance"
-      cost_center: "12345"
-      data_access: "financial"
+      - name: "department"
+        value: "\"finance\""
+      - name: "cost_center"
+        value: "12345"
+      - name: "data_access"
+        value: "\"financial\""
 ```
 
 This inheritance hierarchy (Roles → **Groups** → Scopes → Principal) makes groups ideal for team-level metadata that overrides role defaults but can still be specialized by scopes or individual principal claims.
