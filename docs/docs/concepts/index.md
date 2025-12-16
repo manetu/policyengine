@@ -141,8 +141,8 @@ flowchart TB
    - Phase 2: Identity policies (role-based via [Roles](/concepts/roles) and [Groups](/concepts/groups))
    - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
    - Phase 4: Scope policies (access-method constraints)
-5. **Decision returned**: GRANT or DENY
-6. **[AccessRecord](/concepts/audit) emitted**: Captures PORC, decision, and all evaluated policies
+5. **[AccessRecord](/concepts/audit) written**: Captures PORC, decision, and all evaluated policies
+6. **Decision returned**: GRANT or DENY
 
 ## Key Principles
 
