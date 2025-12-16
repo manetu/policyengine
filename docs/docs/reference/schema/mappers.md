@@ -110,13 +110,12 @@ mappers:
       porc := {
           "principal": claims,
           "operation": sprintf("%s:http:%s", [service, method]),
-          "resource": {
-              "id": sprintf("http://%s%s", [service, path]),
-              "group": "mrn:iam:resource-group:default"
-          },
+          "resource": sprintf("mrn:http:%s%s", [service, path]),
           "context": input
       }
 ```
+
+The PolicyEngine's [Resource Resolution](/integration/resource-resolution) enriches MRN strings with metadata at evaluation time. Use the Fully Qualified Descriptor format only when the PEP has context the backend cannot determine.
 
 ### Service-Specific Mappers
 
