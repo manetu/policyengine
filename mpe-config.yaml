@@ -1,0 +1,253 @@
+include:
+  allbundles: true
+
+mock:
+  enabled: true
+  domain:
+    filedata:
+      main.rego: |
+        package authz
+        default allow = 0
+
+        match_any(candidates, value) {
+                glob.match(candidates[_], [], value)
+        }
+
+        #----------- operation categories --------------
+        public_operations := {
+                "idf:public:list",
+                "idf:default:read",
+                "provider:public:read", #TODO remove after account service is retired
+                "realm:public:read",
+                "idp:recaptcha:execute"
+        }
+
+        visitor_operations := {
+                "visitor:account:create",
+                "visitor:password:write",
+                "visitor:secrets:read",
+                "visitor:keyservice:read",
+                "visitor:token:refresh",
+                "visitor:mfa:resolve",
+                "visitor:mfa:read",
+                "visitor:weblogin:execute",
+        }
+
+        operator_only_operations := {"platform:*"}
+
+        user_only_operations := {"user:*"}
+
+        prohibited_admin_ops := {"platform:*", "user:*"}
+
+        graphql_operations := {
+                "graphql:*"
+        }
+
+        graphql_passthrough_operations := {
+                "graphql:query",
+                "graphql:mutation",
+        }
+
+        #------------ role categories --------------
+        operator {
+                input.principal.mroles[_] == "mrn:iam:manetu.io:role:superadmin"
+        }
+
+        user {
+                input.principal.mroles[_] == "mrn:iam:manetu.io:role:user"
+        }
+
+        realm_admin {
+                input.principal.mroles[_] == "mrn:iam:manetu.io:role:admin"
+        }
+
+        #------------ jwt checks ---------------
+        jwt_ok {
+                match_any(public_operations, input.operation)
+        }
+
+        jwt_ok {
+                not input.visitorenforced
+                match_any(visitor_operations, input.operation)
+        }
+        jwt_ok {
+                input.principal != {}
+        }
+
+        jwt_ok {
+                match_any(graphql_operations, input.operation)
+        }
+        #<<<<<<<<<<<<<< Rules >>>>>>>>>>>>>>>>>>>>>>
+
+        #------------ not allowed ----------------
+        allow = -1 {
+            not jwt_ok
+        } else = -50 {
+            #user operations must be performed by users
+            not user
+            match_any(user_only_operations, input.operation)
+        } else = -2 {
+            #operator operations must be performed by operators
+            not operator
+            match_any(operator_only_operations, input.operation)
+        #------------ ... now, all allowed ----------------
+        } else = 1 {
+            match_any(public_operations, input.operation)
+        } else = 2 {
+            not input.visitorenforced
+            match_any(visitor_operations, input.operation)
+        } else = 50 {
+            # graphql calls are pass-through: The backend GRPC will perform authz and we don't want to require the admin to manage these exceptions
+            match_any(graphql_passthrough_operations, input.operation)
+        } else = 3 {
+            # realm anti-lockout rule - holders of the admin role may bypass phase 2, provided they are not performing dissallowed ops
+            realm_admin
+            not match_any(prohibited_admin_ops, input.operation)
+        }
+      superadmin.rego: |
+        package authz
+        default allow = false
+
+        match_any(candidates, value) {
+           glob.match(candidates[_], [], value)
+        }
+
+        superadmin_operations := {
+            "platform:*",
+            "realm:realm:read"
+        }
+
+        allow {
+            match_any(superadmin_operations, input.operation)
+        }
+
+      myrolepolicy.rego: |
+        package authz
+        default allow = true
+      myscopepolicy.rego: |
+        package authz
+        default allow = true
+      mygrouppolicy.rego: |
+        package authz
+        default allow = true
+      defaultgrouppolicy.rego: |
+        package authz
+        default allow = true
+      share-by-clearance.rego: |
+        package authz
+        default allow = false
+        allow {
+            has_clearance
+        }
+        allow {
+            is_owner
+        }
+        ratings := {"LOW": 1, "MODERATE": 2, "HIGH": 3, "MAXIMUM": 4, "UNASSIGNED": 5}
+        has_clearance {
+                ratings[input.principal.mclearance] >= ratings[input.resource.classification]
+        }
+        is_owner {
+            input.principal.sub == input.resource.owner
+        }
+      networkerrorpolicy.rego: |
+        package authz
+        default allow = true
+    policies:
+      - name: main
+        mrn: &main "mrn:iam:manetu.io:policy:main"
+        filename: "main.rego"
+      - name: superadmin
+        mrn: &superadmin "mrn:iam:manetu.io:policy:superadmin"
+        filename: "superadmin.rego"
+      - name: myrolepolicy
+        mrn: &mrp "mrn:iam:manetu.io:policy:myrolepolicy"
+        filename: "myrolepolicy.rego"
+      - name: mygrouppolicy
+        mrn: &mgp "mrn:iam:manetu.io:policy:mygrouppolicy"
+        filename: "mygrouppolicy.rego"
+      - name: myscopepolicy
+        mrn: &msp "mrn:iam:manetu.io:policy:myscopepolicy"
+        filename: "myscopepolicy.rego"
+      - name: defaultgrouppolicy
+        mrn: &defgrppol "mrn:iam:manetu.io:policy:defaultgrouppolicy"
+        filename: "defaultgrouppolicy.rego"
+      - name: networkerrorpolicy
+        mrn: &networkerrpol "mrn:iam:manetu.io:policy:networkerrorpolicy"
+        filename: "networkerrorpolicy.rego"
+      - name: "share-by-clearance"
+        mrn: &msharepol "mrn:iam:manetu.io:policy:shareclearancepolicy"
+        description: "Resource policy for sharing resources based on the caller's security clearance"
+        public: true
+        filename: "share-by-clearance.rego"
+    roles:
+      - name: myrole
+        mrn: &roleref "mrn:iam:manetu.io:role:myrole"
+        policy:
+          - *mrp
+      - name: superadmin
+        mrn: &superadminref "mrn:iam:manetu.io:role:superadmin"
+        policy:
+          - *superadmin
+      - name: networkerrorrole
+        mrn: "mrn:iam:manetu.io:role:networkerrorrole"
+        policy:
+          - *networkerrpol
+    resourcegroups:
+      - name: sharedresourcegroup
+        mrn: &sharerg "mrn:iam:manetu.io:resource-group:sharedresourcegroup"
+        default: true
+        policy:
+          - *msharepol
+      - name: myresourcegroup
+        mrn: &rgref "mrn:iam:manetu.io:resource-group:mygroup"
+        default: true
+        policy:
+          - *mgp
+      - name: defaultresourcegroup
+        mrn: &defrgref "mrn:iam:manetu.io:resource-group:default"
+        default: true
+        policy:
+          - *defgrppol
+    resources:
+      - mrn: mrn:iam:manetu.io:resource:networkerror
+        metadata:
+          group: *rgref
+          owner: myowner
+      - mrn: mrn:iam:manetu.io:resource:myresource
+        metadata: 
+          group: *rgref
+          owner: myowner
+      - mrn: mrn:vault:acme:resource:sharedresource
+        metadata:
+          group: *sharerg
+          owner: myowner
+          classification: "HIGH"
+          #these annotations go into protos as map[string]string
+          annotations:
+            foo: '"quoted foo"'
+            bar: '{"a": "aaa", "b": 1}'
+      - mrn: mrn:vault:acme:resource:badannotation
+        metadata:
+          group: *rgref
+          owner: myowner
+          classification: "MAXIMUM"
+          annotations:
+            foo: "badannotations (should be a quoted string)"
+    scopes:
+      - name: myscope
+        mrn: &scoperef "mrn:iam:manetu.io:scope:myscope"
+        policy:
+          - *msp
+
+    groups:
+      - name: mygroup
+        mrn: "mrn:iam:manetu.io:group:mygroup"
+        role:
+          - *roleref
+          - *superadminref
+    operations:
+      - name: api
+        selector:
+          - ".*"
+        policy:
+          - *main

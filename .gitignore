@@ -1,0 +1,6 @@
+target/
+.DS_Store
+.idea
+.test
+*.out
+.vscode
