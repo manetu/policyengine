@@ -6,6 +6,11 @@ GO_FILES := $(shell find . -name '*.go')
 OUTPUTDIR := target
 DOCKER_IMAGE ?= ghcr.io/manetu/policyengine
 
+# Version injection via ldflags
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+VERSION_PKG := github.com/manetu/policyengine/cmd/mpe/version
+LDFLAGS := -ldflags "-X $(VERSION_PKG).Version=$(VERSION)"
+
 .PHONY: all clean test goimports staticcheck tests sec-scan protos docker
 
 all: test test_fips race staticcheck goimports sec-scan build
@@ -15,7 +20,7 @@ build: $(OUTPUTDIR)/$(BINARY_NAME)
 $(OUTPUTDIR)/$(BINARY_NAME): $(GO_FILES) Makefile
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@mkdir -p $(OUTPUTDIR)
-	@GOOS=${GOOS} GOARCH=${GOARCH} go build ${LDFLAGS} -o $@ ./cmd/mpe
+	@GOOS=${GOOS} GOARCH=${GOARCH} go build $(LDFLAGS) -o $@ ./cmd/mpe
 
 docker: ## Build and publish Docker container using ko (requires DOCKER_IMAGE env var, e.g., DOCKER_IMAGE=ghcr.io/manetu/policyengine)
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
