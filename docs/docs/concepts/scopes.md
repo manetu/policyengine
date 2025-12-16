@@ -165,8 +165,8 @@ Scope policies should focus on what to *restrict*, not what to *allow*:
 ```rego
 # Good: Scope constrains to read operations
 package authz
-default grant = false
-grant {
+default allow = false
+allow {
     input.operation.method == "read"
 }
 

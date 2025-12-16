@@ -98,8 +98,8 @@ spec:
       name: editor-access
       rego: |
         package authz
-        default grant = false
-        grant { input.operation.method in ["read", "write"] }
+        default allow = false
+        allow { input.operation.method in ["read", "write"] }
 
   roles:
     - mrn: "mrn:iam:role:editor"                # Role MRN
@@ -154,16 +154,16 @@ Use MRN patterns in Rego for fine-grained control:
 ```rego
 package authz
 
-default grant = false
+default allow = false
 
-# Grant if principal has any admin role (MRN pattern)
-grant {
+# Allow if principal has any admin role (MRN pattern)
+allow {
     some role in input.principal.mroles
     startswith(role, "mrn:iam:role:admin")
 }
 
-# Grant access to specific resource types
-grant {
+# Allow access to specific resource types
+allow {
     startswith(input.resource.id, "mrn:data:public:")
 }
 ```

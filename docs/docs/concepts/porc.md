@@ -88,20 +88,20 @@ Access principal fields in Rego via `input.principal`:
 ```rego
 package authz
 
-default grant = false
+default allow = false
 
 # Check if principal has admin role
-grant {
+allow {
     "mrn:iam:role:admin" in input.principal.mroles
 }
 
 # Check security clearance
-grant {
+allow {
     input.principal.mclearance == "HIGH"
 }
 
 # Check department annotation
-grant {
+allow {
     input.principal.mannotations.department == "engineering"
 }
 ```
@@ -130,20 +130,20 @@ See [Operations](/concepts/operations) for details on how operations route reque
 ```rego
 package authz
 
-default grant = false
+default allow = false
 
 # Allow specific operations
-grant {
+allow {
     input.operation in {"api:users:read", "api:users:list"}
 }
 
 # Pattern matching with glob
-grant {
+allow {
     glob.match("*:*:read", [], input.operation)
 }
 
 # Parse operation components
-grant {
+allow {
     parts := split(input.operation, ":")
     parts[0] == "api"
     parts[2] == "read"
@@ -187,21 +187,21 @@ See [Resources](/concepts/resources) and [Resource Groups](/concepts/resource-gr
 ```rego
 package authz
 
-default grant = false
+default allow = false
 
 # Check if principal owns the resource
-grant {
+allow {
     input.principal.sub == input.resource.owner
 }
 
 # Check resource classification against clearance
-grant {
+allow {
     clearance_levels := {"LOW": 1, "MODERATE": 2, "HIGH": 3, "MAXIMUM": 4}
     clearance_levels[input.principal.mclearance] >= clearance_levels[input.resource.classification]
 }
 
 # Check resource annotations
-grant {
+allow {
     input.resource.annotations.department == input.principal.mannotations.department
 }
 ```
@@ -230,17 +230,21 @@ The **Context** contains additional information about the request environment. T
 ```rego
 package authz
 
-# Deny requests from untrusted IPs
-deny {
-    not trusted_network(input.context.source_ip)
+default allow = false
+
+# Allow if all conditions pass
+allow {
+    trusted_network(input.context.source_ip)
+    not weekend_restricted
 }
 
+# Helper: Check trusted network
 trusted_network(ip) {
     net.cidr_contains("10.0.0.0/8", ip)
 }
 
-# Time-based access control
-deny {
+# Helper: Weekend access restriction
+weekend_restricted {
     time.weekday(time.now_ns()) == "Saturday"
     not "mrn:iam:role:weekend-access" in input.principal.mroles
 }

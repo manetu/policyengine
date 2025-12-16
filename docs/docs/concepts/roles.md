@@ -190,21 +190,21 @@ Access role information in Rego via `input.principal.mroles`:
 ```rego
 package authz
 
-default grant = false
+default allow = false
 
-# Grant if principal has admin role
-grant {
+# Allow if principal has admin role
+allow {
     "mrn:iam:role:admin" in input.principal.mroles
 }
 
-# Grant read operations for viewers
-grant {
+# Allow read operations for viewers
+allow {
     "mrn:iam:role:viewer" in input.principal.mroles
     input.operation.method == "read"
 }
 
 # Check for any of multiple roles
-grant {
+allow {
     allowed_roles := {"mrn:iam:role:editor", "mrn:iam:role:admin"}
     some role in input.principal.mroles
     role in allowed_roles
