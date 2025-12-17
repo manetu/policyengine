@@ -50,7 +50,7 @@ spec:
         env:
         - name: MPE_LOG_LEVEL
           value: ".:info"
-        - name: LOG_FORMATTER
+        - name: MPE_LOG_FORMATTER
           value: "json"
         resources:
           requests:
@@ -155,7 +155,7 @@ Monitor these key metrics:
 Use structured logging for observability:
 
 ```bash
-export LOG_FORMATTER=json
+export MPE_LOG_FORMATTER=json
 export MPE_LOG_LEVEL=.:info
 ```
 

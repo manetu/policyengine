@@ -19,8 +19,8 @@ Environment variables and configuration options for the Manetu PolicyEngine.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `MPE_LOG_LEVEL` | Logging level (`debug`, `info`, `warn`, `error`) | `info` |
-| `LOG_FORMATTER` | Log format (`json` or `text`) | `json` |
-| `LOG_REPORT_CALLER` | Include caller info in logs | (not set) |
+| `MPE_LOG_FORMATTER` | Log format (`json` or `text`) | `json` |
+| `MPE_LOG_REPORT_CALLER` | Include caller info in logs | (not set) |
 
 ### PolicyEngine Variables
 
@@ -145,7 +145,7 @@ Override via:
 ```bash
 # Enable debug logging with text format
 export MPE_LOG_LEVEL=.:debug
-export LOG_FORMATTER=text
+export MPE_LOG_FORMATTER=text
 mpe serve -b domain.yml
 ```
 
@@ -156,7 +156,7 @@ mpe serve -b domain.yml
 ```bash
 # Production logging
 export MPE_LOG_LEVEL=.:info
-export LOG_FORMATTER=json
+export MPE_LOG_FORMATTER=json
 
 # Disable unsafe built-ins
 # (don't set unsafe.builtins in config)
@@ -169,7 +169,7 @@ mpe serve -b domain.yml --port 9000
 
 ```dockerfile
 ENV MPE_LOG_LEVEL=.:info
-ENV LOG_FORMATTER=json
+ENV MPE_LOG_FORMATTER=json
 ```
 
 ### Kubernetes ConfigMap
@@ -181,5 +181,5 @@ metadata:
   name: mpe-config
 data:
   MPE_LOG_LEVEL: "info"
-  LOG_FORMATTER: "json"
+  MPE_LOG_FORMATTER: "json"
 ```

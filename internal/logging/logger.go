@@ -41,7 +41,7 @@ func newLogger(module string) *Logger {
 
 	// Determine formatter from environment
 	var encoder zapcore.Encoder
-	logFormatter := os.Getenv("LOG_FORMATTER")
+	logFormatter := os.Getenv("MPE_LOG_FORMATTER")
 	switch logFormatter {
 	case "text":
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
@@ -50,7 +50,7 @@ func newLogger(module string) *Logger {
 	}
 
 	// Determine if we should report caller
-	reportCaller := os.Getenv("LOG_REPORT_CALLER") != ""
+	reportCaller := os.Getenv("MPE_LOG_REPORT_CALLER") != ""
 
 	// Create core
 	core := zapcore.NewCore(encoder, zapcore.AddSync(os.Stderr), zapcore.InfoLevel)
@@ -100,7 +100,7 @@ func (l *Logger) SetLevel(level zapcore.Level) {
 	encoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
 
 	var encoder zapcore.Encoder
-	logFormatter := os.Getenv("LOG_FORMATTER")
+	logFormatter := os.Getenv("MPE_LOG_FORMATTER")
 	switch logFormatter {
 	case "text":
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
@@ -108,7 +108,7 @@ func (l *Logger) SetLevel(level zapcore.Level) {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	}
 
-	reportCaller := os.Getenv("LOG_REPORT_CALLER") != ""
+	reportCaller := os.Getenv("MPE_LOG_REPORT_CALLER") != ""
 
 	// Use custom writer if set, otherwise use stderr
 	var output io.Writer = os.Stderr
@@ -151,7 +151,7 @@ func (l *Logger) SetOut(w io.Writer) {
 	encoderConfig.EncodeLevel = zapcore.LowercaseLevelEncoder
 
 	var encoder zapcore.Encoder
-	logFormatter := os.Getenv("LOG_FORMATTER")
+	logFormatter := os.Getenv("MPE_LOG_FORMATTER")
 	switch logFormatter {
 	case "text":
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
@@ -159,7 +159,7 @@ func (l *Logger) SetOut(w io.Writer) {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	}
 
-	reportCaller := os.Getenv("LOG_REPORT_CALLER") != ""
+	reportCaller := os.Getenv("MPE_LOG_REPORT_CALLER") != ""
 	core := zapcore.NewCore(encoder, zapcore.AddSync(w), l.level)
 
 	options := []zap.Option{
