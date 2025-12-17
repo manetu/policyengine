@@ -139,7 +139,7 @@ Configure logging via environment variables:
 export MPE_LOG_LEVEL=.:debug
 
 # Log format (json or text)
-export LOG_FORMATTER=text
+export MPE_LOG_FORMATTER=text
 
 mpe serve -b my-domain.yml
 ```
