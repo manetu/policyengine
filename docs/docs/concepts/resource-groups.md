@@ -218,6 +218,18 @@ spec:
       policy: "mrn:iam:policy:clearance-access"
 ```
 
+## Resource Groups vs. Groups
+
+It's important to distinguish between Resource Groups and identity [Groups](/concepts/groups):
+
+| Aspect | Resource Groups | Groups (Identity) |
+|--------|-----------------|-------------------|
+| **Contains** | Resource patterns | Roles |
+| **Assigned to** | Resources | Principals |
+| **Phase** | Phase 3 (Resource) | Phase 2 (Identity) |
+| **Purpose** | What policies apply to resources | What roles apply to an identity |
+| **PORC field** | `resource.group` | `principal.mgroups` |
+
 ## Best Practices
 
 1. **Always define a default group**: Ensures fail-closed behavior for resources without explicit group assignment

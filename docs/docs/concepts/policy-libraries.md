@@ -221,3 +221,8 @@ spec:
 3. **Document functions**: Add comments explaining what functions do
 4. **Avoid side effects**: Libraries should be pure functions
 5. **Test libraries**: Write tests for library functions separately
+
+## Related Concepts
+
+- **[Policies](/concepts/policies)**: The authorization policies that use libraries
+- **[Policy Domains](/concepts/policy-domains)**: Where libraries are defined
