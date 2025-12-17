@@ -109,7 +109,7 @@
     "SPIFFE",
     "spiffe",
     "grpcurl",
-    "golint",
+    "golangci",
     "staticcheck",
     "honnef",
     "ingressgateway",

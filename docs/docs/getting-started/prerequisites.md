@@ -50,12 +50,12 @@ Make is useful for running project tasks but not strictly required.
 - **macOS**: `xcode-select --install`
 - **Linux**: `apt-get install make` or `yum install make`
 
-### golint / staticcheck
+### golangci-lint / staticcheck
 
 For development on the PolicyEngine itself:
 
 ```bash
-go install golang.org/x/lint/golint@latest
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 go install honnef.co/go/tools/cmd/staticcheck@latest
 ```
 
