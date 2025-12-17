@@ -22,7 +22,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 	// Create temp file with the content
 	tmpfile, err := os.CreateTemp("", "test-*.yml")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(tmpfile.Name()) })
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	_, err = tmpfile.Write(content)
 	require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestAutoBuildReferenceFiles_OnlyPolicyDomainReference(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Cleanup
-	defer os.Remove(result[0])
+	defer func() { _ = os.Remove(result[0]) }()
 }
 
 func TestAutoBuildReferenceFiles_MixedFiles(t *testing.T) {
@@ -80,7 +80,7 @@ func TestAutoBuildReferenceFiles_MixedFiles(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Cleanup
-	defer os.Remove(result[0])
+	defer func() { _ = os.Remove(result[0]) }()
 }
 
 func TestAutoBuildReferenceFiles_BuildError(t *testing.T) {

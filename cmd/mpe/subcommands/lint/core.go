@@ -141,13 +141,14 @@ func lintRegoUsingExistingValidation(files []string, opaFlags string) int {
 			file = "unknown"
 		}
 
-		if validationError.Type == "rego" {
+		switch validationError.Type {
+		case "rego":
 			// Rego compilation error
 			fmt.Printf("✗ %s (Rego in %s '%s')\n", file, validationError.Entity, validationError.EntityID)
 			fmt.Printf("  Error: %s\n", validationError.Message)
 			fmt.Println()
 			errorCount++
-		} else if validationError.Type == "reference" {
+		case "reference":
 			// Cross-domain reference error - this affects the whole bundle
 			fmt.Printf("✗ %s (%s)\n", file, validationError.Message)
 			fmt.Println()
@@ -226,7 +227,7 @@ func performOpaCheckLinting(files []string, opaFlags string) int {
 		fmt.Printf("✗ Failed to create temporary directory for opa check: %v\n", err)
 		return 1
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	reg, err := registry.NewRegistry(files)
 	if err != nil {
