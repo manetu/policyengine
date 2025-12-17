@@ -67,7 +67,7 @@ mpe serve -b my-domain.yml --port 9000
 |----------|-------------|---------|
 | `MPE_CLI_OPA_FLAGS` | Additional OPA flags | `--v0-compatible` |
 | `MPE_LOG_LEVEL` | Logging level | `info` |
-| `LOG_FORMATTER` | Log format (`json` or `text`) | `json` |
+| `MPE_LOG_FORMATTER` | Log format (`json` or `text`) | `json` |
 
 ## Exit Codes
 
