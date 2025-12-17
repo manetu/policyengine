@@ -13,13 +13,13 @@ import (
 )
 
 func TestInitConfig(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
 	config.ResetConfig()
 	assert.NotNil(t, config.VConfig)
 }
 
 func TestConfigDefaults(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
 	config.ResetConfig()
 
 	// Check some default values
@@ -28,9 +28,9 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigWithCustomFilename(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../../..")
-	os.Setenv(config.ConfigFileNameEnv, "mpe-config")
-	defer os.Unsetenv(config.ConfigFileNameEnv)
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	_ = os.Setenv(config.ConfigFileNameEnv, "mpe-config")
+	defer func() { _ = os.Unsetenv(config.ConfigFileNameEnv) }()
 
 	config.ResetConfig()
 }

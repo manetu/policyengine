@@ -48,7 +48,7 @@ func newStream(w io.Writer) Stream {
 
 // Send marshals the access record to JSON and writes it to the configured writer.
 func (s *IoWriterStream) Send(record *events.AccessRecord) error {
-	fmt.Fprintln(s.writer, s.codec.Format(record))
+	_, _ = fmt.Fprintln(s.writer, s.codec.Format(record))
 	return nil
 }
 

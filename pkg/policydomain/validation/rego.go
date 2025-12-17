@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	//lint:ignore SA1019  "github.com/open-policy-agent/opa/ast" is deprecated
-	"github.com/open-policy-agent/opa/ast"
+	//lint:ignore SA1019 deprecated OPA v0.x package kept for compatibility
+	"github.com/open-policy-agent/opa/ast" //nolint:staticcheck
 )
 
 // RegoValidator handles validation of Rego code compilation

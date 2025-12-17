@@ -49,7 +49,7 @@ func setupTestPolicyEngine(t *testing.T) core.PolicyEngine {
 func findFreePort(t *testing.T) int {
 	listener, err := os.CreateTemp("", "test-port-*")
 	require.NoError(t, err)
-	defer os.Remove(listener.Name())
+	defer func() { _ = os.Remove(listener.Name()) }()
 
 	// Use a high port number to avoid conflicts
 	port := 18000 + (os.Getpid() % 1000)
@@ -83,7 +83,7 @@ func startServerInBackground(t *testing.T, pe core.PolicyEngine, port int) decis
 	for i := 0; i < maxRetries; i++ {
 		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/openapi.yaml", port))
 		if err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return server
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -116,7 +116,7 @@ func TestGenericServer_Decision_Allow(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/decision", port)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -159,7 +159,7 @@ func TestGenericServer_Decision_Deny(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/decision", port)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -189,7 +189,7 @@ func TestGenericServer_Decision_InvalidJSON(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/decision", port)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(invalidJSON))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Should return an error status
 	assert.True(t, resp.StatusCode >= 400, "Should return error status for invalid JSON")
@@ -211,7 +211,7 @@ func TestGenericServer_SwaggerUI(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/swagger-ui/", port)
 	resp, err := http.Get(url)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -232,7 +232,7 @@ func TestGenericServer_OpenAPI(t *testing.T) {
 	url := fmt.Sprintf("http://localhost:%d/openapi.yaml", port)
 	resp, err := http.Get(url)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Regexp(t, "application/.*yaml", resp.Header.Get("Content-Type"))

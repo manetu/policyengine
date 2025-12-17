@@ -50,11 +50,11 @@ func TestPrettyPrint(t *testing.T) {
 
 			PrettyPrint(tt.input)
 
-			w.Close()
+			_ = w.Close()
 			os.Stdout = oldStdout
 
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, _ = io.Copy(&buf, r)
 			output := buf.String()
 
 			assert.Contains(t, output, tt.contains)
@@ -75,11 +75,11 @@ func TestPrettyPrintWithUnmarshalableData(t *testing.T) {
 
 	PrettyPrint(input)
 
-	w.Close()
+	_ = w.Close()
 	os.Stdout = oldStdout
 
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	_, _ = io.Copy(&buf, r)
 	output := buf.String()
 
 	// Should print error when marshaling fails

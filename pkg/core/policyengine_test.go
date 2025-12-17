@@ -66,7 +66,7 @@ func getBundleRefById(record *events.AccessRecord, ph events.AccessRecord_Bundle
 	return nil
 }
 func TestAuditDecision(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
 	config.ResetConfig()
 	ctx := context.Background()
 
@@ -1135,7 +1135,7 @@ func BenchmarkDecistion(b *testing.B) {
 	config.VConfig.Set("mock.domain.filedata.main.rego", opasimple)
 
 	for n := 0; n < b.N; n++ {
-		pe.Authorize(ctx, porc)
+		_, _ = pe.Authorize(ctx, porc)
 	}
 }
 
@@ -1272,7 +1272,7 @@ func TestWithAccessLog(t *testing.T) {
 
 // TestWithBackend verifies that WithBackend option properly configures the backend factory
 func TestWithBackend(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, false)
@@ -1289,7 +1289,7 @@ func TestWithBackend(t *testing.T) {
 
 // TestWithBackendMockModeEnabled verifies that WithBackend ignores the factory when mock mode is enabled
 func TestWithBackendMockModeEnabled(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, true)
@@ -1336,7 +1336,7 @@ func TestSetProbeMode(t *testing.T) {
 
 // TestEngineOptionsMultipleFuncs verifies that multiple option functions can be applied
 func TestEngineOptionsMultipleFuncs(t *testing.T) {
-	os.Setenv(config.ConfigPathEnv, "../..")
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, false)

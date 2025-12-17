@@ -11,9 +11,9 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 VERSION_PKG := github.com/manetu/policyengine/cmd/mpe/version
 LDFLAGS := -ldflags "-X $(VERSION_PKG).Version=$(VERSION)"
 
-.PHONY: all clean test goimports staticcheck tests sec-scan protos docker docs-lint
+.PHONY: lint all clean test goimports staticcheck tests sec-scan protos docker docs-lint
 
-all: test test_fips race staticcheck goimports sec-scan build docs-lint
+all: lint test test_fips race staticcheck goimports sec-scan build docs-lint
 
 build: $(OUTPUTDIR)/$(BINARY_NAME)
 
@@ -32,7 +32,7 @@ docker: ## Build and publish Docker container using ko (requires DOCKER_IMAGE en
 
 lint: ## Lint the files
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
-	@golint -set_exit_status ./...
+	@golangci-lint run --timeout=5m
 
 test: ## Run unittests
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"

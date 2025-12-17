@@ -22,7 +22,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 	// Create temp file with the content
 	tmpfile, err := os.CreateTemp("", "test-*.yml")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(tmpfile.Name()) })
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	_, err = tmpfile.Write(content)
 	require.NoError(t, err)
@@ -34,7 +34,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 func createTempFileWithContent(t *testing.T, content string) string {
 	tmpfile, err := os.CreateTemp("", "test-*.yml")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(tmpfile.Name()) })
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	_, err = tmpfile.WriteString(content)
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestBuildFile_HappyPath(t *testing.T) {
 	assert.NotEmpty(t, result.OutputFile, "Should have output file")
 
 	// Cleanup output file
-	defer os.Remove(result.OutputFile)
+	defer func() { _ = os.Remove(result.OutputFile) }()
 
 	// Read and verify output
 	outputData, err := os.ReadFile(result.OutputFile)
@@ -116,8 +116,8 @@ func TestBuildFile_MultipleFiles(t *testing.T) {
 	assert.True(t, alphaResult.Success, "Alpha build should succeed")
 	assert.True(t, betaResult.Success, "Beta build should succeed")
 
-	defer os.Remove(alphaResult.OutputFile)
-	defer os.Remove(betaResult.OutputFile)
+	defer func() { _ = os.Remove(alphaResult.OutputFile) }()
+	defer func() { _ = os.Remove(betaResult.OutputFile) }()
 
 	// Verify alpha output
 	alphaData, err := os.ReadFile(alphaResult.OutputFile)
@@ -244,7 +244,7 @@ func TestBuildFile_RelativePath(t *testing.T) {
 	// Change to temp directory
 	oldWd, err := os.Getwd()
 	require.NoError(t, err)
-	defer os.Chdir(oldWd)
+	defer func() { _ = os.Chdir(oldWd) }()
 
 	err = os.Chdir(tmpDir)
 	require.NoError(t, err)
@@ -264,7 +264,7 @@ spec:
 	result := File(inputFile, "")
 
 	assert.True(t, result.Success, "Build with relative path should succeed")
-	defer os.Remove(result.OutputFile)
+	defer func() { _ = os.Remove(result.OutputFile) }()
 
 	outputData, err := os.ReadFile(result.OutputFile)
 	require.NoError(t, err)
