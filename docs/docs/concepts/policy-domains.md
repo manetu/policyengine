@@ -294,3 +294,15 @@ dependencies:
 3. **Use anchors**: Avoid duplicating MRNs
 4. **Use references**: Keep Rego in external files for better editing
 5. **Validate early**: Run `mpe lint` frequently during development
+
+## Related Concepts
+
+- **[Policies](/concepts/policies)**: Authorization policies defined in domains
+- **[Policy Libraries](/concepts/policy-libraries)**: Reusable Rego code shared across policies
+- **[Operations](/concepts/operations)**: Route requests to operation phase policies
+- **[Roles](/concepts/roles)**: Connect principals to identity phase policies
+- **[Groups](/concepts/groups)**: Bundle roles for easier assignment
+- **[Resource Groups](/concepts/resource-groups)**: Connect resources to resource phase policies
+- **[Scopes](/concepts/scopes)**: Define access-method constraints
+- **[Resources](/concepts/resources)**: Define resource routing patterns
+- **[Mappers](/concepts/mappers)**: Transform non-PORC inputs

@@ -178,7 +178,7 @@ Access Token Scope: read-only
 Identity Phase (roles): GRANT (admin can delete)
 Scope Phase: DENY (read-only forbids delete)
 
-Final Decision: DENY (all mandatory phases must agree)
+Final Decision: DENY (scope constrains identity)
 ```
 
 Roles define the maximum permissions; scopes can only restrict, never expand.

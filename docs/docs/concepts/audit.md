@@ -40,7 +40,7 @@ Each evaluated policy bundle is recorded with:
 - **MRN**: The policy's Manetu Resource Notation identifier
 - **Fingerprint**: A cryptographic hash of the policy content
 - **Decision**: The outcome of this specific policy (`GRANT` or `DENY`)
-- **Phase**: Which [conjunction phase](/concepts/policy-conjunction) (System, Identity, Resource, Scope)
+- **Phase**: Which [conjunction phase](/concepts/policy-conjunction) (Operation, Identity, Resource, Scope)
 - **Reason Code**: Success or specific error type
 - **Reason**: Human-readable explanation (especially for errors)
 
@@ -189,3 +189,9 @@ Track the ratio of GRANT to DENY decisions. Sudden changes may indicate:
 ## Schema Reference
 
 For the complete AccessRecord schema including all fields, types, and enumeration values, see the [AccessRecord Schema Reference](/reference/access-record).
+
+## Related Concepts
+
+- **[PORC](/concepts/porc)**: The input format captured in AccessRecords
+- **[Policy Conjunction](/concepts/policy-conjunction)**: The phases recorded in AccessRecords
+- **[Policies](/concepts/policies)**: The policies referenced in AccessRecords

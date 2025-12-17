@@ -185,3 +185,10 @@ operations:
 3. **Document operations**: Keep a reference of available operations
 4. **Use verbs consistently**: `create`, `read`, `update`, `delete`, `list`
 5. **Avoid overlapping selectors**: Make patterns mutually exclusive when possible
+
+## Related Concepts
+
+- **[Policies](/concepts/policies)**: The Rego code that operations route to
+- **[Policy Conjunction](/concepts/policy-conjunction)**: How operation policies fit into Phase 1 evaluation
+- **[PORC](/concepts/porc)**: The `operation` field in authorization requests
+- **[Policy Domains](/concepts/policy-domains)**: Where operations are defined
