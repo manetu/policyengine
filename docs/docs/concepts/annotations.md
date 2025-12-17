@@ -120,7 +120,7 @@ resource-groups:
 
 # Resource with override
 resource:
-  mrn: "mrn:data:customer:12345"
+  id: "mrn:data:customer:12345"
   annotations:
     - name: "retention_days"
       value: "730"                 # Overrides resource group
