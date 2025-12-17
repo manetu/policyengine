@@ -18,7 +18,7 @@ Rather than relying on a single policy to make all access decisions, the PolicyE
 Each phase represents a different aspect of the access decision, and all mandatory phases must agree for access to be granted. This separation provides the following benefits:
 
 - It enables different teams or systems to manage their respective concerns independently while maintaining a coherent overall access control posture.
-- It allows the respective policies to remain small and focused since they are brought together dynamically on a request-by-request basis.  This is easier than trying to maintain a single policy that covers all possible situations.
+- It allows the respective policies to remain small and focused since they are brought together dynamically on a request-by-request basis.  This is easier than maintaining a single policy that covers every possible situation.
 
 ## How Phases Are Combined
 
@@ -69,12 +69,12 @@ flowchart TB
 | Scope | No | GRANT |
 
 :::warning Important
-If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, the scope phase defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
+If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, it defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
 :::
 
 ## Operation Phase: Tri-Level Policies
 
-The operation phase uses **tri-level policy output** (negative, zero, positive) instead of simple boolean GRANT/DENY. A negative outcome is equivalent to DENY and a zero outcome is equivalent to GRANT in other phases. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
+The operation phase uses **tri-level policy output** (negative, zero, positive) instead of simple boolean GRANT/DENY. A negative outcome is equivalent to DENY, and a zero outcome is equivalent to GRANT in other phases. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
 
 ### Why Tri-Level?
 
@@ -97,7 +97,7 @@ Operation phase policies return an integer instead of a boolean:
 | Zero (`0`) | **GRANT** | Same as any phase voting GRANT; other phases still evaluated |
 | Positive (e.g., `1`) | **GRANT Override** | Immediately grant; **skip all other phases** |
 
-:::info Note 
+:::info Note
 The specific integer value can serve as a reason code for auditing purposes. For example, `-1` vs `-2` could indicate different denial reasons, and `1` vs `2` could indicate different bypass scenarios. The sign determines the behavior; the magnitude provides additional context.
 :::
 
@@ -224,21 +224,21 @@ resource:
 The PolicyEngine evaluates:
 
 1. **Operation Phase** (1 policy, tri-level)
-   - Returns `0` (CONTINUE) — authenticated request, proceed normally
-   - Phase result: **CONTINUE**
+    - Returns `0` (CONTINUE) — authenticated request, proceed normally
+    - Phase result: **CONTINUE**
 
 2. **Identity Phase** (2 policies, one per role)
-   - Editor role policy → GRANT (can update documents)
-   - Viewer role policy → DENY (read-only)
-   - Phase result: **GRANT** (at least one GRANT)
+    - Editor role policy → GRANT (can update documents)
+    - Viewer role policy → DENY (read-only)
+    - Phase result: **GRANT** (at least one GRANT)
 
 3. **Resource Phase** (1 policy)
-   - Document policy → GRANT (user is owner)
-   - Phase result: **GRANT**
+    - Document policy → GRANT (user is owner)
+    - Phase result: **GRANT**
 
 4. **Scope Phase** (1 policy, scope present)
-   - Write scope policy → GRANT (write operation allowed)
-   - Phase result: **GRANT**
+    - Write scope policy → GRANT (write operation allowed)
+    - Phase result: **GRANT**
 
 **Final Decision: GRANT** (all phases agreed)
 
@@ -253,7 +253,7 @@ Now consider if the resource policy fails to load:
 
 **Final Decision: DENY** (resource phase did not GRANT)
 
-The audit record shows that resource phase denied not because of policy logic, but because the policy could not be found—enabling operators to identify and fix the issue.
+The audit record shows that the resource phase's outcome was DENY, not because of policy logic, but because the policy could not be found—enabling operators to identify and fix the issue.
 
 ## Design Rationale
 
@@ -284,7 +284,7 @@ Multiple layers must all agree, reducing the impact of a misconfigured policy in
 
 ### Fail-Closed Security
 
-Missing or broken policies result in DENY, ensuring that errors don't create security holes.
+Missing or broken policies result in DENY, preventing errors from creating security holes.
 
 ### Auditability
 

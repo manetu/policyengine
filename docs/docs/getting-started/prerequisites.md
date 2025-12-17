@@ -45,7 +45,7 @@ opa version
 
 ### Make
 
-Make is useful for running project tasks but not strictly required.
+Make is useful for running project tasks, but not strictly required.
 
 - **macOS**: `xcode-select --install`
 - **Linux**: `apt-get install make` or `yum install make`

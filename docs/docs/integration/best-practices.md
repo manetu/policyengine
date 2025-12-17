@@ -13,7 +13,7 @@ This guide covers recommended patterns for implementing Policy Enforcement Point
 The PEP's job is to formulate the request and enforce the decision—not to implement access control logic. Keep the logic in policies where it can be centrally managed and tested.
 
 ```go
-// Good: PEP just builds PORC and enforces decision
+// Good: PEP just builds PORC and enforces the decision
 func (m *AuthMiddleware) Handler(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         porc := m.buildPORC(r)
@@ -194,7 +194,7 @@ var pdpClient = &http.Client{
 When using the embedded library, pass maps directly to avoid JSON parsing:
 
 ```go
-// Faster: Pass map directly
+// Faster: Pass the map directly
 porc := map[string]interface{}{
     "principal": principal,
     "operation": operation,
@@ -280,11 +280,11 @@ Use `mpe test decision` to test policies independently of PEP code. Create indiv
 ```
 
 ```bash
-# Test that admin can read resources
+# Test that an admin can read resources
 mpe test decision -b domain.yml -i test-admin-read.json | jq .decision
 # Expected: "GRANT"
 
-# Test that viewer cannot delete (using stdin)
+# Test that a viewer cannot delete (using stdin)
 echo '{"principal":{"sub":"viewer@example.com","mroles":["mrn:iam:role:viewer"]},"operation":"api:documents:delete","resource":{"id":"mrn:app:docs:document:123"}}' | \
   mpe test decision -b domain.yml -i -  | jq .decision
 # Expected: "DENY"

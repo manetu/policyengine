@@ -199,7 +199,7 @@ The `value` field must contain a valid JSON value encoded as a string. This is a
 | Array | `'["read", "write"]'` | `["read", "write"]` |
 | Object | `'{"region": "us-west", "priority": 1}'` | `{region: us-west}` |
 
-**String values require nested quotes.** The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value. Without the inner quotes, a value like `"engineering"` would be interpreted as a JSON identifier (which is invalid), not a JSON string.
+**String values require nested quotes.** The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value. Without the inner quotes, a value like `"engineering"` would be interpreted as a JSON identifier (which is invalid) rather than a JSON string.
 
 ```yaml
 # Correct - string value with nested quotes
@@ -263,7 +263,7 @@ allow {
     "admin" in input.principal.mannotations.capabilities
 }
 
-# Resource must have matching tag
+# Resource must have a matching tag
 allow {
     some tag in input.resource.annotations.tags
     tag in input.principal.mannotations.allowed_tags
@@ -295,7 +295,7 @@ allow {
     input.principal.mannotations.department == input.resource.annotations.department
 }
 
-# Principal must have access to resource's region
+# Principal must have access to the resource's region
 allow {
     input.resource.annotations.region in input.principal.mannotations.allowed_regions
 }
@@ -373,7 +373,7 @@ package authz
 
 default allow = false
 
-# Principal's region must include resource's region
+# Principal's region must include the resource's region
 allow {
     input.resource.annotations.region in input.principal.mannotations.allowed_regions
 }

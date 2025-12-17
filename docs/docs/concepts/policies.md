@@ -72,7 +72,7 @@ is_public_operation {
 
 **Note**: The specific integer value can serve as a reason code for auditing. The sign determines behavior; the magnitude provides context.
 
-See [Policy Conjunction](/concepts/policy-conjunction#operation-phase-tri-level-policies) for detailed explanation.
+See [Policy Conjunction](/concepts/policy-conjunction#operation-phase-tri-level-policies) for a detailed explanation.
 
 ## Policy Inputs
 
@@ -157,7 +157,7 @@ package authz
 
 default allow = false
 
-# Only owner can access
+# Only the owner can access
 allow {
     input.principal.sub == input.resource.owner
 }
