@@ -158,17 +158,43 @@ Aggregate AccessRecords to understand your access patterns:
 
 ### Include Environment Context
 
-Use the metadata `env` field to capture deployment context:
+Use the `audit.env` configuration option to capture deployment context in every AccessRecord. Configure it in your `mpe-config.yaml`:
 
 ```yaml
-# When configuring your PDP
-env:
-  service: "my-service"
-  environment: "production"
-  region: "us-east-1"
+audit:
+  env:
+    service: SERVICE_NAME
+    environment: DEPLOYMENT_ENV
+    region: AWS_REGION
+    pod: HOSTNAME
 ```
 
-This makes it easier to correlate decisions with specific deployments.
+Each entry maps a key name (that will appear in the AccessRecord) to an environment variable name. The environment variable values are read once at PolicyEngine startup.
+
+For example, with the above configuration and these environment variables set:
+- `SERVICE_NAME=api-gateway`
+- `DEPLOYMENT_ENV=production`
+- `AWS_REGION=us-east-1`
+- `HOSTNAME=api-gw-7d9f8b6c4-x2m9k`
+
+Every AccessRecord will include:
+
+```json
+{
+  "metadata": {
+    "env": {
+      "service": "api-gateway",
+      "environment": "production",
+      "region": "us-east-1",
+      "pod": "api-gw-7d9f8b6c4-x2m9k"
+    }
+  }
+}
+```
+
+This makes it easier to correlate decisions with specific deployments, pods, or regions.
+
+See the [Configuration Reference](/reference/configuration#audit-environment-configuration) for complete details.
 
 ### Retain Appropriately
 
