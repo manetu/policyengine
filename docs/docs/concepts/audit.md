@@ -19,7 +19,7 @@ The AccessRecord stream solves these challenges by providing a consistent, struc
 
 ## The AccessRecord
 
-Just as [PORC](/concepts/porc) normalizes authorization **inputs**, the AccessRecord normalizes authorization **outputs**. This symmetry makes it possible to reason about access control decisions consistently, regardless of where they originated in your system.
+Just as [PORC](/concepts/porc) normalizes authorization **inputs**, the AccessRecord normalizes authorization **outputs**. This symmetry allows you to reason about access control decisions consistently, regardless of where they originated in your system.
 
 Every AccessRecord contains:
 
@@ -44,7 +44,7 @@ Each evaluated policy bundle is recorded with:
 - **Reason Code**: Success or specific error type
 - **Reason**: Human-readable explanation (especially for errors)
 
-The fingerprint is particularly valuable—it uniquely identifies the exact policy version that was evaluated, enabling precise forensic analysis even after policies have been updated.
+The fingerprint is particularly valuable—it uniquely identifies the exact policy version evaluated, enabling precise forensic analysis even after policies are updated.
 
 ## Output Destinations
 
@@ -150,7 +150,7 @@ This enables safe policy updates by understanding the impact before deployment.
 Aggregate AccessRecords to understand your access patterns:
 
 - Most frequently accessed resources
-- Policies with highest denial rates
+- Policies with the highest denial rates
 - Principal activity distributions
 - Phase-specific decision patterns
 

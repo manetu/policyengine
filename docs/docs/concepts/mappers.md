@@ -4,7 +4,7 @@ sidebar_position: 13
 
 # Mappers
 
-**Mappers** are an optional feature that transforms non-PORC inputs into [PORC expressions](/concepts/porc) for policy evaluation. They are only needed when integrating with systems that cannot natively construct PORC expressions.
+**Mappers** are an optional feature that transforms non-PORC inputs into [PORC expressions](/concepts/porc) for policy evaluation. They are only needed when integrating with systems that cannot construct PORC expressions natively.
 
 ## When to Use Mappers
 
@@ -163,3 +163,4 @@ mpe test mapper -b my-domain.yml -i envoy-input.json
 - **[PORC Expressions](/concepts/porc)**: The format mappers produce
 - **[Integration Guide](/integration)**: Building PEPs that construct PORC directly
 - **[Envoy Integration](/deployment/envoy-integration)**: Deploying with Envoy/Istio
+

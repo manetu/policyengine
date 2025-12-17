@@ -85,7 +85,7 @@ To use the PolicyEngine in your Go application:
 go get github.com/manetu/policyengine@latest
 ```
 
-Then import in your code:
+Then import into your code:
 
 ```go
 import (
@@ -119,3 +119,4 @@ Now that you have the CLI installed, proceed to:
 
 - [Quick Start](/quick-start) - Create your first PolicyDomain
 - [CLI Reference](/reference/cli) - Learn all CLI commands
+

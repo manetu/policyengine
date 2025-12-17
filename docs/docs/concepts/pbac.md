@@ -8,7 +8,7 @@ Policy-Based Access Control (PBAC) is an advanced access control model that enab
 
 ## Introduction
 
-PBAC focuses on the dynamic evaluation of policies and attributes to determine access permissions. Unlike simpler models like Role-Based Access Control (RBAC), PBAC allows for fine-grained, context-aware decisions based on multiple factors.
+PBAC focuses on the dynamic evaluation of policies and attributes to determine access permissions. Unlike simpler models such as Role-Based Access Control (RBAC), PBAC enables fine-grained, context-aware decisions based on multiple factors.
 
 PBAC allows organizations to manage access to resources by defining policies that consider:
 
