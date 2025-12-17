@@ -213,13 +213,12 @@ principal:
   mroles:
     - "mrn:iam:role:editor"
     - "mrn:iam:role:viewer"
-operation: "api:documents:update"
-resource:
-  mrn: "mrn:data:document:doc456"
-  owner: "user123"
-context:
   scopes:
     - "mrn:iam:scope:write"
+operation: "api:documents:update"
+resource:
+  id: "mrn:data:document:doc456"
+  owner: "user123"
 ```
 
 The PolicyEngine evaluates:

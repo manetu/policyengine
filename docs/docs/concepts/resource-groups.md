@@ -73,7 +73,7 @@ spec:
 | `description` | string | No | Description of the group's purpose |
 | `default` | boolean | No | Use as default for unassigned resources |
 | `policy` | string | Yes | MRN of the policy to apply |
-| `annotations` | object | No | Custom metadata key-value pairs |
+| `annotations` | array | No | List of name/value objects for custom metadata |
 
 ## Default Resource Group
 
