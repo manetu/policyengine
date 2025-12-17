@@ -53,7 +53,7 @@ func newLogger(module string) *Logger {
 	reportCaller := os.Getenv("LOG_REPORT_CALLER") != ""
 
 	// Create core
-	core := zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
+	core := zapcore.NewCore(encoder, zapcore.AddSync(os.Stderr), zapcore.InfoLevel)
 
 	// Build logger
 	options := []zap.Option{
@@ -110,8 +110,8 @@ func (l *Logger) SetLevel(level zapcore.Level) {
 
 	reportCaller := os.Getenv("LOG_REPORT_CALLER") != ""
 
-	// Use custom writer if set, otherwise use stdout
-	var output io.Writer = os.Stdout
+	// Use custom writer if set, otherwise use stderr
+	var output io.Writer = os.Stderr
 	if l.writer != nil {
 		output = l.writer
 	}
@@ -139,7 +139,7 @@ func (l *Logger) Out() io.Writer {
 	if l.writer != nil {
 		return l.writer
 	}
-	return os.Stdout
+	return os.Stderr
 }
 
 // SetOut sets the output writer (for tests)
