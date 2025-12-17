@@ -33,7 +33,7 @@ The `rego` and `rego_filename` fields specify where the Rego code comes from:
 | `PolicyDomain` | Required | Not supported |
 | `PolicyDomainReference` | Optional | Optional |
 
-For `PolicyDomainReference`, you must provide either `rego` (inline) or `rego_filename` (external file), but not both. Using `rego_filename` is recommended for development as it enables IDE syntax highlighting and cleaner version control diffs.
+For `PolicyDomainReference`, you must provide either `rego` (inline) or `rego_filename` (external file), but not both. Using `rego_filename` is recommended for development as it enables IDE syntax highlighting and cleaner version-control diffs.
 
 See [PolicyDomain vs PolicyDomainReference](/reference/schema/#policydomain-vs-policydomainreference) for more details.
 

@@ -30,41 +30,41 @@ mpe serve -b domain.yml -p envoy --port 9001
 
 ```yaml
 http_filters:
-- name: envoy.filters.http.ext_authz
-  typed_config:
-    "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
-    grpc_service:
-      envoy_grpc:
-        cluster_name: ext_authz
-      timeout: 0.25s
-    transport_api_version: V3
-    failure_mode_allow: false
-    with_request_body:
-      max_request_bytes: 8192
-      allow_partial_message: true
+  - name: envoy.filters.http.ext_authz
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+      grpc_service:
+        envoy_grpc:
+          cluster_name: ext_authz
+        timeout: 0.25s
+      transport_api_version: V3
+      failure_mode_allow: false
+      with_request_body:
+        max_request_bytes: 8192
+        allow_partial_message: true
 ```
 
 ### Cluster Configuration
 
 ```yaml
 clusters:
-- name: ext_authz
-  type: STRICT_DNS
-  lb_policy: ROUND_ROBIN
-  typed_extension_protocol_options:
-    envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-      "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-      explicit_http_config:
-        http2_protocol_options: {}
-  load_assignment:
-    cluster_name: ext_authz
-    endpoints:
-    - lb_endpoints:
-      - endpoint:
-          address:
-            socket_address:
-              address: mpe-server
-              port_value: 9001
+  - name: ext_authz
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    load_assignment:
+      cluster_name: ext_authz
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: mpe-server
+                    port_value: 9001
 ```
 
 ## Mapper Configuration
@@ -121,7 +121,7 @@ mappers:
 ```
 
 :::tip[Resource Format]
-This example uses the simple MRN string format, which is the recommended approach. The PolicyEngine's [Resource Resolution](/integration/resource-resolution) enriches resources with metadata at evaluation time. Use the Fully Qualified Descriptor format only when the mapper has context the backend cannot determine.
+This example uses the simple MRN string format, which is the recommended approach. The PolicyEngine's [Resource Resolution](/integration/resource-resolution) enriches resources with metadata at evaluation time. Use the Fully Qualified Descriptor format only when the mapper has context that the backend cannot determine.
 :::
 
 ## Istio Integration
@@ -147,7 +147,7 @@ spec:
         paths: ["/*"]
 ```
 
-Configure the extension provider in Istio mesh config:
+Configure the extension provider in the Istio mesh config:
 
 ```yaml
 extensionProviders:

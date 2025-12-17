@@ -427,7 +427,7 @@ The Premium Edition can be deployed in multiple configurations:
 | **Kubernetes sidecar** | Localhost round-trip | 1:1 with application (Operator-managed) | K8s environments wanting automated scaling |
 | **Standalone service** | Network round-trip | Independent | Non-K8s environments, shared PDP |
 
-Regardless of deployment model, Premium features like centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
+Regardless of the deployment model, Premium features such as centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
 
 ### Quick Decision Guide
 

@@ -112,7 +112,7 @@ If no selector matches, the resource is assigned to the default resource group.
 
 ## Approach 2: MRN String with External Resolution <FeatureChip variant="premium" /> {#approach-2-mrn-string-with-external-resolution}
 
-Extends selector resolution with the ability to resolve metadata dynamically from external systems. This approach maintains the same simple PEP interface—just send an MRN string—while enabling per-resource granularity.
+Extends selector resolution by dynamically resolving metadata from external systems. This approach maintains the same simple PEP interface—just send an MRN string—while enabling per-resource granularity.
 
 ```json
 {

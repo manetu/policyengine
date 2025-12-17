@@ -13,7 +13,7 @@ A **PORC Expression** is the normalized input format for policy evaluation. PORC
 
 ## Overview
 
-PORC is the universal language for expressing authorization requests in the PolicyEngine. Every policy evaluation receives a PORC expression as input, regardless of where the request originated. This standardized format makes it possible to:
+PORC is the universal language for expressing authorization requests in the PolicyEngine. Every policy evaluation receives a PORC expression as input, regardless of the origin of the request. This standardized format makes it possible to:
 
 - Write policies that work across different enforcement points
 - Reuse policy logic regardless of the original request format

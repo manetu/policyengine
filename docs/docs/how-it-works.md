@@ -138,7 +138,7 @@ flowchart LR
     style Decision fill:#38a169,stroke:#2f855a,color:#fff
 ```
 
-You author PolicyDomains as YAML files (with embedded or external Rego code) and load them into the PolicyEngine. The PolicyDomain is injected configuration—defining what policies exist, how roles map to policies, and how requests are routed.
+You author PolicyDomains as YAML files (with embedded or external Rego code) and load them into the PolicyEngine. The PolicyDomain is an injected configuration that defines what policies exist, how roles map to policies, and how requests are routed.
 
 ## The Development Workflow
 
@@ -204,7 +204,7 @@ sequenceDiagram
 7. The PEP enforces the decision
 
 :::info
-The ordering of steps 5 and 6 is intentional: the audit trail is committed **before** the decision is returned. This ensures a complete record exists prior to any action being taken on the outcome.
+The ordering of steps 5 and 6 is intentional: the audit trail is committed **before** the decision is returned. This ensures that a complete record exists before any action is taken on the outcome.
 :::
 
 ## What You'll Learn Next

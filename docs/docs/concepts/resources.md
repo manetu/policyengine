@@ -175,7 +175,7 @@ package authz
 
 default allow = false
 
-# Only finance department can access finance resources
+# Only the finance department can access finance resources
 allow {
     input.resource.annotations.department == "finance"
     input.principal.mannotations.department == "finance"

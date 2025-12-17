@@ -361,7 +361,7 @@ This inheritance hierarchy (Roles → **Groups** → Scopes → Principal) makes
 ### 5. Review Group Membership Regularly
 
 Periodically audit:
-- Which groups principals belong to
+- Principal membership assignment
 - Whether group role assignments are still appropriate
 - Unused or redundant groups that can be consolidated
 

@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Concepts Overview
 
-This section covers the core concepts of the Manetu PolicyEngine. Understanding these concepts is essential for effectively designing and implementing access control policies.
+This section covers the core concepts of the Manetu PolicyEngine. Understanding these concepts is essential to effectively design and implement access control policies.
 
 ## Foundation
 
@@ -27,7 +27,7 @@ For integration guidance (PDP/PEP architecture, resource resolution), see the [I
 
 - **[PORC](/concepts/porc)**: The standardized input format for policy evaluation
 
-**PORC (Principal, Operation, Resource, Context)** is the universal language for expressing authorization requests. Every policy evaluation receives a PORC expression as input, regardless of where the request originated. This standardized format decouples policy logic from application-specific request formats.
+**PORC (Principal, Operation, Resource, Context)** is the universal language for expressing authorization requests. Every policy evaluation receives a PORC expression as input, regardless of the origin of the request. This standardized format decouples policy logic from application-specific request formats.
 
 ## The Four Phases
 
@@ -37,7 +37,7 @@ Policy evaluation happens in four phases, each addressing a different aspect of 
 
 - **[Operations](/concepts/operations)**: Actions that can be performed in your system
 
-Operations define the verbs of your access control model—the actions that principals attempt to perform. They are the starting point for policy evaluation and route requests to appropriate policies. Operation policies can handle public endpoints, JWT validation, and bypass rules using [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies).
+Operations define the verbs of your access control model—the actions that principals attempt to perform. They serve as the starting point for policy evaluation and route requests to the appropriate policies. Operation policies can handle public endpoints, JWT validation, and bypass rules using [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies).
 
 ### Phase 2: Identity
 
@@ -75,7 +75,7 @@ These features span multiple phases and entity types.
 
 - **[Annotations](/concepts/annotations)**: Key-value metadata with inheritance
 
-Annotations are flexible key-value pairs that can be attached to many entity types including roles, groups, scopes, resource groups, and resources. They support an inheritance hierarchy where more specific definitions override less specific ones, enabling powerful attribute-based access control patterns.
+Annotations are flexible key-value pairs that can be attached to many entity types, including roles, groups, scopes, resource groups, and resources. They support an inheritance hierarchy where more specific definitions override less specific ones, enabling powerful attribute-based access control patterns.
 
 ## Audit & Observability
 
@@ -137,10 +137,10 @@ flowchart TB
 2. **PEP constructs** a [PORC expression](/concepts/porc) from the request context
 3. **Operation routing** selects the appropriate operation phase policy
 4. **Policy evaluation** happens in multiple phases:
-   - Phase 1: Operation policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies)
-   - Phase 2: Identity policies (role-based via [Roles](/concepts/roles) and [Groups](/concepts/groups))
-   - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
-   - Phase 4: Scope policies (access-method constraints)
+    - Phase 1: Operation policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies)
+    - Phase 2: Identity policies (role-based via [Roles](/concepts/roles) and [Groups](/concepts/groups))
+    - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
+    - Phase 4: Scope policies (access-method constraints)
 5. **[AccessRecord](/concepts/audit) written**: Captures PORC, decision, and all evaluated policies
 6. **Decision returned**: GRANT or DENY
 

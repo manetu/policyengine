@@ -155,7 +155,7 @@ spec:
 
 ## Using YAML Anchors
 
-YAML anchors make PolicyDomains more maintainable:
+YAML anchors increase PolicyDomain maintainability:
 
 ```yaml
 spec:
