@@ -34,6 +34,9 @@ const (
 
 	// IncludeAllBundles defaults true.  If false, includes only up to final decision
 	IncludeAllBundles string = "bundles.includeall"
+
+	// AuditEnv is a map of key names to environment variable names to include in AccessRecord metadata
+	AuditEnv string = "audit.env"
 )
 
 var (
@@ -120,4 +123,29 @@ func ResetConfig() {
 	Init()
 	// ignore any reset errors
 	_ = Load()
+}
+
+// GetAuditEnv reads the audit.env configuration and returns a map of key names to their
+// resolved environment variable values. The configuration format is:
+//
+//	audit:
+//	  env:
+//	    alpha: FOO
+//	    beta: BAR
+//
+// This would result in a map like {"alpha": <value of FOO env var>, "beta": <value of BAR env var>}.
+// Environment variables that are not set will have empty string values.
+func GetAuditEnv() map[string]string {
+	result := make(map[string]string)
+
+	envConfig := VConfig.GetStringMapString(AuditEnv)
+	if envConfig == nil {
+		return result
+	}
+
+	for key, envVarName := range envConfig {
+		result[key] = os.Getenv(envVarName)
+	}
+
+	return result
 }

@@ -38,6 +38,7 @@ type PolicyEngine struct {
 	compiler *opa.Compiler
 
 	includeAllBundles bool
+	auditEnv          map[string]string // cached environment variables for AccessRecord metadata
 }
 
 var logger = logging.GetLogger("policyengine")
@@ -83,6 +84,7 @@ func NewPolicyEngine(engineOptions *options.EngineOptions) (*PolicyEngine, error
 		backend:           be,
 		compiler:          compiler,
 		includeAllBundles: config.VConfig.GetBool(config.IncludeAllBundles), // default is to debug all bundles
+		auditEnv:          config.GetAuditEnv(),
 	}, nil
 }
 
@@ -281,6 +283,7 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 		Metadata: &events.AccessRecord_Metadata{
 			Timestamp: timestamppb.New(time.Now()),
 			Id:        uuid.New().String(),
+			Env:       pe.auditEnv,
 		},
 	}
 
