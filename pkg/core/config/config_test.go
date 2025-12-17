@@ -34,3 +34,55 @@ func TestConfigWithCustomFilename(t *testing.T) {
 
 	config.ResetConfig()
 }
+
+func TestGetAuditEnvEmpty(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	config.ResetConfig()
+
+	// With no audit.env configuration, should return empty map
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	assert.Empty(t, auditEnv)
+}
+
+func TestGetAuditEnvWithConfig(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	config.ResetConfig()
+
+	// Set up the audit.env configuration manually via Viper
+	config.VConfig.Set(config.AuditEnv, map[string]string{
+		"alpha": "TEST_ENV_ALPHA",
+		"beta":  "TEST_ENV_BETA",
+	})
+
+	// Set the environment variables
+	_ = os.Setenv("TEST_ENV_ALPHA", "value-alpha")
+	_ = os.Setenv("TEST_ENV_BETA", "value-beta")
+	defer func() {
+		_ = os.Unsetenv("TEST_ENV_ALPHA")
+		_ = os.Unsetenv("TEST_ENV_BETA")
+	}()
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	assert.Equal(t, "value-alpha", auditEnv["alpha"])
+	assert.Equal(t, "value-beta", auditEnv["beta"])
+}
+
+func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	config.ResetConfig()
+
+	// Set up the audit.env configuration with an env var that doesn't exist
+	config.VConfig.Set(config.AuditEnv, map[string]string{
+		"missing": "NONEXISTENT_ENV_VAR",
+	})
+
+	// Ensure the env var is not set
+	_ = os.Unsetenv("NONEXISTENT_ENV_VAR")
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	// Missing env vars should result in empty string
+	assert.Equal(t, "", auditEnv["missing"])
+}
