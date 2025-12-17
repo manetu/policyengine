@@ -146,12 +146,11 @@ principal:
   sub: "user123"
   mroles:
     - "mrn:iam:role:editor"
-context:
   scopes:
     - "mrn:iam:scope:read-only"
 operation: "api:documents:update"
 resource:
-  mrn: "mrn:data:document:doc456"
+  id: "mrn:data:document:doc456"
 ```
 
 The integration layer (PEP) is responsible for extracting scope information from the access token or authentication context and including it in the PORC.

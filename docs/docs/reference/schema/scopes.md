@@ -32,7 +32,7 @@ spec:
 
 ## Usage
 
-Scopes define constraint boundaries based on access method. When a request includes scopes (via `context.scopes` in the PORC), the scope policies are evaluated during Phase 4 (scope phase). Common sources of scopes include:
+Scopes define constraint boundaries based on access method. When a request includes scopes (via `principal.scopes` in the PORC), the scope policies are evaluated during Phase 4 (scope phase). Common sources of scopes include:
 
 - Personal Access Tokens (PATs)
 - Federated identity sessions
