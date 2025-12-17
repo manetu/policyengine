@@ -245,3 +245,14 @@ policies:
 3. **Use libraries**: Extract reusable logic
 4. **Test thoroughly**: Cover both grant and deny cases
 5. **Document decisions**: Comment complex logic
+
+## Related Concepts
+
+- **[Policy Conjunction](/concepts/policy-conjunction)**: How policies from different phases combine
+- **[Policy Libraries](/concepts/policy-libraries)**: Reusable Rego code for policies
+- **[PORC](/concepts/porc)**: The input format for policy evaluation
+- **[Operations](/concepts/operations)**: Route requests to operation phase policies
+- **[Roles](/concepts/roles)**: Connect principals to identity phase policies
+- **[Resource Groups](/concepts/resource-groups)**: Connect resources to resource phase policies
+- **[Scopes](/concepts/scopes)**: Connect access methods to scope phase policies
+- **[Policy Domains](/concepts/policy-domains)**: Container for policy definitions
