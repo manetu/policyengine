@@ -57,6 +57,13 @@ const config: Config = {
 
   plugins: [
     [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'G-ML72437DHG',
+        anonymizeIP: false,
+      },
+    ],
+    [
       '@easyops-cn/docusaurus-search-local',
       {
         hashed: true,
@@ -64,6 +71,7 @@ const config: Config = {
         indexBlog: false,
       },
     ],
+    './plugins/iubenda-proxy.js',
   ],
 
   themeConfig: {
@@ -136,6 +144,10 @@ const config: Config = {
             {
               label: 'Manetu',
               href: 'https://manetu.com',
+            },
+            {
+              label: 'Privacy Policy',
+              to: '/privacy-policy',
             },
           ],
         },
