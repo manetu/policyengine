@@ -22,7 +22,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 	// Create temp file with the content
 	tmpfile, err := os.CreateTemp("", "test-*.yml")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(tmpfile.Name()) })
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	_, err = tmpfile.Write(content)
 	require.NoError(t, err)
@@ -34,7 +34,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 func createTempFileWithContent(t *testing.T, content string) string {
 	tmpfile, err := os.CreateTemp("", "test-*.yml")
 	require.NoError(t, err)
-	t.Cleanup(func() { os.Remove(tmpfile.Name()) })
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
 
 	_, err = tmpfile.WriteString(content)
 	require.NoError(t, err)

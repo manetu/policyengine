@@ -150,7 +150,7 @@ func TestEnvoyServer_Check_Allow(t *testing.T) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	require.NoError(t, err)
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	client := authv3.NewAuthorizationClient(conn)
 
@@ -223,7 +223,7 @@ func TestEnvoyServer_Check_Deny(t *testing.T) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	require.NoError(t, err)
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	client := authv3.NewAuthorizationClient(conn)
 
@@ -300,7 +300,7 @@ func TestEnvoyServer_Check_NoMapper(t *testing.T) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	require.NoError(t, err)
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	client := authv3.NewAuthorizationClient(conn)
 
@@ -352,7 +352,7 @@ func TestEnvoyServer_Stop(t *testing.T) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err == nil {
-		conn.Close()
+		_ = conn.Close()
 	}
 	// Connection might succeed but the server should be stopped
 	// The actual test is that Stop() doesn't error
