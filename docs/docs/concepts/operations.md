@@ -61,11 +61,11 @@ Selectors are regular expressions that match operation strings:
 
 ```yaml
 operations:
-  # Match all operations
-  - name: catchall
+  # Match exact operations first
+  - name: health-check
     selector:
-      - ".*"
-    policy: "mrn:iam:policy:default"
+      - "^system:health:check$"
+    policy: "mrn:iam:policy:allow-all"
 
   # Match specific patterns
   - name: vault-ops
@@ -74,12 +74,16 @@ operations:
       - "vault:.*:list"
     policy: "mrn:iam:policy:vault-readonly"
 
-  # Match exact operations
-  - name: health-check
+  # Catch-all last
+  - name: default
     selector:
-      - "^system:health:check$"
-    policy: "mrn:iam:policy:allow-all"
+      - ".*"
+    policy: "mrn:iam:policy:default"
 ```
+
+:::note[Multiple Selectors]
+When an operation entry contains multiple selectors, they have an **OR** relationship. The operation matches if **any** of its selectors match. For example, `vault-ops` above matches requests for either `vault:.*:read` OR `vault:.*:list`. This OR behavior applies uniformly to all selector-based entities (operations, resources, and mappers).
+:::
 
 ### Selector Order
 
