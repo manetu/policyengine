@@ -35,6 +35,13 @@ metadata:
   name: my-first-domain
 spec:
   policies:
+    - mrn: &operation-default "mrn:iam:policy:operation-default"
+      name: operation-default
+      description: "Defers to identity and resource phases"
+      rego: |
+        package authz
+        default allow = 0  # operation policies use tri-state integers
+
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all
       description: "Allows all authenticated requests"
@@ -75,7 +82,7 @@ spec:
     - name: api
       selector:
         - ".*"
-      policy: *allow-all
+      policy: *operation-default
 ```
 
 ## Validating Your PolicyDomain
@@ -92,6 +99,7 @@ If everything is valid, you'll see:
 Linting YAML files...
 
 ✓ my-domain.yml: Valid YAML
+✓ my-domain.yml: Valid Rego in policy 'operation-default'
 ✓ my-domain.yml: Valid Rego in policy 'allow-all'
 ✓ my-domain.yml: Valid Rego in policy 'deny-all'
 ---
