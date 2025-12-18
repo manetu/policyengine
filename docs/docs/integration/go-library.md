@@ -121,6 +121,10 @@ When probe mode is enabled:
 - No audit records are generated
 - Useful for pre-flight permission checks
 
+:::warning
+Only use probe mode for UI capability checks. Actual access control decisions should always be audited (omit the probe option or set it to `false`). See [Audit](/concepts/audit) for more information.
+:::
+
 ## Complete Middleware Example
 
 Here's a complete HTTP middleware PEP implementation:
