@@ -81,6 +81,10 @@ The **Principal** represents who is making the request. This typically comes fro
 | `mclearance` | Security clearance level (LOW, MODERATE, HIGH, MAXIMUM) |
 | `mannotations` | Key-value metadata about the principal |
 
+:::note Audit Consideration
+The `sub` field should always be provided. While omitting it may not affect policy evaluation, `principal.sub` has first-class representation in the AccessRecord and its absence will impact audit data quality.
+:::
+
 ### Principal in Policies
 
 Access principal fields in Rego via `input.principal`:
@@ -180,6 +184,10 @@ The **Resource** identifies the entity being accessed. Resources have metadataâ€
   }
 }
 ```
+
+:::note Audit Consideration
+The `resource.id` field has first-class representation in the AccessRecord. When using the MRN string format, the PolicyEngine automatically populates `resource.id` from the provided string. When using the Fully-Qualified Descriptor format, the `id` field should be provided to ensure complete audit data.
+:::
 
 See [Resource Resolution](/integration/resource-resolution) for guidance on choosing between these formats, and [Resources](/concepts/resources) for details on resource metadata.
 
