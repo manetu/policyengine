@@ -152,11 +152,14 @@ allow {
 
 ## Resource
 
-The **Resource** identifies the entity being accessed. Resources can be specified in two formats:
+The **Resource** identifies the entity being accessed. Resources have metadata—group membership, classification, ownership, and annotations—that policies use to make decisions. The two PORC formats differ in *who provides* that metadata:
 
-### MRN String (Simple)
+| Format | Metadata Provider |
+|--------|-------------------|
+| MRN String | PolicyEngine resolves via selectors or external resolvers |
+| Fully-Qualified Descriptor | PEP provides directly in the request |
 
-For resources that don't need additional metadata:
+### MRN String
 
 ```json
 {
@@ -165,8 +168,6 @@ For resources that don't need additional metadata:
 ```
 
 ### Fully-Qualified Descriptor
-
-For resources with ownership, classification, or other metadata:
 
 ```json
 {
@@ -180,7 +181,7 @@ For resources with ownership, classification, or other metadata:
 }
 ```
 
-See [Resources](/concepts/resources) and [Resource Groups](/concepts/resource-groups) for details. For integration guidance on when to use each format, see [Resource Resolution](/integration/resource-resolution).
+See [Resource Resolution](/integration/resource-resolution) for guidance on choosing between these formats, and [Resources](/concepts/resources) for details on resource metadata.
 
 ### Resource in Policies
 
