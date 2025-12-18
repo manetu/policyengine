@@ -8,6 +8,14 @@ paths:
     post:
       summary: Invokes a policy decision
       operationId: decision
+      parameters:
+        - name: probe
+          in: query
+          description: When true, disables audit logging for this request. Use for UI capability checks where you need to test permissions without generating audit entries.
+          required: false
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:

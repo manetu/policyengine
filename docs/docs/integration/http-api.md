@@ -39,6 +39,12 @@ POST /decision
 Content-Type: application/json
 ```
 
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `probe` | boolean | `false` | When `true`, disables audit logging for this request. Use for UI capability checks. |
+
 ### Request Body
 
 A PORC expression as JSON:
@@ -65,6 +71,25 @@ A PORC expression as JSON:
   "allow": true
 }
 ```
+
+### Probe Mode
+
+Use probe mode (`?probe=true`) to check permissions without generating audit entries. This is useful for UI capability checks—determining which buttons, menu items, or actions to display to users.
+
+```bash
+# Check if user can edit, without creating an audit entry
+curl -X POST "http://localhost:9000/decision?probe=true" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "principal": {"sub": "user@example.com", "mroles": ["mrn:iam:example.com:role:viewer"]},
+    "operation": "api:documents:edit",
+    "resource": "mrn:app:example:document:12345"
+  }'
+```
+
+:::warning
+Only use probe mode for UI capability checks. Actual access control decisions should always be audited (omit the `probe` parameter or set it to `false`). See [Audit](/concepts/audit) for more information.
+:::
 
 ## Client Examples
 
