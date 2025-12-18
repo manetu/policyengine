@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
 
@@ -21,6 +22,12 @@ type Decision struct {
 // DecisionJSONBody defines parameters for Decision.
 type DecisionJSONBody = map[string]interface{}
 
+// DecisionParams defines parameters for Decision.
+type DecisionParams struct {
+	// Probe When true, disables audit logging for this request. Use for UI capability checks where you need to test permissions without generating audit entries.
+	Probe *bool `form:"probe,omitempty" json:"probe,omitempty"`
+}
+
 // DecisionJSONRequestBody defines body for Decision for application/json ContentType.
 type DecisionJSONRequestBody = DecisionJSONBody
 
@@ -28,7 +35,7 @@ type DecisionJSONRequestBody = DecisionJSONBody
 type ServerInterface interface {
 	// Invokes a policy decision
 	// (POST /decision)
-	Decision(ctx echo.Context) error
+	Decision(ctx echo.Context, params DecisionParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -40,8 +47,17 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) Decision(ctx echo.Context) error {
 	var err error
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params DecisionParams
+	// ------------- Optional query parameter "probe" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "probe", ctx.QueryParams(), &params.Probe)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter probe: %s", err))
+	}
+
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.Decision(ctx)
+	err = w.Handler.Decision(ctx, params)
 	return err
 }
 
@@ -78,7 +94,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 }
 
 type DecisionRequestObject struct {
-	Body *DecisionJSONRequestBody
+	Params DecisionParams
+	Body   *DecisionJSONRequestBody
 }
 
 type DecisionResponseObject interface {
@@ -114,8 +131,10 @@ type strictHandler struct {
 }
 
 // Decision operation middleware
-func (sh *strictHandler) Decision(ctx echo.Context) error {
+func (sh *strictHandler) Decision(ctx echo.Context, params DecisionParams) error {
 	var request DecisionRequestObject
+
+	request.Params = params
 
 	var body DecisionJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {

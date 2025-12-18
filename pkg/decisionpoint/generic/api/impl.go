@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 
 	"github.com/manetu/policyengine/pkg/core"
+	"github.com/manetu/policyengine/pkg/core/options"
 )
 
 // Server implements the generic decision point API server.
@@ -30,7 +31,8 @@ func (s Server) Decision(ctx context.Context, request DecisionRequestObject) (De
 		return nil, err
 	}
 
-	allow, _ := s.pe.Authorize(ctx, string(porc))
+	probe := request.Params.Probe != nil && *request.Params.Probe
+	allow, _ := s.pe.Authorize(ctx, string(porc), options.SetProbeMode(probe))
 	return Decision200JSONResponse{
 		Allow: &allow,
 	}, nil

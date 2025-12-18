@@ -261,3 +261,175 @@ func TestGenericServer_Stop(t *testing.T) {
 	_, err = http.Get(url)
 	assert.Error(t, err, "Should fail to connect after server is stopped")
 }
+
+func TestGenericServer_Decision_ProbeTrue(t *testing.T) {
+	pe := setupTestPolicyEngine(t)
+	port := findFreePort(t)
+
+	server := startServerInBackground(t, pe, port)
+
+	// Test decision with probe=true - should still return correct decision
+	porc := map[string]interface{}{
+		"principal": map[string]interface{}{
+			"sub":    "test-user",
+			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+		},
+		"operation": "idf:public:list",
+		"resource":  map[string]interface{}{},
+		"context":   map[string]interface{}{},
+	}
+
+	porcJSON, err := json.Marshal(porc)
+	require.NoError(t, err)
+
+	// Use probe=true query parameter
+	url := fmt.Sprintf("http://localhost:%d/decision?probe=true", port)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	require.NoError(t, err)
+
+	allow, ok := result["allow"].(bool)
+	assert.True(t, ok, "Response should have 'allow' field")
+	assert.True(t, allow, "Decision should be allowed even with probe=true")
+
+	// Cleanup
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err = server.Stop(ctx)
+	assert.NoError(t, err)
+}
+
+func TestGenericServer_Decision_ProbeFalse(t *testing.T) {
+	pe := setupTestPolicyEngine(t)
+	port := findFreePort(t)
+
+	server := startServerInBackground(t, pe, port)
+
+	// Test decision with probe=false - should work same as default
+	porc := map[string]interface{}{
+		"principal": map[string]interface{}{
+			"sub":    "test-user",
+			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+		},
+		"operation": "idf:public:list",
+		"resource":  map[string]interface{}{},
+		"context":   map[string]interface{}{},
+	}
+
+	porcJSON, err := json.Marshal(porc)
+	require.NoError(t, err)
+
+	// Use probe=false query parameter
+	url := fmt.Sprintf("http://localhost:%d/decision?probe=false", port)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	require.NoError(t, err)
+
+	allow, ok := result["allow"].(bool)
+	assert.True(t, ok, "Response should have 'allow' field")
+	assert.True(t, allow, "Decision should be allowed with probe=false")
+
+	// Cleanup
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err = server.Stop(ctx)
+	assert.NoError(t, err)
+}
+
+func TestGenericServer_Decision_ProbeDefault(t *testing.T) {
+	pe := setupTestPolicyEngine(t)
+	port := findFreePort(t)
+
+	server := startServerInBackground(t, pe, port)
+
+	// Test decision without probe parameter - should default to false
+	porc := map[string]interface{}{
+		"principal": map[string]interface{}{
+			"sub":    "test-user",
+			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+		},
+		"operation": "idf:public:list",
+		"resource":  map[string]interface{}{},
+		"context":   map[string]interface{}{},
+	}
+
+	porcJSON, err := json.Marshal(porc)
+	require.NoError(t, err)
+
+	// No probe parameter
+	url := fmt.Sprintf("http://localhost:%d/decision", port)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	require.NoError(t, err)
+
+	allow, ok := result["allow"].(bool)
+	assert.True(t, ok, "Response should have 'allow' field")
+	assert.True(t, allow, "Decision should be allowed without probe parameter")
+
+	// Cleanup
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err = server.Stop(ctx)
+	assert.NoError(t, err)
+}
+
+func TestGenericServer_Decision_ProbeDeny(t *testing.T) {
+	pe := setupTestPolicyEngine(t)
+	port := findFreePort(t)
+
+	server := startServerInBackground(t, pe, port)
+
+	// Test deny decision with probe=true - should still deny
+	porc := map[string]interface{}{
+		"principal": map[string]interface{}{
+			"sub":    "test-user",
+			"mroles": []string{"mrn:iam:manetu.io:role:user"},
+		},
+		"operation": "platform:admin:create",
+		"resource":  map[string]interface{}{},
+		"context":   map[string]interface{}{},
+	}
+
+	porcJSON, err := json.Marshal(porc)
+	require.NoError(t, err)
+
+	// Use probe=true query parameter
+	url := fmt.Sprintf("http://localhost:%d/decision?probe=true", port)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(porcJSON))
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	require.NoError(t, err)
+
+	allow, ok := result["allow"].(bool)
+	assert.True(t, ok, "Response should have 'allow' field")
+	assert.False(t, allow, "Decision should be denied even with probe=true")
+
+	// Cleanup
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err = server.Stop(ctx)
+	assert.NoError(t, err)
+}
