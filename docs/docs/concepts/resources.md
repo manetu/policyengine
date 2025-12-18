@@ -151,9 +151,10 @@ When a resource entry contains multiple selectors, they have an **OR** relations
 When a resource MRN is resolved:
 1. The system checks if any `resources` selector matches the MRN
 2. If a match is found, the resource is assigned to the corresponding group
-3. If no match is found, the resource falls back to the default resource group
+3. If no selector matches and an external resolver is configured, it is consulted <FeatureChip variant="premium" label="Premium Only" />
+4. If no match is found, the resource falls back to the default resource group
 
-See the [Resources Schema Reference](/reference/schema/resources) for detailed documentation.
+See [Resource Resolution](/integration/resource-resolution) and [Resources Schema Reference](/reference/schema/resources) for more information.
 
 ## Annotations
 
