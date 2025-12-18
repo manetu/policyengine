@@ -83,6 +83,12 @@ metadata:
   name: resource-routing-example
 spec:
   policies:
+    - mrn: &operation-default "mrn:iam:policy:operation-default"
+      name: operation-default
+      rego: |
+        package authz
+        default allow = 0  # operation policies use tri-state integers
+
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all
       rego: |
@@ -156,7 +162,7 @@ spec:
     - name: all
       selector:
         - ".*"
-      policy: *allow-all
+      policy: *operation-default
 ```
 
 ## Resolution Flow

@@ -67,11 +67,11 @@ operations:
 
 ```yaml
 operations:
-  # Specific matches first
+  # Specific matches first (public-grant returns positive to bypass other phases)
   - name: public-health
     selector:
       - "^health:check$"
-    policy: "mrn:iam:policy:allow-all"
+    policy: "mrn:iam:policy:public-grant"
 
   # Then broader patterns
   - name: api-read
@@ -86,11 +86,11 @@ operations:
       - "api:.*"
     policy: "mrn:iam:policy:api-full"
 
-  # Catch-all last
+  # Catch-all last (returns 0 to defer to identity/resource phases)
   - name: default
     selector:
       - ".*"
-    policy: "mrn:iam:policy:deny-all"
+    policy: "mrn:iam:policy:operation-default"
 ```
 
 ### Using YAML Anchors
