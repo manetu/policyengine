@@ -11,6 +11,19 @@ const config: Config = {
     v4: true,
   },
 
+  headTags: [
+      {
+          tagName: "script",
+          attributes: {
+              id: "Cookiebot",
+              type: 'text/javascript',
+              src: "https://consent.cookiebot.com/uc.js",
+              'data-cbid': "3d4b1355-2f20-4c2e-a32d-fbc05913fb1d",
+              'data-blockingmode': "auto",
+          },
+      },
+  ],
+
   markdown: {
     mermaid: true,
     hooks: {
