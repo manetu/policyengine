@@ -80,6 +80,10 @@ spec:
         # Default mapping...
 ```
 
+:::note[Multiple Selectors]
+When a mapper entry contains multiple selectors, they have an **OR** relationship. The mapper matches if **any** of its selectors match. This OR behavior applies uniformly to all selector-based entities (operations, resources, and mappers).
+:::
+
 ## Envoy Integration Example
 
 The following example shows a mapper for Envoy's ext_authz protocol:
