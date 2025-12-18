@@ -14,16 +14,6 @@ Libraries help you:
 - **Improve maintainability**: Update logic in one place
 - **Organize code**: Separate concerns into focused packages
 
-:::warning[Package Name Requirements]
-Policy Libraries have specific package naming requirements:
-
-1. **Must NOT use `package authz`** — The `authz` package is reserved for authorization policies (those defined in the `policies` section that make access decisions). Libraries use their own unique package names (e.g., `package helpers`, `package utils`).
-
-2. **Must be unique across all dependencies** — When an authorization policy imports multiple libraries, each library must have a distinct package name. If two libraries both declare `package utils`, a collision will occur.
-
-**Best practice:** Use descriptive, organization-specific package names to avoid collisions (e.g., `package myorg.helpers` or `package acme.validation`). This ensures libraries can be safely combined in any policy.
-:::
-
 ## Defining a Library
 
 ```yaml
@@ -50,6 +40,16 @@ spec:
             input.principal.mgroups[_] == group
         }
 ```
+
+:::warning[Package Name Requirements]
+Policy Libraries have specific package naming requirements:
+
+1. **Must NOT use `package authz`** — The `authz` package is reserved for authorization policies (those defined in the `policies` section that make access decisions). Libraries use their own unique package names (e.g., `package helpers`, `package utils`).
+
+2. **Must be unique across all dependencies** — When an authorization policy imports multiple libraries, each library must have a distinct package name. If two libraries both declare `package utils`, a collision will occur.
+
+**Best practice:** Use descriptive, organization-specific package names to avoid collisions (e.g., `package myorg.helpers` or `package acme.validation`). This ensures libraries can be safely combined in any policy.
+:::
 
 ## Using Libraries in Policies
 
