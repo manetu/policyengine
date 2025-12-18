@@ -219,6 +219,7 @@ operation: "api:documents:update"
 resource:
   id: "mrn:data:document:doc456"
   owner: "user123"
+  group: "mrn:iam:resource-group:owner-exclusive"
 ```
 
 The PolicyEngine evaluates:
