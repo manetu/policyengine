@@ -63,18 +63,19 @@ NAME:
    mpe - A CLI application for working with the Manetu PolicyEngine
 
 USAGE:
-   mpe [global options] command [command options]
+   mpe [global options] [command [command options]]
 
 COMMANDS:
-   test     Invokes various aspects of policy-decision flow
+   test     Invokes various aspects of policy-decision flow, simplifying policy-domain authoring and verification
    serve    Creates a decision-point service
-   lint     Validate PolicyDomain YAML files
-   build    Build PolicyDomain YAML from PolicyDomainReference
+   lint     Validate PolicyDomain YAML files for syntax errors and lint embedded Rego code
+   build    Build PolicyDomain YAML from PolicyDomainReference (with external .rego files)
+   version  Print the version of mpe
    help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --trace, -t   Enable OPA trace logging output (default: false)
-   --help, -h    show help
+   --trace, -t  Enable OPA trace logging output to stderr for commands that evaluate REGO
+   --help, -h   show help
 ```
 
 ## Installing the Go Library
