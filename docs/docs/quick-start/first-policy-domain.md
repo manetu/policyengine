@@ -291,7 +291,7 @@ This creates a `PolicyDomain` with the Rego content inlined.
 Once you're comfortable with the basics, explore these advanced features:
 
 - **[Policy Libraries](/concepts/policy-libraries)** — Extract reusable Rego code into shared libraries that multiple policies can import
-- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the three evaluation phases work together, including tri-state return values for early grant/deny decisions
+- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the evaluation phases work together, including tri-state return values for early grant/deny decisions
 - **[Resource Routing](/concepts/resources#resource-routing-v1alpha4)** — Route resources to groups based on MRN patterns
 - **[Scopes](/concepts/scopes)** — Add access-method constraints for scenarios like API keys vs. interactive sessions
 
