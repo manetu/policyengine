@@ -180,13 +180,19 @@ The PEP provides complete resource metadata directly, bypassing all resolution.
 
 ### Resource Object Fields
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique resource identifier (MRN) |
-| `owner` | MRN or identifier of the resource owner |
-| `group` | MRN of the resource group |
-| `classification` | Security classification level |
-| `annotations` | Custom key-value metadata |
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique resource identifier (MRN) — has first-class representation in AccessRecord |
+| `owner` | No | MRN or identifier of the resource owner |
+| `group` | Yes | MRN of the resource group — used to select the Phase 3 resource policy |
+| `classification` | No | Security classification level |
+| `annotations` | No | Custom key-value metadata |
+
+:::note
+When using the MRN string format, the PolicyEngine automatically populates `resource.id` and `resource.group` from resolution before processing. With Fully-Qualified Descriptors, the PEP must provide these fields directly:
+- **`id`** — Required for complete audit records (first-class field in AccessRecord)
+- **`group`** — Required for policy evaluation (Phase 3 is mandatory; omitting this field will result in a DENY)
+:::
 
 ### Classification Levels
 
