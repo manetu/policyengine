@@ -85,7 +85,8 @@ const config: Config = {
       title: 'Policy Engine',
       logo: {
         alt: 'Manetu Logo',
-        src: 'img/logo.svg',
+        src: 'img/logo-light.svg',
+        srcDark: 'img/logo-dark.svg',
       },
       items: [
         {
