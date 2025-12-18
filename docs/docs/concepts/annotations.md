@@ -25,8 +25,7 @@ Annotations can be defined on multiple entity types:
 | Group | PolicyDomain `spec.groups[].annotations`                                                    | Group-specific metadata |
 | Scope | PolicyDomain `spec.scopes[].annotations`                                                    | Scope-specific metadata |
 | Resource Group | PolicyDomain `spec.resource-groups[].annotations`                                           | Resource group metadata |
-| Resource | PolicyDomain `spec.resources[].annotations`, or external resource resolution <FeatureChip variant="premium" label="Premium Only" />
-| Resource-specific metadata |
+| Resource | PolicyDomain `spec.resources[].annotations`, or external resource resolution <FeatureChip variant="premium" label="Premium Only" />| Resource-specific metadata |
 | Principal | JWT claims                                                                                  | Identity-level metadata |
 
 ## Annotation Inheritance
