@@ -144,6 +144,10 @@ spec:
           value: "\"HIGH\""
 ```
 
+:::note[Multiple Selectors]
+When a resource entry contains multiple selectors, they have an **OR** relationship. The resource matches if **any** of its selectors match. In the example above, `sensitive-data` matches resources with MRNs matching either `mrn:data:sensitive:.*` OR `mrn:secret:.*`. This OR behavior applies uniformly to all selector-based entities (operations, resources, and mappers).
+:::
+
 When a resource MRN is resolved:
 1. The system checks if any `resources` selector matches the MRN
 2. If a match is found, the resource is assigned to the corresponding group
