@@ -52,7 +52,7 @@ spec:
     - name: public
       selector:
         - "public:.*"
-      policy: "mrn:iam:policy:allow-all"
+      policy: "mrn:iam:policy:public-grant"
 ```
 
 ## Selectors
@@ -65,7 +65,7 @@ operations:
   - name: health-check
     selector:
       - "^system:health:check$"
-    policy: "mrn:iam:policy:allow-all"
+    policy: "mrn:iam:policy:public-grant"
 
   # Match specific patterns
   - name: vault-ops
@@ -146,7 +146,7 @@ allow {
 
 ### Public Operations
 
-No authentication required:
+No authentication required—uses a [tri-state](/concepts/policy-conjunction#operation-phase-tri-level-policies) GRANT override to bypass identity and resource phases:
 
 ```yaml
 operations:
@@ -154,24 +154,24 @@ operations:
     selector:
       - "public:.*"
       - "health:.*"
-    policy: "mrn:iam:policy:allow-all"
+    policy: "mrn:iam:policy:public-grant"
 ```
 
 ### User Operations
 
-Requires authenticated user:
+Denies unauthenticated requests, then defers to identity and resource phases:
 
 ```yaml
 operations:
   - name: user-ops
     selector:
       - "user:.*"
-    policy: "mrn:iam:policy:user-authenticated"
+    policy: "mrn:iam:policy:require-auth"
 ```
 
 ### Admin Operations
 
-Requires admin role:
+Denies unauthenticated requests and verifies admin access:
 
 ```yaml
 operations:
@@ -179,7 +179,7 @@ operations:
     selector:
       - "admin:.*"
       - "platform:.*"
-    policy: "mrn:iam:policy:admin-only"
+    policy: "mrn:iam:policy:require-admin"
 ```
 
 ## Best Practices
