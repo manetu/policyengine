@@ -208,9 +208,9 @@ porcJSON := `{"principal": {...}, ...}`
 allowed, _ := pe.Authorize(ctx, porcJSON)
 ```
 
-### Consider Caching for Repeated Checks
+### Consider Caching for Probe-Mode Checks
 
-For UI capability checks (e.g., which buttons to show), consider short-term caching:
+For UI capability checks (e.g., determining which buttons to show), you can use `probe=true` to disable audit logging and safely cache results. Probe mode is designed for scenarios where you need to check permissions without creating audit entries:
 
 ```go
 type PermissionCache struct {
@@ -225,11 +225,16 @@ func (c *PermissionCache) CanPerform(ctx context.Context, principal, operation, 
         return cached.(bool)
     }
 
-    allowed := c.pdp.Authorize(ctx, buildPORC(principal, operation, resource))
+    // Use probe=true for UI checks - disables audit logging
+    allowed := c.pdp.Authorize(ctx, buildPORC(principal, operation, resource), WithProbe(true))
     c.cache.Add(key, allowed)
     return allowed
 }
 ```
+
+:::warning
+Only cache probe-mode results. Regular authorization checks (without `probe=true`) should never be cached, as this would bypass the audit log. See [Audit](/concepts/audit) for more information.
+:::
 
 ## Testing
 

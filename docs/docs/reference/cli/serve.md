@@ -150,7 +150,6 @@ mpe serve -b my-domain.yml
 
 - Use connection pooling from clients
 - Deploy multiple replicas for high availability
-- Consider caching for repeated requests
 
 ### Security
 
