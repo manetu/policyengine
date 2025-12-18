@@ -12,6 +12,27 @@ const config: Config = {
   },
 
   headTags: [
+      // Google Consent Mode v2 - Set default consent state before GTM/Cookiebot loads
+      {
+          tagName: "script",
+          attributes: {
+              id: "google-consent-mode-defaults",
+          },
+          innerHTML: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'analytics_storage': 'denied',
+              'functionality_storage': 'denied',
+              'personalization_storage': 'denied',
+              'security_storage': 'granted',
+              'wait_for_update': 500
+            });
+          `,
+      },
       {
           tagName: "script",
           attributes: {
@@ -21,6 +42,35 @@ const config: Config = {
               'data-cbid': "3d4b1355-2f20-4c2e-a32d-fbc05913fb1d",
               'data-blockingmode': "auto",
           },
+      },
+      // Update Google Consent Mode based on Cookiebot consent
+      {
+          tagName: "script",
+          attributes: {
+              id: "cookiebot-consent-mode-update",
+          },
+          innerHTML: `
+            window.addEventListener('CookiebotOnAccept', function() {
+              gtag('consent', 'update', {
+                'ad_storage': Cookiebot.consent.marketing ? 'granted' : 'denied',
+                'ad_user_data': Cookiebot.consent.marketing ? 'granted' : 'denied',
+                'ad_personalization': Cookiebot.consent.marketing ? 'granted' : 'denied',
+                'analytics_storage': Cookiebot.consent.statistics ? 'granted' : 'denied',
+                'functionality_storage': Cookiebot.consent.preferences ? 'granted' : 'denied',
+                'personalization_storage': Cookiebot.consent.preferences ? 'granted' : 'denied'
+              });
+            });
+            window.addEventListener('CookiebotOnDecline', function() {
+              gtag('consent', 'update', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'functionality_storage': 'denied',
+                'personalization_storage': 'denied'
+              });
+            });
+          `,
       },
   ],
 
@@ -74,6 +124,12 @@ const config: Config = {
       {
         trackingID: 'G-ML72437DHG',
         anonymizeIP: false,
+      },
+    ],
+    [
+      '@docusaurus/plugin-google-tag-manager',
+      {
+        containerId: 'GTM-KLGP237V',
       },
     ],
     [
