@@ -6,6 +6,7 @@ package config_test
 
 import (
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/manetu/policyengine/pkg/core/config"
@@ -85,4 +86,29 @@ func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
 	assert.NotNil(t, auditEnv)
 	// Missing env vars should result in empty string
 	assert.Equal(t, "", auditEnv["missing"])
+}
+
+// TestConcurrentLoad tests that concurrent calls to Load() are race-free.
+// Run with: go test -race -run TestConcurrentLoad
+func TestConcurrentLoad(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+
+	const numGoroutines = 10
+
+	var wg sync.WaitGroup
+	wg.Add(numGoroutines)
+
+	// Reset config first to ensure we start fresh
+	config.ResetConfig()
+
+	// Spawn multiple goroutines that all call Load() concurrently
+	for i := 0; i < numGoroutines; i++ {
+		go func() {
+			defer wg.Done()
+			err := config.Load()
+			assert.Nil(t, err)
+		}()
+	}
+
+	wg.Wait()
 }

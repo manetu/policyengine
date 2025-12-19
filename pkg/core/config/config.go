@@ -40,7 +40,9 @@ const (
 )
 
 var (
-	once sync.Once
+	once     sync.Once
+	loadOnce sync.Once
+	loadErr  error
 
 	// VConfig main viper-based config instance
 	VConfig *viper.Viper
@@ -93,33 +95,39 @@ func doInitialize() {
 }
 
 // Load finalizes the loading of the configuration.
+// This function is safe to call concurrently from multiple goroutines.
 func Load() error {
-	Init()
+	loadOnce.Do(func() {
+		Init()
 
-	// Add the path specified by the env var.
-	err := VConfig.ReadInConfig()
-	if err != nil {
-		logger.SysWarnf("error reading config; using defaults: %+v", err)
-		// fall through to continue loading
-	}
+		// Add the path specified by the env var.
+		err := VConfig.ReadInConfig()
+		if err != nil {
+			logger.SysWarnf("error reading config; using defaults: %+v", err)
+			// fall through to continue loading
+		}
 
-	loglevel := VConfig.GetString(logLevel)
-	if err := logging.UpdateLogLevels(loglevel); err != nil {
-		logger.SysErrorf("Failed updating log level %s: %+v", loglevel, err)
-		return err
-	}
+		loglevel := VConfig.GetString(logLevel)
+		if err := logging.UpdateLogLevels(loglevel); err != nil {
+			logger.SysErrorf("Failed updating log level %s: %+v", loglevel, err)
+			loadErr = err
+			return
+		}
 
-	if logger.IsDebugEnabled() {
-		VConfig.DebugTo(logger.Out())
-	}
+		if logger.IsDebugEnabled() {
+			VConfig.DebugTo(logger.Out())
+		}
+	})
 
-	return nil
+	return loadErr
 }
 
 // ResetConfig releases any currently read configuration (used mainly for tests - be careful!).
 func ResetConfig() {
 	VConfig = nil
-	once = sync.Once{} // reset the sync.Once to allow re-initialization
+	once = sync.Once{}     // reset the sync.Once to allow re-initialization
+	loadOnce = sync.Once{} // reset the loadOnce to allow re-loading
+	loadErr = nil          // reset any previous load error
 	Init()
 	// ignore any reset errors
 	_ = Load()
