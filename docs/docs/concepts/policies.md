@@ -196,6 +196,221 @@ allow {
 }
 ```
 
+## Authoring Policies for Different Phases
+
+While all four phases (operation, identity, resource, scope) evaluate Rego policies drawn from the same pool of Policy entities, the **goals of each phase are different**. Understanding these differences helps you write cleaner, more maintainable policies.
+
+### Operation Phase (Phase 1): Coarse-Grained Request Control
+
+Operation phase policies focus on **request-level requirements** that apply regardless of specific resources or detailed identity attributes:
+
+- Validating that a JWT is present for protected endpoints
+- Identifying public endpoints that require no authentication
+- Implementing IP allowlists/blocklists
+- Rejecting requests that fail basic sanity checks
+
+```rego
+package authz
+
+default allow = 0  # Continue to other phases
+
+# Public endpoints bypass identity/resource phases
+allow = 1 {
+    input.operation in {"public:health:check", "public:docs:read"}
+}
+
+# Reject unauthenticated requests to protected endpoints
+allow = -1 {
+    input.principal == {}
+}
+```
+
+**Key insight**: Operation policies answer "Should this request be processed at all?" rather than "Does this specific principal have access to this specific resource?"
+
+### Identity Phase (Phase 2): Principal-Centric Permissions
+
+Identity phase policies focus on **what operations the principal is permitted to perform** based on their identity attributes (roles, groups, claims). These policies consider the principal and the operation, but generally **do not concern themselves with resource-specific logic**—that's the resource phase's job.
+
+Since each role references its own policy, you'll typically have separate policies for different roles:
+
+**Editor role policy** (`mrn:iam:policy:editor-operations`):
+```rego
+package authz
+
+default allow = false
+
+# Editors can create, update, and read content
+permitted_operations := {
+    "api:documents:create",
+    "api:documents:update",
+    "api:documents:read",
+    "api:documents:list",
+}
+
+allow {
+    input.operation in permitted_operations
+}
+```
+
+**Viewer role policy** (`mrn:iam:policy:viewer-operations`):
+```rego
+package authz
+
+default allow = false
+
+# Viewers can only perform read-like operations
+permitted_operations := {
+    "*:read",
+    "*:list",
+    "*:get",
+}
+
+allow {
+    glob.match(permitted_operations[_], [], input.operation)
+}
+```
+
+**Key insight**: Identity policies answer "Based on who this principal is, what types of operations can they perform?" The resource phase will separately determine whether the principal can access the *specific* resource.
+
+### Resource Phase (Phase 3): Resource-Centric Access Control
+
+Resource phase policies focus on **what properties the principal must have to access this specific resource**. These policies often compare principal attributes against resource attributes:
+
+```rego
+package authz
+
+default allow = false
+
+# Owner has full access
+allow {
+    input.principal.sub == input.resource.owner
+}
+
+# Non-owners can only perform read-like operations
+readonly_operations := {
+    "*:read",
+    "*:list",
+    "*:get",
+}
+
+allow {
+    input.principal.sub != input.resource.owner
+    glob.match(readonly_operations[_], [], input.operation)
+}
+```
+
+Another common pattern is **clearance-based access**, where principal attributes are compared against resource classification:
+
+```rego
+package authz
+
+default allow = false
+
+clearance_level(c) = 1 { c == "PUBLIC" }
+clearance_level(c) = 2 { c == "INTERNAL" }
+clearance_level(c) = 3 { c == "CONFIDENTIAL" }
+clearance_level(c) = 4 { c == "SECRET" }
+
+allow {
+    clearance_level(input.principal.mclearance) >= clearance_level(input.resource.classification)
+}
+```
+
+**Key insight**: Resource policies answer "Given this principal's attributes and this resource's attributes, should access be granted?" They may also consider the operation to implement tiered access (e.g., owners get full access, others get read-only).
+
+### Scope Phase (Phase 4): Access Method Constraints
+
+Scope phase policies focus on **constraining access based on how the request was authenticated** (PATs, OAuth tokens, federated sessions). These policies typically restrict operations regardless of identity or resource:
+
+```rego
+package authz
+
+default allow = false
+
+# Read-only scope permits only read-like operations
+permitted_operations := {
+    "*:read",
+    "*:list",
+    "*:get",
+    "*:query",
+}
+
+allow {
+    glob.match(permitted_operations[_], [], input.operation)
+}
+```
+
+**Key insight**: Scope policies answer "Given the access method (token type, federation context), is this operation permitted?" They act as an additional constraint layer.
+
+### Avoid Duplicating Logic Across Phases
+
+A common anti-pattern is duplicating the same checks across multiple phases. This makes policies harder to maintain and debug:
+
+```rego
+# ❌ Bad: Checking authentication in every phase
+# operation_policy.rego
+allow = -1 { input.principal == {} }
+
+# identity_policy.rego
+allow { input.principal.sub != "" }  # Redundant auth check
+
+# resource_policy.rego
+allow { input.principal.sub != "" }  # Redundant again
+```
+
+Instead, **handle each concern in the appropriate phase**:
+
+```rego
+# ✅ Good: Authentication checked once in operation phase
+# operation_policy.rego
+allow = -1 { input.principal == {} }  # Only check here
+
+# identity_policy.rego - assumes principal is authenticated
+allow { input.operation in allowed_operations }
+
+# resource_policy.rego - assumes principal is authenticated
+allow { input.principal.sub == input.resource.owner }
+```
+
+### Avoid Using the Same Policy in Multiple Phases
+
+Another anti-pattern is referencing the same policy MRN from both identity (roles) and resource (resource-groups) configurations. This typically indicates the policy is trying to do too much:
+
+```yaml
+# ❌ Bad: Same policy used in both phases
+roles:
+  - mrn: "mrn:iam:role:editor"
+    policy: "mrn:iam:policy:mega-policy"  # Does everything
+
+resource-groups:
+  - mrn: "mrn:iam:resource-group:documents"
+    policy: "mrn:iam:policy:mega-policy"  # Same policy!
+```
+
+This approach leads to unwieldy policies that mix concerns and are difficult to understand. Instead, write focused policies for each phase:
+
+```yaml
+# ✅ Good: Separate, focused policies
+roles:
+  - mrn: "mrn:iam:role:editor"
+    policy: "mrn:iam:policy:editor-operations"  # What editors can do
+
+resource-groups:
+  - mrn: "mrn:iam:resource-group:documents"
+    policy: "mrn:iam:policy:document-access"  # How documents are accessed
+```
+
+### Summary: Phase Responsibilities
+
+| Phase | Focus | Typical Checks |
+|-------|-------|----------------|
+| **Operation** | Request validity | Authentication present, public endpoints, IP filtering |
+| **Identity** | Principal capabilities | Which operations this principal can perform |
+| **Resource** | Resource access rules | Principal-to-resource relationship (ownership, clearance) |
+| **Scope** | Access method constraints | Token type limitations (read-only PAT, OAuth scopes) |
+
+By keeping each phase focused on its specific concern, you create policies that are easier to write, test, audit, and maintain.
+
 ## Using Dependencies
 
 Import libraries declared as dependencies:
