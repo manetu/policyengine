@@ -1165,6 +1165,41 @@ func TestConcurrentPORC(t *testing.T) {
 	wg.Wait()
 }
 
+// TestConcurrentPolicyEngineInit tests that multiple PolicyEngine instances can be created
+// concurrently without race conditions. This simulates what happens when multiple unit tests
+// run in parallel, each initializing their own PolicyEngine.
+// Run with: go test -race -run TestConcurrentPolicyEngineInit
+func TestConcurrentPolicyEngineInit(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+
+	const numGoroutines = 10
+
+	var wg sync.WaitGroup
+	wg.Add(numGoroutines)
+
+	engines := make([]core.PolicyEngine, numGoroutines)
+	errors := make([]error, numGoroutines)
+
+	// Spawn multiple goroutines that all create PolicyEngine instances concurrently
+	for i := 0; i < numGoroutines; i++ {
+		go func(idx int) {
+			defer wg.Done()
+			pe, _, err := test.NewTestPolicyEngine(1024)
+			engines[idx] = pe
+			errors[idx] = err
+		}(i)
+	}
+
+	wg.Wait()
+
+	// Verify all engines were created successfully
+	for i := 0; i < numGoroutines; i++ {
+		assert.Nil(t, errors[i], "Engine %d should not have an error", i)
+		assert.NotNil(t, engines[i], "Engine %d should not be nil", i)
+	}
+}
+
 func TestDisallowHttpSend(t *testing.T) {
 	var (
 		listener net.Listener
