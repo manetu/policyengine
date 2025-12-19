@@ -10,19 +10,19 @@ sidebar_position: 3
 
 Rather than relying on a single policy to make all access decisions, the PolicyEngine evaluates policies across four distinct phases:
 
-1. **Operation** - Request-level routing and control (public endpoints, JWT validation, bypass rules)
-2. **Identity** - Who the principal is and what they can do (based on [Roles](/concepts/roles) and [Groups](/concepts/groups))
-3. **Resource** - What can be done to the target resource (resource group-based)
+1. **Operation** - Request-level routing and control (public endpoints, JWT validation, bypass rules) - see [Operations](/concepts/operations)
+2. **Identity** - Who the principal is and what they can do - see [Roles](/concepts/roles) and [Groups](/concepts/groups)
+3. **Resource** - What can be done to the target resource - see [Resources](/concepts/resources) and [Resource Groups](/concepts/resource-groups)
 4. **Scope** - Access-method constraints (tokens, federation, etc.) - see [Scopes](/concepts/scopes)
 
-Each phase represents a different aspect of the access decision, and all mandatory phases must agree for access to be granted. This separation provides the following benefits:
+Each phase represents a different aspect of the access decision, and all phases must agree for access to be granted. This separation provides the following benefits:
 
 - It enables different teams or systems to manage their respective concerns independently while maintaining a coherent overall access control posture.
 - It allows the respective policies to remain small and focused since they are brought together dynamically on a request-by-request basis.  This is easier than maintaining a single policy that covers every possible situation.
 
 ## How Phases Are Combined
 
-The PolicyEngine processes all phases in **parallel** for maximum performance. However, the final decision requires **at least one GRANT vote from each mandatory phase** for the top-level decision to be GRANT.
+The PolicyEngine processes all phases in **parallel** for maximum performance. However, the final decision requires **at least one GRANT vote from each phase** for the top-level decision to be GRANT.
 
 ```mermaid
 flowchart TB

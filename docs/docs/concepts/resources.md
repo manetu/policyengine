@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # Resources
 
-**Resources** are accessible entities within your application. Each resource has a unique identifier and metadata that policies can use for access control decisions.
+**Resources** are accessible entities within your application. Each resource has a unique identifier and metadata that policies can use for access control decisions. Resource policies are associated by membership in a [Resource Group](/concepts/resource-groups) and are evaluated during Phase 3 (Resource Phase) of [Policy Conjunction](/concepts/policy-conjunction).
 
 ## Overview
 
