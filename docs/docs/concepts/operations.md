@@ -4,7 +4,8 @@ sidebar_position: 4
 
 # Operations
 
-**Operations** define the actions that can be performed in your system and route requests to the appropriate policies.
+**Operations** define the actions that can be performed in your system and route requests to the appropriate policies, and are evaluated during Phase 1 (Operation Phase) of [Policy Conjunction](/concepts/policy-conjunction).
+
 
 ## Overview
 

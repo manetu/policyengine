@@ -4,7 +4,7 @@ sidebar_position: 8
 
 # Scopes
 
-**Scopes** provide an additional policy phase that allows MPE users to further constrain access decisions without modifying identity or resource policies. They represent a mechanism to apply contextual limitations based on the means of access rather than the identity itself.
+**Scopes** provide a mechanism to additionally constrain access decisions without modifying identity or resource policies.  They achieve this by applying additional policy, typically based on the means of access such as a 'read-only' scoped OAuth token.  Scopes are evaluated during Phase 4 (Scope Phase) of [Policy Conjunction](/concepts/policy-conjunction).
 
 ## Overview
 
