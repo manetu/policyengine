@@ -6,6 +6,8 @@ sidebar_position: 8
 
 **Resource Groups** are the mechanism for associating policies with sets of resources. They enable resource-level access control by defining which policy governs access to resources within each group.
 
+See also: [Resources](/concepts/resources)
+
 ## Overview
 
 Resource Groups serve as the bridge between resources and policies:
