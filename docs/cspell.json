@@ -92,6 +92,8 @@
     "versioned",
     "hardcoding",
     "hardcoded",
+    "allowlists",
+    "blocklists",
     "stringify",
     "stringified",
     "unmarshal",
