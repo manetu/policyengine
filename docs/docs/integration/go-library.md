@@ -70,7 +70,7 @@ The `Authorize` method accepts either a JSON string or a `map[string]interface{}
 porc := map[string]interface{}{
     "principal": map[string]interface{}{
         "sub":        "user@example.com",
-        "mroles":     []string{"mrn:iam:example.com:role:developer"},
+        "mroles":     []interface{}{"mrn:iam:example.com:role:developer"},
         "mclearance": "MODERATE",
     },
     "operation": "api:documents:read",
@@ -82,6 +82,20 @@ porc := map[string]interface{}{
 
 allowed, err := pe.Authorize(ctx, porc)
 ```
+
+:::warning Array Type Compatibility
+When constructing PORC maps directly in Go, use `[]interface{}` for array fields (like `mroles`, `mgroups`, `scopes`), **not** `[]string`. The PolicyEngine is designed to work with structures unmarshalled via `json.Unmarshal()`, which converts JSON arrays into `[]interface{}` rather than `[]string`.
+
+```go
+// ✓ Correct - matches json.Unmarshal behavior
+"mroles": []interface{}{"mrn:iam:example.com:role:admin", "mrn:iam:example.com:role:user"},
+
+// ✗ Incorrect - will cause type mismatch errors
+"mroles": []string{"mrn:iam:example.com:role:admin", "mrn:iam:example.com:role:user"},
+```
+
+This is not an issue when passing a JSON string to `Authorize`, as the internal unmarshalling handles the conversion automatically.
+:::
 
 ## Configuration Options
 

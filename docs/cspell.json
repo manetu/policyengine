@@ -138,7 +138,8 @@
     "unsafebuiltins",
     "XVCJ",
     "apikey",
-    "INVALPARAM"
+    "INVALPARAM",
+    "unmarshalling"
   ],
   "flagWords": [],
   "dictionaries": [
