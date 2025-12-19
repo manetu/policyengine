@@ -36,6 +36,7 @@ func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 	if perr != nil {
 		logger.Debugf(agent, "authorize", "[phase3] error getting group for resource %s (err: %+v)", res.ID, perr)
 	} else {
+		policy = rg.Policy
 		result, perr = rg.Policy.EvaluateBool(ctx, input)
 		if perr != nil {
 			logger.Debugf(agent, "authorize", "[phase3] phase3 failed(err-%s)", perr)
