@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/manetu/policyengine/internal/core/backend/local"
 	"github.com/manetu/policyengine/pkg/core"
 	"github.com/manetu/policyengine/pkg/core/accesslog"
+	"github.com/manetu/policyengine/pkg/core/backend/local"
 	"github.com/manetu/policyengine/pkg/core/opa"
 	"github.com/manetu/policyengine/pkg/core/options"
 	"github.com/manetu/policyengine/pkg/policydomain/registry"
