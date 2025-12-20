@@ -1,32 +1,53 @@
+//
+//  Copyright © Manetu Inc. All rights reserved.
+//
+
 package accesslog
 
 import (
 	events "github.com/manetu/policyengine/pkg/protos/manetu/policyengine/events/v1"
 )
 
-// NullFactory is a factory for NullStream.
+// NullFactory creates [NullStream] instances that discard all records.
 type NullFactory struct {
 }
 
-// NullStream implements the Stream interface but drops all writes to the floor.  It is useful to downstream implementations
-// when they want to support disabling access logging as a configuration option, such as for testing.
+// NullStream is an access log stream that discards all records.
+//
+// NullStream is useful for:
+//   - Testing: When you don't need access log output in tests
+//   - Benchmarking: To measure authorization performance without I/O overhead
+//   - Conditional logging: When you want to disable logging based on configuration
+//
+// Example:
+//
+//	pe, _ := core.NewPolicyEngine(
+//	    options.WithAccessLog(accesslog.NewNullFactory()),
+//	)
 type NullStream struct {
 }
 
-// NewNullFactory creates a new NullStream that writes to the specified writer.
+// NewNullFactory creates a [Factory] that produces streams discarding all records.
+//
+// Use this when you want to completely disable access logging:
+//
+//	factory := accesslog.NewNullFactory()
+//	pe, _ := core.NewPolicyEngine(options.WithAccessLog(factory))
 func NewNullFactory() Factory {
 	return &NullFactory{}
 }
 
-// NewStream creates a new NullStream to satisfy the Factory interface.
+// NewStream creates a new [NullStream].
 func (f *NullFactory) NewStream() (Stream, error) {
 	return &NullStream{}, nil
 }
 
-// Send drops the access record on the floor
+// Send discards the access record without taking any action.
+//
+// This method always returns nil.
 func (s *NullStream) Send(record *events.AccessRecord) error {
 	return nil
 }
 
-// Close is a no-op for NullStream
+// Close is a no-op for NullStream as there are no resources to release.
 func (s *NullStream) Close() {}

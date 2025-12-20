@@ -2,6 +2,34 @@
 //  Copyright © Manetu Inc. All rights reserved.
 //
 
+// Package local provides a backend implementation that loads policies
+// from local YAML files via a [registry.Registry].
+//
+// The local backend is the standard backend for applications that
+// manage their policies as configuration files, either bundled with
+// the application or loaded from a filesystem path.
+//
+// # Usage
+//
+//	// Load policy domains from local directories
+//	registry, err := registry.NewRegistry([]string{
+//	    "./policies/base",
+//	    "./policies/application",
+//	})
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	// Create policy engine with local backend
+//	pe, err := core.NewPolicyEngine(
+//	    options.WithBackend(local.NewFactory(registry)),
+//	)
+//
+// # Policy Compilation
+//
+// When [Backend] is created via [Factory.NewBackend], all policies and
+// mappers in the registry are compiled. This ensures fast authorization
+// decisions at runtime with no compilation overhead.
 package local
 
 import (
@@ -23,26 +51,37 @@ import (
 var logger = logging.GetLogger("policyengine.backend.local")
 var actor = "backend.local"
 
-// Factory ...
+// Factory creates [Backend] instances from a [registry.Registry].
 type Factory struct {
 	reg *registry.Registry
 }
 
-// Backend implements the backend.Service interface using local policy domain data.
+// Backend implements [backend.Service] using policy domain data from a registry.
+//
+// Backend serves policy data from compiled policy domains. All policies and
+// mappers are compiled during backend initialization, ensuring fast runtime
+// performance.
 type Backend struct {
 	policyCompiler *opa.Compiler
 	mapperCompiler *opa.Compiler
 	reg            *registry.Registry
 }
 
-// NewFactory creates a new Factory for the local backend.
+// NewFactory creates a [backend.Factory] for the local backend.
+//
+// The registry must be fully loaded and validated before calling NewFactory.
+// Use [registry.NewRegistry] to create the registry from policy domain paths.
 func NewFactory(reg *registry.Registry) backend.Factory {
 	return &Factory{reg: reg}
 }
 
-// NewBackend creates a new Backend with the specified policyCompiler.
-// It compiles all policies and mappers in the registry using the passed-in compiler,
-// respecting trace logging and Rego compatibility settings.
+// NewBackend creates a [Backend] and compiles all policies in the registry.
+//
+// The provided compiler is used for policies (with unsafe built-in exclusions).
+// A separate mapper compiler is created with default capabilities since mappers
+// may need access to built-ins that are restricted for policies.
+//
+// Returns an error if any policy or mapper fails to compile.
 func (f *Factory) NewBackend(compiler *opa.Compiler) (backend.Service, error) {
 	// Create a separate OPA compiler for mappers, since they don't want/need unsafe builtin exclusions like the policy compiler does
 	mapperCompiler := compiler.Clone(opa.WithDefaultCapabilities())
