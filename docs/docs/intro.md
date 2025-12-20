@@ -13,6 +13,10 @@ The Manetu PolicyEngine (MPE) is a programmable access-control and governance la
 
 As a core component of the Manetu governance platform, MPE provides the policy evaluation engine that enables fine-grained, context-aware access control across data, APIs, and services. It features a high-performance, flexible architecture with comprehensive tooling for policy development and testing.
 
+:::tip Language-Agnostic by Design
+While MPE is written in Go, it integrates with **any language or runtime** via its HTTP/gRPC API. Whether you're building in Python, Java, TypeScript, Rust, or any other language, you can use MPE as a standalone policy decision service. Go developers have the additional option of embedding the policy engine directly for lowest latency.
+:::
+
 ## Open Source and Premium Editions
 
 The Manetu PolicyEngine is available in two editions:

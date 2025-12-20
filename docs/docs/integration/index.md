@@ -58,19 +58,19 @@ The PolicyEngine provides two integration options:
 
 | Method                                          | Best For |
 |-------------------------------------------------|----------|
+| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> | Any language — Python, Java, TypeScript, Go, and more |
 | <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="oss" label="OSS Only"/> | Go applications needing lowest latency |
-| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> | Non-Go applications or microservices architecture |
 
 #### Considerations for Future Growth
 
 When choosing an integration method, consider your long-term needs:
 
-| Consideration | Embedded Go Library <FeatureChip variant="oss" label="OSS Only"/> | HTTP API |
-|--------------|----------------------|----------|
-| Latency | Lowest (in-process)  | Low (network call) |
-| Language support | Go only              | Any language |
-| Deployment | Single artifact      | Separate service |
-| Premium Edition | Not available        | Required for Premium |
+| Consideration | HTTP API | Embedded Go Library <FeatureChip variant="oss" label="OSS Only"/> |
+|--------------|----------|----------------------|
+| Language support | Any language | Go only |
+| Latency | Low (network call) | Lowest (in-process) |
+| Deployment | Separate service | Single artifact |
+| Premium Edition | Required for Premium | Not available |
 
 **Premium Edition Compatibility**: The [Premium Edition](/#open-source-and-premium-editions) requires integration via the gRPC/HTTP interface to enable enterprise features such as centralized audit and policy coordination. If you use the HTTP API, you can migrate to Premium by simply changing the endpoint URL. The embedded Go library is only available in the open source edition — it cannot connect to Premium services.
 
@@ -119,8 +119,8 @@ if !allowed {
 
 ## Section Contents
 
-- [Embedded Go Library](/integration/go-library) - Using the PolicyEngine as an embedded library
-- [HTTP API](/integration/http-api) - Calling the PolicyEngine server via HTTP
+- [HTTP API](/integration/http-api) - Integrate from any language via HTTP
+- [Embedded Go Library](/integration/go-library) - Embed directly in Go applications for lowest latency
 - [Resource Resolution](/integration/resource-resolution) - MRN strings and resource metadata
 - [Best Practices](/integration/best-practices) - Implementation guidelines
 
