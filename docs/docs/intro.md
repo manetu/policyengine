@@ -14,7 +14,7 @@ The Manetu PolicyEngine (MPE) is a programmable access-control and governance la
 As a core component of the Manetu governance platform, MPE provides the policy evaluation engine that enables fine-grained, context-aware access control across data, APIs, and services. It features a high-performance, flexible architecture with comprehensive tooling for policy development and testing.
 
 :::tip Language-Agnostic by Design
-While MPE is written in Go, it integrates with **any language or runtime** via its HTTP/gRPC API. Whether you're building in Python, Java, TypeScript, Rust, or any other language, you can use MPE as a standalone policy decision service. Go developers have the additional option of embedding the policy engine directly for lowest latency.
+While MPE is written in Go, it integrates with **any language or runtime** via its HTTP API. Whether you're building in Python, Java, TypeScript, Rust, or any other language, you can use MPE as a standalone policy decision service. Go developers have the additional option of embedding the policy engine directly for lowest latency.
 :::
 
 ## Open Source and Premium Editions
@@ -27,31 +27,32 @@ The Manetu PolicyEngine is available in two editions:
 
 ### Feature Comparison
 
-| Feature                                                              | <FeatureChip variant="oss" label="Open Source" /> | <FeatureChip variant="premium" label="Premium" /> |
-|----------------------------------------------------------------------|:-------------------------------------------------:|:-------------------------------------------------:|
-| <TableSection><IconText icon="settings">**Core Policy Engine**</IconText></TableSection> |                                                   |                                                   |
-| OPA/Rego policy evaluation                                           |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| PolicyDomain model (policies, roles, groups, scopes)                 |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Multi-phase policy evaluation                                        |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Local resource resolution via selectors                              |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="terminal">**Developer Tooling**</IconText></TableSection> |                                                   |                                                   |
-| CLI for build, lint, and test                                        |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Local development server (`mpe serve`)                               |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="extension">**Integration**</IconText></TableSection> |                                                   |                                                   |
-| Embeddable Go library                                                |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="no" />               |
-| gRPC/HTTP decision service                                           |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Feature                                                                                   | <FeatureChip variant="oss" label="Open Source" /> | <FeatureChip variant="premium" label="Premium" /> |
+|-------------------------------------------------------------------------------------------|:-------------------------------------------------:|:-------------------------------------------------:|
+| <TableSection><IconText icon="settings">**Core Policy Engine**</IconText></TableSection>  |                                                   |                                                   |
+| OPA/Rego policy evaluation                                                                |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| PolicyDomain model (policies, roles, groups, scopes)                                      |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Multi-phase policy evaluation                                                             |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Local resource resolution via selectors                                                   |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Istio/Envoy Integration                                                                   |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| <TableSection><IconText icon="terminal">**Developer Tooling**</IconText></TableSection>   |                                                   |                                                   |
+| CLI for build, lint, and test                                                             |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Local development server (`mpe serve`)                                                    |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| <TableSection><IconText icon="extension">**Integration**</IconText></TableSection>        |                                                   |                                                   |
+| Embeddable Go library                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="no" />               |
+| HTTP decision service                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
 | <TableSection><IconText icon="business">**Enterprise Features**</IconText></TableSection> |                                                   |                                                   |
-| ElasticSearch integration for audit storage, indexing, and reporting |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Centralized policy administration                                    |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Kubernetes Operator with auto-scaling sidecars                       |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Queryable Audit History                                              |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Analytics Dashboards                                                 |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Streaming Live Audit                                                 |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Decision Replay with Visual Policy Debugger                          |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| External resource resolution integration (Databases, APIs, etc)      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| ElasticSearch integration for audit storage, indexing, and reporting                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Centralized policy administration                                                         |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Kubernetes Operator with auto-scaling sidecars                                            |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Queryable Audit History                                                                   |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Analytics Dashboards                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Streaming Live Audit                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Decision Replay with Visual Policy Debugger                                               |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| External resource resolution integration (Databases, APIs, etc)                           |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 
 :::info
-The Premium Edition requires integration via the gRPC/HTTP interface to enable enterprise features such as centralized audit and policy coordination. The embeddable Go library is available only in the open source edition.
+The Premium Edition requires integration via the HTTP interface to enable enterprise features such as centralized audit and policy coordination. The embeddable Go library is available only in the open source edition.
 :::
 
 Interested in Premium features? Contact [Manetu](https://manetu.com) to learn more.
