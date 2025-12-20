@@ -70,9 +70,24 @@ When choosing an integration method, consider your long-term needs:
 | Language support | Any language | Go only |
 | Latency | Low (network call) | Lowest (in-process) |
 | Deployment | Separate service | Single artifact |
+| Scaling | Independent of application | Scales with application |
 | Premium Edition | Required for Premium | Not available |
 
 **Premium Edition Compatibility**: The [Premium Edition](/#open-source-and-premium-editions) requires integration via the gRPC/HTTP interface to enable enterprise features such as centralized audit and policy coordination. If you use the HTTP API, you can migrate to Premium by simply changing the endpoint URL. The embedded Go library is only available in the open source edition — it cannot connect to Premium services.
+
+#### Quick Decision Guide
+
+**Choose the HTTP API when:**
+- Your application is written in any language (Python, Java, TypeScript, Go, etc.)
+- You want to share a PDP across multiple services
+- You need to scale the PDP independently of your applications
+- You want the option to migrate to Premium Edition in the future
+
+**Choose the embedded Go library when:**
+- Your application is written in Go
+- You need the absolute lowest latency (in-process, no network overhead)
+- You prefer a single deployment artifact
+- You don't need Premium features
 
 ### 2. Build Your PORC Expressions
 

@@ -2,11 +2,11 @@
 sidebar_position: 2
 ---
 
-# Embedded Go Library  
+# Embedded Go Library
 
 <FeatureChip variant="oss" label="OSS Only"/>
 
-For Go applications, you can embed the PolicyEngine directly using the `github.com/manetu/policyengine` package. This approach offers the lowest latency since policy evaluation happens in-process.
+For Go applications, you can embed the PolicyEngine directly using the `github.com/manetu/policyengine` package. This approach offers the lowest latency since policy evaluation happens in-process, but is only available in the open source edition and does not offer an upgrade path to the Premium offering. See [Choosing Your Integration Method](/integration#1-choose-your-integration-method) for a detailed comparison of integration options.
 
 ## Installation
 
@@ -252,17 +252,3 @@ func main() {
 }
 ```
 
-## When to Use the Embedded Library
-
-The embedded library is ideal when:
-
-- Your application is written in Go
-- You need the lowest possible latency (no network overhead)
-- You want a single deployment artifact
-- Policy updates can be deployed with application updates
-
-For non-Go applications or when you need to share a PDP across services, see [HTTP API](/integration/http-api).
-
-:::note Open Source Edition Only
-The embedded Go library is only available in the open source edition. The [Premium Edition](/#open-source-and-premium-editions) requires integration via the gRPC/HTTP interface to enable enterprise features such as centralized audit and policy coordination. If you anticipate needing Premium features, consider using the [HTTP API](/integration/http-api) instead — you can migrate to Premium by simply changing the endpoint URL.
-:::
