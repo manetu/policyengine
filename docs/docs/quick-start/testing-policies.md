@@ -120,7 +120,8 @@ mpe test decision -b my-domain.yml -i input.json
   "principal": {},
   "operation": "api:data:read",
   "resource": {
-    "id": "mrn:app:data:secret"
+    "id": "mrn:app:data:secret",
+    "group": "mrn:iam:resource-group:default"
   }
 }
 ```
@@ -231,6 +232,10 @@ echo '{"principal": {"sub": "test", "mroles": ["mrn:iam:role:user"]}, "operation
   mpe test decision -b my-domain.yml -i -
 ```
 
+:::tip[stdin is the default]
+You may omit '-i -' when you wish to use stdin-based input because it is the default
+:::
+
 ## Common Test Patterns
 
 ### Test JWT Validation
@@ -238,7 +243,11 @@ echo '{"principal": {"sub": "test", "mroles": ["mrn:iam:role:user"]}, "operation
 ```json
 {
   "principal": {},
-  "operation": "api:secure:read"
+  "operation": "api:secure:read",
+  "resource": {
+    "id": "mrn:app:data:secret",
+    "group": "mrn:iam:resource-group:default"
+  }
 }
 ```
 
@@ -270,12 +279,12 @@ Expected: DENY (viewer role typically lacks write permissions)
     "sub": "user123",
     "mroles": ["mrn:iam:role:user"]
   },
+  "operation": "api:item:delete",
   "resource": {
     "id": "mrn:app:item:456",
     "owner": "user123",
     "group": "mrn:iam:resource-group:owner-access"
-  },
-  "operation": "api:item:delete"
+  }
 }
 ```
 
