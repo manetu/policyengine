@@ -7,6 +7,10 @@ sidebar_label: Embedded Go Library
 
 For Go applications, you can embed the PolicyEngine directly using the `github.com/manetu/policyengine` package. This approach offers the lowest latency since policy evaluation happens in-process, but is only available in the open source edition and does not offer an upgrade path to the Premium offering. See [Choosing Your Integration Method](/integration#1-choose-your-integration-method) for a detailed comparison of integration options.
 
+:::warning
+The embedded Go library is only available in the open source edition — it cannot connect to Premium services.  If you decide later to upgrade to Premium, you will need to port your PEPs to the [HTTP-API](/integration/http-api)
+:::
+
 ## Installation
 
 ```bash
