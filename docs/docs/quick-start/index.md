@@ -40,7 +40,7 @@ spec:
       description: "Defers to identity and resource phases"
       rego: |
         package authz
-        default allow = 0  # operation policies use tri-state integers
+        default allow = 0  # operation policies use tri-level integers
 
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all

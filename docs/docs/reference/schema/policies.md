@@ -61,23 +61,17 @@ rego: |
 
 ### Tri-Level Policy (Operation Phase)
 
-Operation phase policies use integer output (negative, zero, positive). A negative outcome is equivalent to DENY and a zero outcome is equivalent to GRANT in other phases. A **positive value is a "GRANT Override"** that bypasses all other phases:
-
-| Value | Meaning | Effect |
-|-------|---------|--------|
-| Negative (e.g., `-1`) | DENY | Same as any phase voting DENY |
-| `0` | GRANT | Same as any phase voting GRANT; other phases still evaluated |
-| Positive (e.g., `1`) | GRANT Override | Immediately grant; **skip all other phases** |
+Operation phase policies use integer output instead of boolean. Negative values deny, zero continues evaluation, and positive values grant immediately (bypassing other phases):
 
 ```yaml
 rego: |
   package authz
   default allow = 0
-  allow = -1 { input.principal == {} }  # Deny (like any phase)
-  allow = 1 { is_public_operation }     # GRANT Override (bypass other phases)
+  allow = -1 { input.principal == {} }  # Deny
+  allow = 1 { is_public_operation }     # GRANT Override
 ```
 
-The GRANT Override is essential for public endpoints that have no JWT and would otherwise fail the identity phase. The specific integer value can serve as a reason code for auditing. See [Policy Conjunction](/concepts/policy-conjunction#operation-phase-tri-level-policies) for details.
+See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics and usage guidance.
 
 ## Examples
 

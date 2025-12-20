@@ -39,7 +39,7 @@ Policy evaluation happens in four phases, each addressing a different aspect of 
 
 - **[Operations](/concepts/operations)**: Actions that can be performed in your system
 
-Operations define the verbs of your access control model—the actions that principals attempt to perform. They serve as the starting point for policy evaluation and route requests to the appropriate policies. Operation policies can handle public endpoints, JWT validation, and bypass rules using [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies).
+Operations define the verbs of your access control model—the actions that principals attempt to perform. They serve as the starting point for policy evaluation and route requests to the appropriate policies. Operation policies can handle public endpoints, JWT validation, and bypass rules using [tri-level output](/concepts/policy-conjunction#tri-level).
 
 ### Phase 2: Identity
 
@@ -139,7 +139,7 @@ flowchart TB
 2. **PEP constructs** a [PORC expression](/concepts/porc) from the request context
 3. **Operation routing** selects the appropriate operation phase policy
 4. **Policy evaluation** happens in multiple phases:
-    - Phase 1: Operation policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies)
+    - Phase 1: Operation policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policy-conjunction#tri-level)
     - Phase 2: Identity policies (role-based via [Roles](/concepts/roles) and [Groups](/concepts/groups))
     - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
     - Phase 4: Scope policies (access-method constraints)
