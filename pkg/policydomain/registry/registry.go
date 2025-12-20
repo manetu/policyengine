@@ -2,6 +2,33 @@
 //  Copyright © Manetu Inc. All rights reserved.
 //
 
+// Package registry provides functionality for loading and validating
+// policy domains from YAML files.
+//
+// The registry is the primary entry point for loading policy domains.
+// It parses YAML files, validates cross-references, and compiles Rego
+// policies into executable ASTs.
+//
+// # Loading Policy Domains
+//
+//	registry, err := registry.NewRegistry([]string{
+//	    "./policies/domain1",
+//	    "./policies/domain2",
+//	})
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+// # Using with the Policy Engine
+//
+//	backend := local.NewFactory(registry)
+//	pe, _ := core.NewPolicyEngine(options.WithBackend(backend))
+//
+// # Validation
+//
+// The registry validates all cross-references between policy entities
+// during loading. Use [Registry.ValidateWithSummary] for detailed error
+// information, or [Registry.GetAllValidationErrors] for programmatic access.
 package registry
 
 import (
@@ -14,10 +41,14 @@ import (
 	"github.com/manetu/policyengine/pkg/policydomain/validation"
 )
 
-// DomainMap maps domain names to their intermediate policy models
+// DomainMap maps policy domain names to their parsed intermediate models.
 type DomainMap map[string]*policydomain.IntermediateModel
 
-// Registry manages a collection of policy domains with validation
+// Registry manages loaded policy domains and their validation state.
+//
+// Registry is created by [NewRegistry], which loads and validates policy
+// domain YAML files. The registry can then be used with the local backend
+// to provide policy data to the engine.
 type Registry struct {
 	domains   DomainMap
 	validator *validation.BundleValidator
@@ -65,7 +96,20 @@ func (r *Registry) ResolveDependencies(model *policydomain.IntermediateModel, de
 	return r.validator.ValidateDependencies(modelAdapter, dependencies)
 }
 
-// NewRegistry creates a new Registry instance
+// NewRegistry loads and validates policy domains from the specified paths.
+//
+// Each path should be a directory containing a policy domain YAML file
+// (policydomain.yaml or similar). Domains are loaded in the order provided,
+// with later domains taking precedence for name collisions.
+//
+// Returns an error if any domain fails to parse or validate.
+//
+// Example:
+//
+//	registry, err := registry.NewRegistry([]string{
+//	    "./policies/base",
+//	    "./policies/application",
+//	})
 func NewRegistry(domainPaths []string) (*Registry, error) {
 	domainsList := make([]*policydomain.IntermediateModel, 0)
 	for _, domainpath := range domainPaths {
