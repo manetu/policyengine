@@ -224,11 +224,11 @@ This shows:
 {
   "principal": {},
   "operation": "api:secure:read",
-  "resource": {"id": "test"}
+  "resource": {"id": "test", "group": "mrn:iam:resource-group:default"}
 }
 ```
 
-Expected: DENY (no principal)
+Expected: DENY (no principal — fails at operation phase before identity evaluation)
 
 ### Test Role Access
 
@@ -253,6 +253,7 @@ Expected: DENY (viewer can't write)
   "operation": "api:resource:delete",
   "resource": {
     "id": "mrn:app:item:456",
+    "group": "mrn:iam:resource-group:default",
     "owner": "owner123"
   }
 }
