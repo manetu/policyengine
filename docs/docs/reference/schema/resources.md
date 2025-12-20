@@ -87,7 +87,7 @@ spec:
       name: operation-default
       rego: |
         package authz
-        default allow = 0  # operation policies use tri-level integers
+        default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all

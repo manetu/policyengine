@@ -61,7 +61,7 @@ rego: |
 
 ### Tri-Level Policy (Operation Phase)
 
-Operation phase policies use integer output instead of boolean. Negative values deny, zero continues evaluation, and positive values grant immediately (bypassing other phases):
+Operation phase policies use integer output instead of boolean. Negative values are DENY, zero is GRANT (other phases still evaluated), and positive values are GRANT Override (bypassing other phases):
 
 ```yaml
 rego: |
@@ -124,7 +124,7 @@ policies:
     description: "Operation phase policy for request routing"
     rego: |
       package authz
-      default allow = 0
+      default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
       # Deny unauthenticated requests on protected endpoints
       allow = -1 {

@@ -46,7 +46,7 @@ Operation phase policies use **tri-level integer output** instead of boolean:
 ```rego
 package authz
 
-default allow = 0  # Continue to other phases
+default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
 allow = 1 { is_public_operation }     # GRANT Override (bypass other phases)
 allow = -1 { input.principal == {} }  # Deny
@@ -196,7 +196,7 @@ Operation phase policies focus on **request-level requirements** that apply rega
 ```rego
 package authz
 
-default allow = 0  # Continue to other phases
+default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
 # Public endpoints bypass identity/resource phases
 allow = 1 {
