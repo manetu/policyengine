@@ -65,15 +65,13 @@ The PolicyEngine provides two integration options:
 
 When choosing an integration method, consider your long-term needs:
 
-| Consideration | HTTP API | Embedded Go Library <FeatureChip variant="oss" label="OSS Only"/> |
-|--------------|----------|----------------------|
-| Language support | Any language | Go only |
-| Latency | Low (network call) | Lowest (in-process) |
-| Deployment | Separate service | Single artifact |
-| Scaling | Independent of application | Scales with application |
-| Premium Edition | Required for Premium | Not available |
-
-**Premium Edition Compatibility**: The [Premium Edition](/#open-source-and-premium-editions) requires integration via the gRPC/HTTP interface to enable enterprise features such as centralized audit and policy coordination. If you use the HTTP API, you can migrate to Premium by simply changing the endpoint URL. The embedded Go library is only available in the open source edition — it cannot connect to Premium services.
+| Consideration              | HTTP API                                                                    | Embedded Go Library <FeatureChip variant="oss" label="OSS Only"/> |
+|----------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------|
+| Language support           | Any language                                                                | Go only                                                           |
+| Latency                    | Low (network call)                                                          | Lowest (in-process)                                               |
+| Deployment                 | Separate service or sidecar                                                 | Single artifact                                                   |
+| Scaling                    | Varies (See [Deployment Options](/integration/http-api#deployment-options)) | Scales with application                                           |
+| Premium Edition Compatible | Yes                                                                         | No                                                                |
 
 #### Quick Decision Guide
 
