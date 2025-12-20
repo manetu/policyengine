@@ -8,7 +8,7 @@ Before diving into installation and policy authoring, it helps to understand how
 
 ## The Big Picture
 
-The Manetu PolicyEngine is an **authorization service**—it answers the question "Is this action allowed?" Your application asks, the PolicyEngine answers.
+The Manetu PolicyEngine is an **authorization and governance service**—it answers the question "Is this action allowed?" Your application asks, the PolicyEngine answers. Every decision is policy-driven, observable, and auditable.
 
 ```mermaid
 flowchart LR
