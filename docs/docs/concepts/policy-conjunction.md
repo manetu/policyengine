@@ -72,9 +72,13 @@ flowchart TB
 If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, it defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
 :::
 
-## Operation Phase: Tri-Level Policies
+## Operation Phase: Tri-Level Policies {#tri-level}
 
 The operation phase uses **tri-level policy output** (negative, zero, positive) instead of simple boolean GRANT/DENY. A negative outcome is equivalent to DENY, and a zero outcome is equivalent to GRANT in other phases. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
+
+:::tip Terminology
+This feature is sometimes called "tri-state" in conversation, referring to the three possible states: deny, continue, and grant override. The documentation uses "tri-level" to emphasize that the actual output is an integer with magnitude, not just three discrete states—the specific value can serve as a reason code for auditing.
+:::
 
 ### Why Tri-Level?
 
