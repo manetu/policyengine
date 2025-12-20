@@ -4,11 +4,7 @@ sidebar_position: 3
 
 # HTTP API
 
-The HTTP API provides a language-agnostic interface for policy decisions. Choose this approach when:
-
-- **Non-Go language** — Your application is written in Python, Java, TypeScript, or another language
-- **Separate PDP service** — You prefer running the PolicyEngine as an independent service rather than embedding it
-- **Premium compatibility** — You want to integrate with the Premium Edition, or keep the option open for future migration
+The HTTP API provides a language-agnostic interface for policy decisions. This is the recommended approach for most applications — it works with any language (Python, Java, TypeScript, Go, etc.), enables independent scaling of the policy decision service, and provides a seamless migration path to the Premium Edition. See [Choosing Your Integration Method](/integration#1-choose-your-integration-method) for a detailed comparison of integration options.
 
 ## Using `mpe serve`
 
@@ -433,17 +429,7 @@ retries = Retry(total=3, backoff_factor=0.1)
 session.mount('http://', HTTPAdapter(max_retries=retries))
 ```
 
-## Comparing Integration Options
-
-| Consideration | [Embedded Go Library](/integration/go-library) | HTTP API with `mpe serve` | HTTP API with Premium |
-|---------------|------------------------------------------------|---------------------------|------------------------|
-| **Language support** | Go only | Any language | Any language |
-| **Deployment model** | In-process | Standalone service | Flexible (standalone or sidecar) |
-| **Latency** | Sub-millisecond | Network round-trip | Depends on deployment |
-| **Scaling** | Scales with application | Independent | Flexible |
-| **Premium features** | Not available | Not available | Available |
-
-### Premium Deployment Options
+## Premium Deployment Options
 
 The Premium Edition can be deployed in multiple configurations:
 
@@ -454,25 +440,8 @@ The Premium Edition can be deployed in multiple configurations:
 
 Regardless of the deployment model, Premium features such as centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
 
-### Quick Decision Guide
-
-**Choose the embedded Go library when:**
-- Your application is Go-based
-- You need the absolute lowest latency
-- You don't need Premium features
-- You prefer a simpler deployment without external dependencies
-
-**Choose HTTP API with `mpe serve` when:**
-- Your application is not written in Go
-- You want to share a PDP across multiple services
-- You need to scale the PDP independently of applications
-- You're developing locally before deploying to Premium
-
-**Choose HTTP API with Premium when:**
-- You need Premium features (centralized audit, decision replay, external resolution, policy coordination)
-- You want flexibility in deployment model (sidecar or standalone)
-- You're running in Kubernetes and want Operator-managed sidecar automation (optional)
-
 :::tip Seamless Migration Path
 All HTTP-based options use the same API. You can develop locally with `mpe serve`, then deploy to Premium—whether as a sidecar or standalone service—by updating your endpoint URL. No code changes required.
 :::
+
+For a full comparison of HTTP API vs. the embedded Go library, see [Choosing Your Integration Method](/integration#1-choose-your-integration-method).
