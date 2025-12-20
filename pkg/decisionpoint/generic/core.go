@@ -55,7 +55,7 @@ type Server struct {
 //
 // The server starts immediately in a background goroutine and listens on
 // the specified port. It provides the following endpoints:
-//   - POST /authorize: Authorization decision endpoint
+//   - POST /decision: Authorization decision endpoint
 //   - GET /swagger-ui/*: Swagger UI for API exploration
 //   - GET /openapi.yaml: OpenAPI specification
 //
