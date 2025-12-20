@@ -429,7 +429,7 @@ retries = Retry(total=3, backoff_factor=0.1)
 session.mount('http://', HTTPAdapter(max_retries=retries))
 ```
 
-## Premium Deployment Options
+## Premium Deployment Options <FeatureChip variant="premium" label="Premium" size="medium"/>
 
 The Premium Edition can be deployed in multiple configurations:
 
