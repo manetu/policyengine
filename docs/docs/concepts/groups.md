@@ -14,10 +14,13 @@ A group is a named collection of roles. When a principal belongs to a group, the
 - **Ensuring Consistency**: All members of a group have the same set of roles
 - **Enabling Organizational Alignment**: Map groups to teams, departments, or functions
 
+Like [Roles](/concepts/roles), groups serve a dual purpose: they aggregate roles for policy selection, and they can carry [annotations](/concepts/annotations) that parameterize policy evaluation. Group annotations take precedence over role annotations in the [inheritance hierarchy](/concepts/annotations#identity-annotation-hierarchy), allowing groups to override role-level defaults (see [Parameterizing Policies](/concepts/annotations#parameterizing-policies)).
+
 ### Key Characteristics
 
 - **Role Aggregation**: Groups contain one or more roles
 - **Inheritance**: Principals inherit all roles from their groups
+- **Annotation-Enabled**: Groups can carry annotations that override role annotations and parameterize policies
 - **Indirect Assignment**: Groups are assigned via the `mgroups` JWT claim
 - **Complementary to Direct Roles**: Principals can have both direct roles and group-inherited roles
 

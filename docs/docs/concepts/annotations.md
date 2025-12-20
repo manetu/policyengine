@@ -15,6 +15,57 @@ Annotations provide flexible metadata that:
 - Support any valid JSON values
 - Follow inheritance hierarchies where more specific definitions take precedence
 
+## Parameterizing Policies
+
+Annotations enable a powerful pattern: **generic policies that are parameterized by entity configuration**.
+
+Consider this policy that checks if a principal's environment matches the resource's environment:
+
+```rego
+package authz
+
+default allow = false
+
+allow {
+    input.principal.mannotations.environment == input.resource.annotations.environment
+}
+```
+
+This policy is completely generic—it doesn't mention any specific environment. The **role** and **resource group** definitions parameterize it:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:finance-analyst"
+    name: finance-analyst
+    policy: "mrn:iam:policy:environment-match"
+    annotations:
+      - name: "environment"
+        value: "\"finance\""      # This role grants access to "finance" resources
+
+resource-groups:
+  - mrn: "mrn:iam:resource-group:finance-data"
+    name: finance-data
+    policy: "mrn:iam:policy:resource-access"
+    annotations:
+      - name: "environment"
+        value: "\"finance\""      # Resources in this group are tagged "finance"
+```
+
+When a principal with the `finance-analyst` role accesses a resource in the `finance-data` group:
+- The role's `environment: "finance"` annotation flows into `input.principal.mannotations`
+- The resource group's `environment: "finance"` annotation flows into `input.resource.annotations`
+- The generic policy evaluates the match and grants access
+
+This pattern is fundamental to the PolicyEngine architecture. Entities like [Roles](/concepts/roles), [Groups](/concepts/groups), [Scopes](/concepts/scopes), and [Resource Groups](/concepts/resource-groups) serve a dual purpose:
+
+1. **Policy selection**: They link to a policy that contains the access control logic
+2. **Policy parameterization**: They provide annotations that flow into the PORC, giving the policy context-specific values to evaluate
+
+This separation means you can:
+- **Write generic, reusable policies** that work across many contexts
+- **Configure access through entity definitions** without modifying policy code
+- **Create new access patterns** by defining new roles or resource groups with different annotations
+
 ## Where Annotations Apply
 
 Annotations can be defined on multiple entity types:
