@@ -18,6 +18,10 @@ PBAC allows organizations to manage access to resources by defining policies tha
 
 ## Benefits of PBAC
 
+### Governance That Executes
+
+Unlike traditional governance approaches that document policies in prose, PBAC implements governance as executable code. Policies are machine-readable, automatically enforced, and produce auditable decision records. This transforms governance from a compliance exercise into an operational capability.
+
 ### Enhanced Security
 
 PBAC enables organizations to create fine-grained access control policies considering various attributes. This level of control minimizes the risk of unauthorized access and reduces the attack surface.

@@ -6,6 +6,8 @@ sidebar_position: 1
 
 This section covers the core concepts of the Manetu PolicyEngine. Understanding these concepts is essential to effectively design and implement access control policies.
 
+The PolicyEngine provides **fine-grained, context-aware governance** where every access decision considers not just who is asking, but what they're accessing, how they're accessing it, and the circumstances of the request. All decisions are observable and auditable.
+
 ## Foundation
 
 These core concepts underpin everything in the PolicyEngine.
