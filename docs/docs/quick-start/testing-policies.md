@@ -14,6 +14,59 @@ The `mpe test` command provides several ways to test your policies during develo
 | `mpe test mapper` | Test [mapper](/concepts/mappers) transformations |
 | `mpe test envoy` | Test full Envoy-to-decision pipeline |
 
+## Understanding Test Output
+
+Before diving into the commands, it helps to understand what each command outputs:
+
+### Decision and Envoy Output: AccessRecord
+
+The `mpe test decision` and `mpe test envoy` commands output an **AccessRecord**—a JSON document that captures everything about the policy evaluation. The most important field is `decision`, which will be either `"GRANT"` or `"DENY"`.
+
+```json
+{
+  "decision": "GRANT",
+  "principal": { "subject": "user123", "realm": "" },
+  "operation": "api:resource:read",
+  "resource": "mrn:app:resource:123",
+  "references": [ ... ],
+  "porc": "{ ... }"
+}
+```
+
+Key fields you'll see:
+
+| Field | Description |
+|-------|-------------|
+| `decision` | The final outcome: `"GRANT"` or `"DENY"` |
+| `principal` | Who made the request (extracted from PORC) |
+| `operation` | What action was attempted |
+| `resource` | What resource was accessed |
+| `references` | Details about each policy evaluated (useful for debugging) |
+
+To quickly extract just the decision, pipe the output through `jq`:
+
+```bash
+mpe test decision -b my-domain.yml -i input.json | jq .decision
+# Output: "GRANT" or "DENY"
+```
+
+For a deeper understanding of AccessRecords and how they support auditing and debugging, see [Audit & Access Records](/concepts/audit).
+
+### Mapper Output: PORC Expression
+
+The `mpe test mapper` command outputs a **[PORC expression](/concepts/porc)**—the standardized format that policies evaluate. This shows how your mapper transforms external input (like an Envoy request) into the Principal, Operation, Resource, and Context structure:
+
+```json
+{
+  "principal": { "sub": "user@example.com", "mroles": [...] },
+  "operation": "my-service:http:get",
+  "resource": { "id": "mrn:http:my-service/api/users/123", ... },
+  "context": { ... }
+}
+```
+
+This is useful for verifying that your mapper correctly extracts identity information and constructs the operation and resource fields.
+
 ## Testing Policy Decisions
 
 ### Basic Decision Test
@@ -118,7 +171,15 @@ EOF
 mpe test mapper -b my-domain.yml -i envoy-input.json
 ```
 
-The output will show the generated PORC expression.
+The output is a [PORC expression](/concepts/porc) showing how the mapper transformed the input. You can inspect specific fields with `jq`:
+
+```bash
+# Check what operation was generated
+mpe test mapper -b my-domain.yml -i envoy-input.json | jq .operation
+
+# Verify the principal was extracted correctly
+mpe test mapper -b my-domain.yml -i envoy-input.json | jq .principal
+```
 
 ## Testing Full Pipeline
 
@@ -128,9 +189,15 @@ Test the complete Envoy input to decision pipeline:
 mpe test envoy -b my-domain.yml -i envoy-input.json
 ```
 
-This runs:
-1. Mapper: Transform Envoy input → PORC
-2. Decision: Evaluate PORC against policies
+This runs both stages and outputs an AccessRecord (same format as `mpe test decision`):
+
+1. **Mapper**: Transform Envoy input → PORC
+2. **Decision**: Evaluate PORC against policies → AccessRecord
+
+```bash
+# Get the final decision
+mpe test envoy -b my-domain.yml -i envoy-input.json | jq .decision
+```
 
 ## Using Multiple Bundles
 
@@ -224,5 +291,7 @@ Expected: GRANT (owner access, assuming role and resource-group policies permit 
 
 ## Next Steps
 
-- [CLI Reference](/reference/cli/test) - Complete test command reference
-- [PORC Expressions](/concepts/porc) - Understand PORC expressions
+- [CLI Reference](/reference/cli/test) - Complete test command reference with all options
+- [PORC Expressions](/concepts/porc) - Understand the authorization request format
+- [Audit & Access Records](/concepts/audit) - Learn how AccessRecords support debugging and compliance
+- [AccessRecord Schema](/reference/access-record) - Complete field reference for test output
