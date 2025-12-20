@@ -306,14 +306,14 @@ Here's a fully-populated PORC expression showing all components:
     "sub": "alice@acme.com",
     "mrealm": "acme.com",
     "mroles": [
-      "mrn:iam:acme.com:role:editor",
-      "mrn:iam:acme.com:role:viewer"
+      "mrn:iam:role:editor",
+      "mrn:iam:role:viewer"
     ],
     "mgroups": [
-      "mrn:iam:acme.com:group:content-team"
+      "mrn:iam:group:content-team"
     ],
     "scopes": [
-      "mrn:iam:acme.com:scope:full-access"
+      "mrn:iam:scope:full-access"
     ],
     "mclearance": "MODERATE",
     "mannotations": {
@@ -325,7 +325,7 @@ Here's a fully-populated PORC expression showing all components:
   "resource": {
     "id": "mrn:content:acme.com:article:summer-campaign",
     "owner": "bob@acme.com",
-    "group": "mrn:iam:acme.com:resource-group:marketing-content",
+    "group": "mrn:iam:resource-group:marketing-content",
     "classification": "LOW",
     "annotations": {
       "campaign": "summer-2024",

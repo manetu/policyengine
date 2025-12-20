@@ -50,15 +50,15 @@ mock:
 
         #------------ role categories --------------
         operator {
-                input.principal.mroles[_] == "mrn:iam:manetu.io:role:superadmin"
+                input.principal.mroles[_] == "mrn:iam:role:superadmin"
         }
 
         user {
-                input.principal.mroles[_] == "mrn:iam:manetu.io:role:user"
+                input.principal.mroles[_] == "mrn:iam:role:user"
         }
 
         realm_admin {
-                input.principal.mroles[_] == "mrn:iam:manetu.io:role:admin"
+                input.principal.mroles[_] == "mrn:iam:role:admin"
         }
 
         #------------ jwt checks ---------------
@@ -154,66 +154,66 @@ mock:
         default allow = true
     policies:
       - name: main
-        mrn: &main "mrn:iam:manetu.io:policy:main"
+        mrn: &main "mrn:iam:policy:main"
         filename: "main.rego"
       - name: superadmin
-        mrn: &superadmin "mrn:iam:manetu.io:policy:superadmin"
+        mrn: &superadmin "mrn:iam:policy:superadmin"
         filename: "superadmin.rego"
       - name: myrolepolicy
-        mrn: &mrp "mrn:iam:manetu.io:policy:myrolepolicy"
+        mrn: &mrp "mrn:iam:policy:myrolepolicy"
         filename: "myrolepolicy.rego"
       - name: mygrouppolicy
-        mrn: &mgp "mrn:iam:manetu.io:policy:mygrouppolicy"
+        mrn: &mgp "mrn:iam:policy:mygrouppolicy"
         filename: "mygrouppolicy.rego"
       - name: myscopepolicy
-        mrn: &msp "mrn:iam:manetu.io:policy:myscopepolicy"
+        mrn: &msp "mrn:iam:policy:myscopepolicy"
         filename: "myscopepolicy.rego"
       - name: defaultgrouppolicy
-        mrn: &defgrppol "mrn:iam:manetu.io:policy:defaultgrouppolicy"
+        mrn: &defgrppol "mrn:iam:policy:defaultgrouppolicy"
         filename: "defaultgrouppolicy.rego"
       - name: networkerrorpolicy
-        mrn: &networkerrpol "mrn:iam:manetu.io:policy:networkerrorpolicy"
+        mrn: &networkerrpol "mrn:iam:policy:networkerrorpolicy"
         filename: "networkerrorpolicy.rego"
       - name: "share-by-clearance"
-        mrn: &msharepol "mrn:iam:manetu.io:policy:shareclearancepolicy"
+        mrn: &msharepol "mrn:iam:policy:shareclearancepolicy"
         description: "Resource policy for sharing resources based on the caller's security clearance"
         public: true
         filename: "share-by-clearance.rego"
     roles:
       - name: myrole
-        mrn: &roleref "mrn:iam:manetu.io:role:myrole"
+        mrn: &roleref "mrn:iam:role:myrole"
         policy:
           - *mrp
       - name: superadmin
-        mrn: &superadminref "mrn:iam:manetu.io:role:superadmin"
+        mrn: &superadminref "mrn:iam:role:superadmin"
         policy:
           - *superadmin
       - name: networkerrorrole
-        mrn: "mrn:iam:manetu.io:role:networkerrorrole"
+        mrn: "mrn:iam:role:networkerrorrole"
         policy:
           - *networkerrpol
     resourcegroups:
       - name: sharedresourcegroup
-        mrn: &sharerg "mrn:iam:manetu.io:resource-group:sharedresourcegroup"
+        mrn: &sharerg "mrn:iam:resource-group:sharedresourcegroup"
         default: true
         policy:
           - *msharepol
       - name: myresourcegroup
-        mrn: &rgref "mrn:iam:manetu.io:resource-group:mygroup"
+        mrn: &rgref "mrn:iam:resource-group:mygroup"
         default: true
         policy:
           - *mgp
       - name: defaultresourcegroup
-        mrn: &defrgref "mrn:iam:manetu.io:resource-group:default"
+        mrn: &defrgref "mrn:iam:resource-group:default"
         default: true
         policy:
           - *defgrppol
     resources:
-      - mrn: mrn:iam:manetu.io:resource:networkerror
+      - mrn: mrn:iam:resource:networkerror
         metadata:
           group: *rgref
           owner: myowner
-      - mrn: mrn:iam:manetu.io:resource:myresource
+      - mrn: mrn:iam:resource:myresource
         metadata: 
           group: *rgref
           owner: myowner
@@ -235,13 +235,13 @@ mock:
             foo: "badannotations (should be a quoted string)"
     scopes:
       - name: myscope
-        mrn: &scoperef "mrn:iam:manetu.io:scope:myscope"
+        mrn: &scoperef "mrn:iam:scope:myscope"
         policy:
           - *msp
 
     groups:
       - name: mygroup
-        mrn: "mrn:iam:manetu.io:group:mygroup"
+        mrn: "mrn:iam:group:mygroup"
         role:
           - *roleref
           - *superadminref

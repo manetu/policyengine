@@ -18,7 +18,7 @@ import (
  ********************************************************************************************/
 
 const (
-	apiScope = "mrn:iam:manetu.io:scope:api"
+	apiScope = "mrn:iam:scope:api"
 )
 
 type phase4 struct {

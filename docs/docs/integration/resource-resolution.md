@@ -36,7 +36,7 @@ mrn:<type>:<namespace>:<resource-class>:<instance>
 
 Examples:
 - `mrn:vault:acme.com:secret:api-key`
-- `mrn:iam:manetu.io:role:admin`
+- `mrn:iam:role:admin`
 - `mrn:app:myservice:user:12345`
 - `mrn:data:analytics:report:monthly`
 
