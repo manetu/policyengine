@@ -159,7 +159,7 @@ export MPE_LOG_LEVEL=.:info
 export MPE_LOG_FORMATTER=json
 
 # Disable unsafe built-ins
-# (don't set unsafe.builtins in config)
+# (don't set opa.unsafebuiltins in config)
 
 # Run server
 mpe serve -b domain.yml --port 9000

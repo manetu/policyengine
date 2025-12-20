@@ -81,7 +81,7 @@ The generic protocol accepts PORC expressions directly:
 
 ```json
 {
-  "allowed": true
+  "allow": true
 }
 ```
 
