@@ -12,7 +12,7 @@ The Manetu PolicyEngine provides:
 
 1. **A CLI tool** (`mpe`) for developing, testing, and serving policies
 2. **A [PolicyDomain](/concepts/policy-domains) schema** for organizing policies into deployable bundles
-3. **An [HTTP/gRPC API](/integration/http-api)** for integrating with applications in any language
+3. **An [HTTP API](/integration/http-api)** for integrating with applications in any language
 4. **An [embedded Go library](/integration/go-library)** for Go applications needing lowest latency <FeatureChip variant="oss" label="OSS Only"/>
 
 :::note Use MPE with Any Language
