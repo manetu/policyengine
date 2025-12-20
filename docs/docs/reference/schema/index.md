@@ -185,8 +185,8 @@ spec:
       rego: |
         package authz
         import data.utils
-        default allow = 0
-        allow = -1 { input.principal == {} }
+        default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+        allow = -1 { input.principal == {} }  # DENY
 
   roles:
     - mrn: "mrn:iam:role:admin"

@@ -77,7 +77,7 @@ If a PORC expression is missing references to any mandatory phase (operation, id
 The operation phase uses **tri-level policy output** (negative, zero, positive) instead of simple boolean GRANT/DENY. A negative outcome is equivalent to DENY, and a zero outcome is equivalent to GRANT in other phases. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
 
 :::tip Terminology
-This feature is sometimes called "tri-state" in conversation, referring to the three possible states: deny, continue, and grant override. The documentation uses "tri-level" to emphasize that the actual output is an integer with magnitude, not just three discrete states—the specific value can serve as a reason code for auditing.
+This feature is sometimes called "tri-state" in conversation, referring to the three possible outcomes. The documentation uses "tri-level" to emphasize that the actual output is an integer with magnitude, not just three discrete states—the specific value can serve as a reason code for auditing.
 :::
 
 ### Why Tri-Level?
@@ -110,7 +110,7 @@ The specific integer value can serve as a reason code for auditing purposes. For
 ```rego
 package authz
 
-default allow = 0  # Grant (like other phases), continue evaluation
+default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
 # Public endpoints - GRANT Override, skip identity/resource phases
 allow = 1 {
@@ -154,11 +154,11 @@ allow { ... }  # true or false
 Only operation phase policies use integer output:
 
 ```rego
-# Operation phase - integer output
+# Operation phase - tri-level integer output (not boolean)
 package authz
-default allow = 0
+default allow = 0   # GRANT (other phases still evaluated)
 allow = 1 { ... }   # GRANT Override (bypass other phases)
-allow = -1 { ... }  # Deny (like any phase denying)
+allow = -1 { ... }  # DENY
 ```
 
 ## Multiple Policies Within a Phase
@@ -229,8 +229,8 @@ resource:
 The PolicyEngine evaluates:
 
 1. **Operation Phase** (1 policy, tri-level)
-    - Returns `0` (CONTINUE) — authenticated request, proceed normally
-    - Phase result: **CONTINUE**
+    - Returns `0` (GRANT) — authenticated request, proceed normally
+    - Phase result: **GRANT**
 
 2. **Identity Phase** (2 policies, one per role)
     - Editor role policy → GRANT (can update documents)
@@ -251,7 +251,7 @@ The PolicyEngine evaluates:
 
 Now consider if the resource policy fails to load:
 
-1. **Operation Phase** → CONTINUE
+1. **Operation Phase** → GRANT
 2. **Identity Phase** → GRANT
 3. **Resource Phase** → **DENY** (policy not found, treated as DENY)
 4. **Scope Phase** → GRANT
@@ -299,7 +299,7 @@ The phase-based structure provides clear visibility into why access was granted 
 
 1. **Ensure all mandatory phases are defined**: Missing operation, identity, or resource policies will result in DENY.
 
-2. **Use tri-level output correctly in operation phase**: Return `0` (CONTINUE) for normal requests, `1` (GRANT) only for truly public endpoints, and `-1` (DENY) for early rejection of invalid requests.
+2. **Use tri-level output correctly in operation phase**: Return `0` (GRANT) for normal requests, positive values (GRANT Override) only for truly public endpoints, and negative values (DENY) for early rejection of invalid requests.
 
 3. **Handle scope intentionally**: Decide whether your application uses scopes (for PATs, federation, etc.). If not, omit them from the PORC for implicit GRANT.
 
