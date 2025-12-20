@@ -78,11 +78,13 @@ mpe test decision -b my-domain.yml -i input.json
 {
   "principal": {
     "sub": "user123",
+    "mroles": ["mrn:iam:role:analyst"],
     "mclearance": "HIGH"
   },
   "operation": "vault:secret:read",
   "resource": {
     "id": "mrn:vault:secret:123",
+    "group": "mrn:iam:resource-group:classified",
     "classification": "MODERATE",
     "owner": "user456"
   }
@@ -158,7 +160,7 @@ This shows detailed evaluation steps.
 Read input from stdin:
 
 ```bash
-echo '{"principal": {"sub": "test"}, "operation": "test:op", "resource": {"id": "test"}}' | \
+echo '{"principal": {"sub": "test", "mroles": ["mrn:iam:role:user"]}, "operation": "test:op", "resource": {"id": "test", "group": "mrn:iam:resource-group:default"}}' | \
   mpe test decision -b my-domain.yml -i -
 ```
 
@@ -183,28 +185,34 @@ Expected: DENY (no principal)
     "sub": "user1",
     "mroles": ["mrn:iam:role:viewer"]
   },
-  "operation": "api:data:write"
+  "operation": "api:data:write",
+  "resource": {
+    "id": "mrn:app:data:123",
+    "group": "mrn:iam:resource-group:default"
+  }
 }
 ```
 
-Expected: Depends on viewer role policy (likely DENY for write)
+Expected: DENY (viewer role typically lacks write permissions)
 
 ### Test Resource Ownership
 
 ```json
 {
   "principal": {
-    "sub": "user123"
+    "sub": "user123",
+    "mroles": ["mrn:iam:role:user"]
   },
   "resource": {
     "id": "mrn:app:item:456",
-    "owner": "user123"
+    "owner": "user123",
+    "group": "mrn:iam:resource-group:owner-access"
   },
   "operation": "api:item:delete"
 }
 ```
 
-Expected: GRANT (owner access)
+Expected: GRANT (owner access, assuming role and resource-group policies permit owner operations)
 
 ## Best Practices
 
