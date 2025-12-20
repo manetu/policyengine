@@ -41,38 +41,22 @@ allow {
 
 ### Tri-Level Policy (Operation Phase)
 
-Operation phase policies use **tri-level integer output** (negative, zero, positive). A negative outcome is equivalent to DENY and a zero outcome is equivalent to GRANT in other phases. A **positive value acts as a "GRANT Override"** that bypasses all other phases.
+Operation phase policies use **tri-level integer output** instead of boolean:
 
 ```rego
 package authz
 
-# Return codes:
-#  Negative (e.g., -1): Deny (same as any phase denying)
-#  Zero (0): Grant (same as any phase granting); other phases still evaluated
-#  Positive (e.g., 1): GRANT Override - immediately grant, skip all other phases
-default allow = 0
+default allow = 0  # Continue to other phases
 
-# Deny if no valid principal on protected endpoints
-allow = -1 {
-    input.principal == {}
-    not is_public_operation
-}
-
-# GRANT Override for public operations (bypass identity phase)
-allow = 1 {
-    is_public_operation
-}
+allow = 1 { is_public_operation }     # GRANT Override (bypass other phases)
+allow = -1 { input.principal == {} }  # Deny
 
 is_public_operation {
     input.operation in {"public:health:check", "public:docs:read"}
 }
 ```
 
-**Why tri-level?** Public endpoints have no JWT by definition, so the identity phase would always deny them (no roles = no GRANT). The operation phase's ability to return a positive value (GRANT Override) bypasses the other phases entirely.
-
-**Note**: The specific integer value can serve as a reason code for auditing. The sign determines behavior; the magnitude provides context.
-
-See [Policy Conjunction](/concepts/policy-conjunction#operation-phase-tri-level-policies) for a detailed explanation.
+The GRANT Override (positive value) is essential for public endpoints that have no JWT—without it, the identity phase would always deny them. See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics, return value meanings, and usage guidance.
 
 ## Policy Inputs
 

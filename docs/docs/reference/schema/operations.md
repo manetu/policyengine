@@ -26,7 +26,7 @@ spec:
 
 Operations route requests to **operation phase (Phase 1)** policies based on the operation string. Selectors are evaluated in order; first match wins.
 
-The operation phase uses [tri-level output](/concepts/policy-conjunction#operation-phase-tri-level-policies) (negative, zero, positive) instead of boolean. A **positive value acts as a "GRANT Override"** that bypasses all other phases—essential for public endpoints that have no JWT.
+The operation phase uses [tri-level output](/concepts/policy-conjunction#tri-level) (negative, zero, positive) instead of boolean. A positive value acts as a "GRANT Override" that bypasses all other phases—essential for public endpoints that have no JWT.
 
 ## Selector Patterns
 

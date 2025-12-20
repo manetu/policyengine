@@ -63,24 +63,24 @@ spec:
             glob.match(pattern, [], input.operation)
         }
 
-    # Operation phase policy (see note below about tri-state)
+    # Operation phase policy (see note below about tri-level)
     - mrn: &operation-default "mrn:iam:policy:operation-default"
       name: operation-default
       description: "Default operation policy - defers to identity and resource phases"
       rego: |
         package authz
-        # Operation policies use tri-state: negative=deny, 0=continue, positive=grant override
+        # Operation policies use tri-level: negative=deny, 0=continue, positive=grant override
         # Returning 0 defers the decision to identity and resource phases
         default allow = 0
 ```
 
 :::info[Operation Policies Are Different]
-Operation policies use a [tri-state](/concepts/policy-conjunction#operation-phase-tri-level-policies) return value instead of simple true/false:
+Operation policies use [tri-level](/concepts/policy-conjunction#tri-level) integer output instead of simple true/false:
 - **Negative** (e.g., `-1`): Deny immediately
 - **Zero** (`0`): Continue to identity and resource phases
 - **Positive** (e.g., `1`): Grant immediately, skip other phases
 
-Using `default allow = 0` keeps this example simple by deferring all decisions to the identity and resource phases. In practice, operation policies often perform checks like verifying authentication (e.g., `input.principal != {}`). See [Policy Conjunction](/concepts/policy-conjunction) for real-world patterns.
+Using `default allow = 0` keeps this example simple by deferring all decisions to the identity and resource phases. In practice, operation policies often perform checks like verifying authentication (e.g., `input.principal != {}`). See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics and real-world patterns.
 :::
 
 :::tip[YAML Anchors]
@@ -208,7 +208,7 @@ spec:
       description: "Defers to identity and resource phases"
       rego: |
         package authz
-        default allow = 0  # operation policies use tri-state integers
+        default allow = 0  # operation policies use tri-level integers
 
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all
@@ -291,7 +291,7 @@ This creates a `PolicyDomain` with the Rego content inlined.
 Once you're comfortable with the basics, explore these advanced features:
 
 - **[Policy Libraries](/concepts/policy-libraries)** — Extract reusable Rego code into shared libraries that multiple policies can import
-- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the evaluation phases work together, including tri-state return values for early grant/deny decisions
+- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the evaluation phases work together, including [tri-level policies](/concepts/policy-conjunction#tri-level) for early grant/deny decisions
 - **[Resource Routing](/concepts/resources#resource-routing-v1alpha4)** — Route resources to groups based on MRN patterns
 - **[Scopes](/concepts/scopes)** — Add access-method constraints for scenarios like API keys vs. interactive sessions
 

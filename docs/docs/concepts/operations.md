@@ -147,7 +147,7 @@ allow {
 
 ### Public Operations
 
-No authentication required—uses a [tri-state](/concepts/policy-conjunction#operation-phase-tri-level-policies) GRANT override to bypass identity and resource phases:
+No authentication required—uses a [tri-level](/concepts/policy-conjunction#tri-level) GRANT override to bypass identity and resource phases:
 
 ```yaml
 operations:
