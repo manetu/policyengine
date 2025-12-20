@@ -69,16 +69,16 @@ spec:
       description: "Default operation policy - defers to identity and resource phases"
       rego: |
         package authz
-        # Operation policies use tri-level: negative=deny, 0=continue, positive=grant override
+        # Operation policies use tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
         # Returning 0 defers the decision to identity and resource phases
         default allow = 0
 ```
 
 :::info[Operation Policies Are Different]
 Operation policies use [tri-level](/concepts/policy-conjunction#tri-level) integer output instead of simple true/false:
-- **Negative** (e.g., `-1`): Deny immediately
-- **Zero** (`0`): Continue to identity and resource phases
-- **Positive** (e.g., `1`): Grant immediately, skip other phases
+- **Negative** (e.g., `-1`): DENY
+- **Zero** (`0`): GRANT (other phases still evaluated)
+- **Positive** (e.g., `1`): GRANT Override (skip other phases)
 
 Using `default allow = 0` keeps this example simple by deferring all decisions to the identity and resource phases. In practice, operation policies often perform checks like verifying authentication (e.g., `input.principal != {}`). See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics and real-world patterns.
 :::
@@ -208,7 +208,7 @@ spec:
       description: "Defers to identity and resource phases"
       rego: |
         package authz
-        default allow = 0  # operation policies use tri-level integers
+        default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
     - mrn: &allow-all "mrn:iam:policy:allow-all"
       name: allow-all
