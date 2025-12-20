@@ -10,10 +10,13 @@ sidebar_position: 8
 
 While identity policies determine what a principal *can* do based on their roles, scopes allow you to add an additional layer of constraint based on *how* the principal is accessing the system. This separation enables powerful access patterns where the same identity can have different effective permissions depending on the access context.
 
+Like other entities in the PolicyEngine, scopes serve a dual purpose: they link to a policy for access evaluation, and they can carry [annotations](/concepts/annotations) that parameterize policy decisions. Scope annotations have the highest precedence in the [identity annotation hierarchy](/concepts/annotations#identity-annotation-hierarchy) (after principal claims), allowing them to override annotations from roles and groups (see [Parameterizing Policies](/concepts/annotations#parameterizing-policies)).
+
 ### Key Characteristics
 
 - **Decoupled from Identity**: Scopes constrain access without requiring the identity phase to be aware of limitations
 - **Access-Method Driven**: Typically associated with the means of access (tokens, API keys, federation)
+- **Annotation-Enabled**: Scopes can carry annotations with higher precedence than roles and groups
 - **Additive Constraints**: Scopes can only further restrict access, never expand it beyond what identity policies allow
 - **Optional Phase**: If no scopes are present in a request, the scope phase defaults to GRANT
 

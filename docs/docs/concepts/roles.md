@@ -8,12 +8,19 @@ sidebar_position: 5
 
 ## Overview
 
-A role connects a principal's identity to a policy. When a principal is assigned a role, the role's associated policy is evaluated to determine whether the principal can perform the requested operation. Roles answer the question: *"Based on who this principal is, what are they allowed to do?"*
+Roles serve a dual purpose in the PolicyEngine:
+
+1. **Policy Selection**: A role links a principal's identity to a policy. When a principal is assigned a role, the role's associated policy is evaluated to determine access.
+
+2. **Policy Parameterization**: A role can carry [annotations](/concepts/annotations) that flow into the PORC, allowing generic policies to make context-specific decisions based on the role's configuration.
+
+When a principal is assigned a role, the role's associated policy is evaluated to determine whether the principal can perform the requested operation. Roles answer the question: *"Based on who this principal is, what are they allowed to do?"*
 
 ### Key Characteristics
 
 - **Identity-Centric**: Roles are assigned to principals (users, services) to define their capabilities
 - **Policy-Backed**: Each role references exactly one policy that contains the access logic
+- **Annotation-Enabled**: Roles can carry annotations that parameterize policy evaluation (see [Parameterizing Policies](/concepts/annotations#parameterizing-policies))
 - **Mandatory Phase**: The identity phase (Phase 2) must contribute at least one GRANT for access to be allowed
 - **Additive Permissions**: A principal can have multiple roles, and only one needs to grant access
 
