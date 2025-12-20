@@ -429,7 +429,19 @@ retries = Retry(total=3, backoff_factor=0.1)
 session.mount('http://', HTTPAdapter(max_retries=retries))
 ```
 
-## Premium Deployment Options <FeatureChip variant="premium" label="Premium" size="medium"/>
+## Premium Considerations <FeatureChip variant="premium" label="Premium Only" size="medium"/>
+
+All HTTP-based options use the same API.  This guide helps you navigate as you migrate from OSS to Premium.
+
+### Migration from OSS
+
+Migrating from OSS to Premium—whether as a sidecar or standalone service-is as simple as updating your endpoint URL. No code changes required.
+
+### Development
+
+You can develop locally with [`mpe serve`](/reference/cli/serve), then deploy to Premium production by simply updating your endpoint URL.
+
+### Deployment Options
 
 The Premium Edition can be deployed in multiple configurations:
 
@@ -439,9 +451,5 @@ The Premium Edition can be deployed in multiple configurations:
 | **Standalone service** | Network round-trip | Independent | Non-K8s environments, shared PDP |
 
 Regardless of the deployment model, Premium features such as centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
-
-:::tip Seamless Migration Path
-All HTTP-based options use the same API. You can develop locally with `mpe serve`, then deploy to Premium—whether as a sidecar or standalone service—by updating your endpoint URL. No code changes required.
-:::
 
 For a full comparison of HTTP API vs. the embedded Go library, see [Choosing Your Integration Method](/integration#1-choose-your-integration-method).
