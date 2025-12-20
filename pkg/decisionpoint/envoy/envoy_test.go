@@ -70,7 +70,7 @@ porc := {
     "operation": operation,
     "resource": {
         "id": sprintf("http://%s%s", [service, path]),
-        "group": "mrn:iam:manetu.io:resource-group:default"
+        "group": "mrn:iam:resource-group:default"
     },
     "context": input,
 }`

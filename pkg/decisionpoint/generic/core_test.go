@@ -103,7 +103,7 @@ func TestGenericServer_Decision_Allow(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+			"mroles": []string{"mrn:iam:role:superadmin"},
 		},
 		"operation": "idf:public:list",
 		"resource":  map[string]interface{}{},
@@ -146,7 +146,7 @@ func TestGenericServer_Decision_Deny(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:user"},
+			"mroles": []string{"mrn:iam:role:user"},
 		},
 		"operation": "platform:admin:create",
 		"resource":  map[string]interface{}{},
@@ -272,7 +272,7 @@ func TestGenericServer_Decision_ProbeTrue(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+			"mroles": []string{"mrn:iam:role:superadmin"},
 		},
 		"operation": "idf:public:list",
 		"resource":  map[string]interface{}{},
@@ -315,7 +315,7 @@ func TestGenericServer_Decision_ProbeFalse(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+			"mroles": []string{"mrn:iam:role:superadmin"},
 		},
 		"operation": "idf:public:list",
 		"resource":  map[string]interface{}{},
@@ -358,7 +358,7 @@ func TestGenericServer_Decision_ProbeDefault(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:superadmin"},
+			"mroles": []string{"mrn:iam:role:superadmin"},
 		},
 		"operation": "idf:public:list",
 		"resource":  map[string]interface{}{},
@@ -401,7 +401,7 @@ func TestGenericServer_Decision_ProbeDeny(t *testing.T) {
 	porc := map[string]interface{}{
 		"principal": map[string]interface{}{
 			"sub":    "test-user",
-			"mroles": []string{"mrn:iam:manetu.io:role:user"},
+			"mroles": []string{"mrn:iam:role:user"},
 		},
 		"operation": "platform:admin:create",
 		"resource":  map[string]interface{}{},

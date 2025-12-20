@@ -25,7 +25,6 @@ mrn:<type>:<namespace>:<class>:<instance>
 |-----------|-------------|---------|
 | `mrn:` | Fixed prefix | Always `mrn:` |
 | `type` | Entity type or system | `iam`, `vault`, `data`, `app` |
-| `namespace` | Organization or domain | `acme.com`, `manetu.io` |
 | `class` | Entity classification | `role`, `policy`, `secret`, `user` |
 | `instance` | Unique instance identifier | `admin`, `api-key`, `12345` |
 
@@ -38,41 +37,41 @@ The PolicyEngine does not enforce any specific scheme, including the 'mrn:' pref
 ### Policies
 
 ```
-mrn:iam:acme.com:policy:allow-all
-mrn:iam:acme.com:policy:authenticated-only
-mrn:iam:acme.com:policy:clearance-required
+mrn:iam:policy:allow-all
+mrn:iam:policy:authenticated-only
+mrn:iam:policy:clearance-required
 ```
 
 ### Roles
 
 ```
-mrn:iam:acme.com:role:admin
-mrn:iam:acme.com:role:editor
-mrn:iam:acme.com:role:viewer
+mrn:iam:role:admin
+mrn:iam:role:editor
+mrn:iam:role:viewer
 ```
 
 ### Groups
 
 ```
-mrn:iam:acme.com:group:engineering
-mrn:iam:acme.com:group:finance
-mrn:iam:acme.com:group:executives
+mrn:iam:group:engineering
+mrn:iam:group:finance
+mrn:iam:group:executives
 ```
 
 ### Resource Groups
 
 ```
-mrn:iam:acme.com:resource-group:public
-mrn:iam:acme.com:resource-group:internal
-mrn:iam:acme.com:resource-group:sensitive
+mrn:iam:resource-group:public
+mrn:iam:resource-group:internal
+mrn:iam:resource-group:sensitive
 ```
 
 ### Scopes
 
 ```
-mrn:iam:acme.com:scope:read-only
-mrn:iam:acme.com:scope:full-access
-mrn:iam:acme.com:scope:admin
+mrn:iam:scope:read-only
+mrn:iam:scope:full-access
+mrn:iam:scope:admin
 ```
 
 ### Resources
@@ -204,7 +203,7 @@ MRNs appear throughout [PORC expressions](/concepts/porc):
 Use domain names for multi-tenant systems:
 
 ```
-mrn:iam:acme.com:role:admin
+mrn:iam:role:admin
 mrn:iam:globex.io:role:admin
 mrn:iam:initech.com:role:admin
 ```
@@ -237,14 +236,14 @@ Establish a naming convention and stick to it:
 
 ```yaml
 # Good: Consistent namespace format
-mrn:iam:acme.com:role:admin
-mrn:iam:acme.com:policy:admin-access
-mrn:iam:acme.com:group:administrators
+mrn:iam:role:admin
+mrn:iam:policy:admin-access
+mrn:iam:group:administrators
 
 # Avoid: Inconsistent namespacing
 mrn:iam:acme:role:admin
-mrn:iam:ACME.COM:policy:admin-access
-mrn:iam:acme.com:group:admins
+mrn:iam:policy:admin-access
+mrn:iam:group:admins
 ```
 
 ### 2. Use Descriptive Instance Names
@@ -253,12 +252,12 @@ Make instance identifiers meaningful:
 
 ```yaml
 # Good: Descriptive names
-mrn:iam:acme.com:role:billing-admin
-mrn:iam:acme.com:policy:pii-access-clearance
+mrn:iam:role:billing-admin
+mrn:iam:policy:pii-access-clearance
 
 # Avoid: Cryptic names
-mrn:iam:acme.com:role:r1
-mrn:iam:acme.com:policy:pol-7b
+mrn:iam:role:r1
+mrn:iam:policy:pol-7b
 ```
 
 ### 3. Keep MRNs Immutable
@@ -274,14 +273,14 @@ Structure MRNs to support future pattern matching:
 
 ```yaml
 # Good: Hierarchical structure enables pattern matching
-mrn:iam:acme.com:role:finance-admin
-mrn:iam:acme.com:role:finance-viewer
-mrn:iam:acme.com:role:finance-auditor
-# Can match: "mrn:iam:acme.com:role:finance-.*"
+mrn:iam:role:finance-admin
+mrn:iam:role:finance-viewer
+mrn:iam:role:finance-auditor
+# Can match: "mrn:iam:role:finance-.*"
 
 # Less flexible: Flat structure
-mrn:iam:acme.com:role:admin-finance
-mrn:iam:acme.com:role:viewer-finance
+mrn:iam:role:admin-finance
+mrn:iam:role:viewer-finance
 ```
 
 ### 5. Document Your MRN Schema
