@@ -56,10 +56,10 @@ A **PEP** is code within your application that enforces access control. Each PEP
 
 The PolicyEngine provides two integration options:
 
-| Method                                          | Best For |
-|-------------------------------------------------|----------|
-| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> | Any language — Python, Java, TypeScript, Go, and more |
-| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="oss" label="OSS Only"/> | Go applications needing lowest latency |
+| Method                                                                                                                                                      | Best For |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> <FeatureChip variant="oss" label="OSS"/> <FeatureChip variant="premium" label="Premium"/> | Any language — Python, Java, TypeScript, Go, and more |
+| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="oss" label="OSS Only"/>                               | Go applications needing lowest latency |
 
 #### Considerations for Future Growth
 
