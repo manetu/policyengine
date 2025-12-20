@@ -11,7 +11,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 The Manetu PolicyEngine (MPE) is a programmable access-control and governance layer that organizations use to protect software assets such as Application Programming Interfaces (APIs) and sensitive data using a [Policy-Based Access Control (PBAC)](/concepts/pbac) model.
 
-It features a granular, high-performance, and flexible architecture, a simple definition and enforcement protocol, and comprehensive tooling for policy development and testing.
+As a core component of the Manetu governance platform, MPE provides the policy evaluation engine that enables fine-grained, context-aware access control across data, APIs, and services. It features a high-performance, flexible architecture with comprehensive tooling for policy development and testing.
 
 ## Open Source and Premium Editions
 
