@@ -86,7 +86,13 @@ PBAC combines the best aspects of RBAC and ABAC while adding the flexibility of 
 
 The Manetu PolicyEngine implements PBAC using:
 
-1. **Open Policy Agent (OPA)**: Industry-standard policy engine
-2. **Rego Language**: Declarative policy language
-3. **PORC Model**: Normalized input format (Principal, Operation, Resource, Context)
+1. **[Open Policy Agent (OPA)](https://www.openpolicyagent.org/)**: Industry-standard policy engine
+2. **[Rego](https://www.openpolicyagent.org/docs/latest/policy-language/)**: Declarative policy language
+3. **[PORC](/concepts/porc)**: Normalized input format (Principal, Operation, Resource, Context)
 4. **[Policy Conjunction](/concepts/policy-conjunction)**: Multi-phase evaluation that combines operation, identity, resource, and scope policies dynamically for each request
+
+## Related Concepts
+
+- **[PolicyDomains](/concepts/policy-domains)**: Self-contained bundles that organize policies and related entities
+- **[Policies](/concepts/policies)**: The Rego code that implements access control decisions
+- **[Audit & Access Records](/concepts/audit)**: The auditable decision records that PBAC produces
