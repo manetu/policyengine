@@ -125,8 +125,8 @@ mrn:<type>:<namespace>:<class>:<instance>
 ```
 
 Examples:
-- `mrn:iam:manetu.io:policy:admin`
-- `mrn:iam:acme.com:role:developer`
+- `mrn:iam:policy:admin`
+- `mrn:iam:role:developer`
 - `mrn:app:myservice:resource-group:default`
 
 ### YAML Anchors

@@ -90,8 +90,8 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:admin"],
-			           "scopes": ["mrn:iam:manetu.io:scope:myscope"]},
+			           "mroles":["mrn:iam:role:admin"],
+			           "scopes": ["mrn:iam:scope:myscope"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -158,8 +158,8 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-                       "mroles":["mrn:iam:manetu.io:role:myrole"],
-			           "scopes": ["mrn:iam:manetu.io:scope:myscope"]},
+                       "mroles":["mrn:iam:role:myrole"],
+			           "scopes": ["mrn:iam:scope:myscope"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -217,7 +217,7 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"],
+			           "mroles":["mrn:iam:role:myrole"],
 			           "scopes": ["badscope"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
@@ -275,7 +275,7 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:superadmin"]},
+			           "mroles":["mrn:iam:role:superadmin"]},
 			           "resource":"mrn:realm:realm",
 			           "operation":"platform:realm:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -335,7 +335,7 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:superadmin"]},
+			           "mroles":["mrn:iam:role:superadmin"]},
 			           "resource":"mrn:realm:realm",
 			           "operation":"realm:realm:write"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -375,7 +375,7 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:admin"]},
+			           "mroles":["mrn:iam:role:admin"]},
 			           "resource":"mrn:realm:realm",
 			           "operation":"platform:realm:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -407,7 +407,7 @@ func TestAuditDecision(t *testing.T) {
 			          {"sub":"foo",
 			           "mrealm":"bar",
 			           "aud":"manetu.io",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"]},
+			           "mroles":["mrn:iam:role:myrole"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -460,7 +460,7 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "LOW",
-			           "mroles":["mrn:iam:manetu.io:role:unknown"]},
+			           "mroles":["mrn:iam:role:unknown"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -504,7 +504,7 @@ func TestAuditDecision(t *testing.T) {
                                    "mrealm":"acme",
                                    "aud":"manetu.io",
                                    "mclearance": "MAXIMUM",
-                                   "mroles":["mrn:iam:manetu.io:role:myrole", "mrn:iam:manetu.io:role:notfound"]},
+                                   "mroles":["mrn:iam:role:myrole", "mrn:iam:role:notfound"]},
                                    "resource":"mrn:vault:bar:v1",
                                    "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -534,12 +534,12 @@ func TestAuditDecision(t *testing.T) {
 				assert.Equal(t, "", phase1Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase1Ref.Decision)
 
-				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:role:notfound")
+				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:role:notfound")
 				assert.NotNil(t, phase2Ref)
-				assert.Equal(t, "role not found 3: mrn:iam:manetu.io:role:notfound", phase2Ref.Reason)
+				assert.Equal(t, "role not found 3: mrn:iam:role:notfound", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_DENY, phase2Ref.Decision)
 
-				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:role:myrole")
+				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:role:myrole")
 				assert.NotNil(t, phase2Ref)
 				assert.Equal(t, "", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase2Ref.Decision)
@@ -553,7 +553,7 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "LOW",
-			           "mgroups":["mrn:iam:manetu.io:group:unknown"]},
+			           "mgroups":["mrn:iam:group:unknown"]},
 			           "resource":"mrn:vault:bar:v1",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -597,7 +597,7 @@ func TestAuditDecision(t *testing.T) {
                                    "mrealm":"acme",
                                    "aud":"manetu.io",
                                    "mclearance": "MAXIMUM",
-                                   "mgroups":["mrn:iam:manetu.io:group:mygroup", "mrn:iam:manetu.io:group:notfound"]},
+                                   "mgroups":["mrn:iam:group:mygroup", "mrn:iam:group:notfound"]},
                                    "resource":"mrn:vault:bar:v1",
                                    "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -627,12 +627,12 @@ func TestAuditDecision(t *testing.T) {
 				assert.Equal(t, "", phase1Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase1Ref.Decision)
 
-				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:group:notfound")
+				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:group:notfound")
 				assert.NotNil(t, phase2Ref)
-				assert.Equal(t, "group not found: mrn:iam:manetu.io:group:notfound", phase2Ref.Reason)
+				assert.Equal(t, "group not found: mrn:iam:group:notfound", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_DENY, phase2Ref.Decision)
 
-				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:role:myrole")
+				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:role:myrole")
 				assert.NotNil(t, phase2Ref)
 				assert.Equal(t, "", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase2Ref.Decision)
@@ -646,8 +646,8 @@ func TestAuditDecision(t *testing.T) {
                                    "mrealm":"acme",
                                    "aud":"manetu.io",
                                    "mclearance": "MAXIMUM",
-                                   "mgroups":["mrn:iam:manetu.io:group:notfound1", "mrn:iam:manetu.io:group:notfound2"],
-                                   "mroles":["mrn:iam:manetu.io:role:myrole", "mrn:iam:manetu.io:role:notfound"]},
+                                   "mgroups":["mrn:iam:group:notfound1", "mrn:iam:group:notfound2"],
+                                   "mroles":["mrn:iam:role:myrole", "mrn:iam:role:notfound"]},
                                    "resource":"mrn:vault:bar:v1",
                                    "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -677,22 +677,22 @@ func TestAuditDecision(t *testing.T) {
 				assert.Equal(t, "", phase1Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase1Ref.Decision)
 
-				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:role:notfound")
+				phase2Ref := getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:role:notfound")
 				assert.NotNil(t, phase2Ref)
-				assert.Equal(t, "role not found 3: mrn:iam:manetu.io:role:notfound", phase2Ref.Reason)
+				assert.Equal(t, "role not found 3: mrn:iam:role:notfound", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_DENY, phase2Ref.Decision)
 
-				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:group:notfound1")
+				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:group:notfound1")
 				assert.NotNil(t, phase2Ref)
-				assert.Equal(t, "group not found: mrn:iam:manetu.io:group:notfound1", phase2Ref.Reason)
+				assert.Equal(t, "group not found: mrn:iam:group:notfound1", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_DENY, phase2Ref.Decision)
 
-				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:group:notfound2")
+				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:group:notfound2")
 				assert.NotNil(t, phase2Ref)
-				assert.Equal(t, "group not found: mrn:iam:manetu.io:group:notfound2", phase2Ref.Reason)
+				assert.Equal(t, "group not found: mrn:iam:group:notfound2", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_DENY, phase2Ref.Decision)
 
-				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:manetu.io:role:myrole")
+				phase2Ref = getBundleRefById(record, events.AccessRecord_BundleReference_IDENTITY, "mrn:iam:role:myrole")
 				assert.NotNil(t, phase2Ref)
 				assert.Equal(t, "", phase2Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase2Ref.Decision)
@@ -706,7 +706,7 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "LOW",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"]},
+			           "mroles":["mrn:iam:role:myrole"]},
 			           "resource":"mrn:vault:acme:resource:sharedresource",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -756,8 +756,8 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "LOW",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"]},
-			           "resource":"mrn:iam:manetu.io:resource:networkerror",
+			           "mroles":["mrn:iam:role:myrole"]},
+			           "resource":"mrn:iam:resource:networkerror",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
 				// summary for p-good, r-unknown resource, o-known op, s-known scope
@@ -789,8 +789,8 @@ func TestAuditDecision(t *testing.T) {
 				phase3Ref := getBundleRef(record, events.AccessRecord_BundleReference_RESOURCE, 0)
 				assert.NotNil(t, phase3Ref)
 				assert.Equal(t, events.AccessRecord_BundleReference_NETWORK_ERROR, phase3Ref.ReasonCode)
-				assert.Equal(t, record.Resource, "mrn:iam:manetu.io:resource:networkerror")
-				assert.Equal(t, phase3Ref.Id, "mrn:iam:manetu.io:resource:networkerror")
+				assert.Equal(t, record.Resource, "mrn:iam:resource:networkerror")
+				assert.Equal(t, phase3Ref.Id, "mrn:iam:resource:networkerror")
 			},
 		},
 		{
@@ -801,7 +801,7 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "LOW",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"]},
+			           "mroles":["mrn:iam:role:myrole"]},
 			           "resource":"mrn:vault:acme:resource:badannotation",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -847,8 +847,8 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "MAXIMUM",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"],
-			           "scopes": ["mrn:iam:manetu.io:scope:api"]},
+			           "mroles":["mrn:iam:role:myrole"],
+			           "scopes": ["mrn:iam:scope:api"]},
 			           "resource":"mrn:vault:acme:resource:sharedresource",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -899,7 +899,7 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "MAXIMUM",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"],
+			           "mroles":["mrn:iam:role:myrole"],
 			           "scopes": ["mrn:iam:acme:scope:networkerror"]},
 			           "resource":"mrn:vault:acme:resource:sharedresource",
 			           "operation":"vault:admin:create"}`,
@@ -951,8 +951,8 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "MAXIMUM",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"],
-			           "scopes": ["mrn:iam:manetu.io:scope:myscope", "mrn:iam:acme:scope:notfound"]},
+			           "mroles":["mrn:iam:role:myrole"],
+			           "scopes": ["mrn:iam:scope:myscope", "mrn:iam:acme:scope:notfound"]},
 			           "resource":"mrn:vault:acme:resource:sharedresource",
 			           "operation":"vault:admin:create"}`,
 			post: func(pe core.PolicyEngine, decision bool, record *events.AccessRecord) {
@@ -994,7 +994,7 @@ func TestAuditDecision(t *testing.T) {
 				assert.Equal(t, "", phase3Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase3Ref.Decision)
 
-				phase4Ref := getBundleRefById(record, events.AccessRecord_BundleReference_SCOPE, "mrn:iam:manetu.io:scope:myscope")
+				phase4Ref := getBundleRefById(record, events.AccessRecord_BundleReference_SCOPE, "mrn:iam:scope:myscope")
 				assert.NotNil(t, phase4Ref)
 				assert.Equal(t, "", phase4Ref.Reason)
 				assert.Equal(t, events.AccessRecord_GRANT, phase4Ref.Decision)
@@ -1013,10 +1013,10 @@ func TestAuditDecision(t *testing.T) {
 			           "mrealm":"acme",
 			           "aud":"manetu.io",
 			           "mclearance": "MAXIMUM",
-			           "mroles":["mrn:iam:manetu.io:role:myrole"],
-			           "scopes": ["mrn:iam:manetu.io:scope:api"]},
+			           "mroles":["mrn:iam:role:myrole"],
+			           "scopes": ["mrn:iam:scope:api"]},
 			        "resource": {"id": "mrn:vault:acme:resource:sharedresource",
-                                 "group": "mrn:iam:manetu.io:resource-group:sharedresourcegroup",
+                                 "group": "mrn:iam:resource-group:sharedresourcegroup",
 								 "classification": "HIGH",
                                  "annotations": {"foo": "bar", "extnnot": {"a": "aaa", "i": 100}}},
 			        "operation":"vault:admin:create"}`,
@@ -1147,10 +1147,10 @@ func TestConcurrentPORC(t *testing.T) {
                     {"sub":"foo",
                      "mrealm":"bar",
                      "aud":"manetu.io",
-                     "mroles":["mrn:iam:manetu.io:role:admin"]},
+                     "mroles":["mrn:iam:role:admin"]},
                  "resource":"mrn:vault:bar:v1",
                  "operation":"vault:admin:create",
-                 "scopes": ["mrn:iam:manetu.io:scope:myscope"]}`
+                 "scopes": ["mrn:iam:scope:myscope"]}`
 
 	pe, _, _ := test.NewTestPolicyEngine(1024)
 	wg := &sync.WaitGroup{}
@@ -1238,10 +1238,10 @@ func TestDisallowHttpSend(t *testing.T) {
 	pe, _, _ := test.NewTestPolicyEngine(1024)
 	ctx := context.Background()
 
-	porc := "{\"principal\":{\"sub\":\"foo\",\"mrealm\":\"bar\",\"aud\":\"manetu.io\",\"mroles\":[\"mrn:iam:manetu.io:role:admin\"]},\"resource\":\"mrn:http:/manetu.api.localfile.v1.IAMGateway/CreateRole\",\"operation\":\"http:post\", \"scopes\": [\"mrn:iam:manetu.io:scope:myscope\"]}"
+	porc := "{\"principal\":{\"sub\":\"foo\",\"mrealm\":\"bar\",\"aud\":\"manetu.io\",\"mroles\":[\"mrn:iam:role:admin\"]},\"resource\":\"mrn:http:/manetu.api.localfile.v1.IAMGateway/CreateRole\",\"operation\":\"http:post\", \"scopes\": [\"mrn:iam:scope:myscope\"]}"
 	authz, _ := pe.Authorize(ctx, porc)
 	// NOTE: though not surfaced, we do see the error log that confirms the unsafebuiltins is kicking in...
-	//      {"action":"compileBundle","actor":"policyengine","level":"error","module":"policyengine","msg":"error compiling modules: 1 error occurred: mrn:iam:manetu.io:policy:main:6: rego_type_error: unsafe built-in function calls in expression: http.send","time":"2024-02-09T12:52:56-05:00"}
+	//      {"action":"compileBundle","actor":"policyengine","level":"error","module":"policyengine","msg":"error compiling modules: 1 error occurred: mrn:iam:policy:main:6: rego_type_error: unsafe built-in function calls in expression: http.send","time":"2024-02-09T12:52:56-05:00"}
 	assert.False(t, authz)
 
 	//turn unsafebuiltins and try again

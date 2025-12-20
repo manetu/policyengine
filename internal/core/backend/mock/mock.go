@@ -254,7 +254,7 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 	// Resource not found.  Return resource with default resource group
 	defaultResource := &model.Resource{
 		ID:          mrn,
-		Group:       "mrn:iam:manetu.io:resource-group:default",
+		Group:       "mrn:iam:resource-group:default",
 		Owner:       "",
 		Annotations: model.UnsafeToJSON(map[string]string{"foo": "\"quoted foo\"", "bar": "1", "foobar": "{\"x\": \"double quoted x\"}"}),
 	}
@@ -336,7 +336,7 @@ func (b *Backend) GetResourceGroup(ctx context.Context, mrn string) (*model.Poli
 		}
 
 		annot := map[string]string{}
-		if mrn == "mrn:iam:manetu.io:resource-group:default" {
+		if mrn == "mrn:iam:resource-group:default" {
 			annot = map[string]string{"foo": "\"quoted foo\""}
 		}
 
