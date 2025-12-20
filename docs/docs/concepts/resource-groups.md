@@ -17,6 +17,8 @@ Resource Groups serve as the bridge between resources and policies:
 - The policy determines access control for all resources in that group
 - A default group can be designated for resources that don't specify a group
 
+Like identity entities ([Roles](/concepts/roles), [Groups](/concepts/groups), [Scopes](/concepts/scopes)), resource groups serve a dual purpose: they link to a policy for access evaluation, and they can carry [annotations](/concepts/annotations) that parameterize policy decisions. Resource group annotations flow into `input.resource.annotations`, providing default metadata for all resources in the group. Individual [Resources](/concepts/resources) can override these defaults with their own annotations (see [Parameterizing Policies](/concepts/annotations#parameterizing-policies)).
+
 ## How Resource Groups Work
 
 When a request involves a resource:
