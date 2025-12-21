@@ -6,6 +6,8 @@ sidebar_position: 9
 
 A **PolicyDomain** is a self-contained bundle that defines all policy-related artifacts for a specific domain or service.
 
+![PolicyDomain Model](./assets/policydomain.svg)
+
 ## Overview
 
 PolicyDomains provide:
@@ -287,6 +289,166 @@ dependencies:
   - "other-domain/library-name"
 ```
 
+## GitOps-Friendly Design
+
+PolicyDomains are fundamentally GitOps-friendly because they are plain files—YAML documents that can be version-controlled, reviewed, tested, and deployed through any standard GitOps workflow.
+
+### Why Plain Files Matter
+
+- **Human-readable**: Easy to review in pull requests
+- **Diff-friendly**: Changes are clearly visible in version control
+- **Declarative**: Describes the desired state, not imperative steps
+- **Tooling support**: Standard YAML linting, formatting, and validation
+- **Portable**: Deploy through any file-based workflow
+
+### Deployment Patterns
+
+Because PolicyDomains are just files, they integrate with any GitOps-oriented deployment flow:
+
+```mermaid
+flowchart TB
+    subgraph Git["Git Repository"]
+        Domain["PolicyDomain<br/>YAML"]
+    end
+
+    subgraph Push["Push-Based (CI/CD)"]
+        CI["CI Pipeline"]
+        Push1["kubectl apply"]
+    end
+
+    subgraph Pull["Pull-Based (GitOps Operators)"]
+        Flux["Flux / ArgoCD"]
+    end
+
+    subgraph K8s["Kubernetes"]
+        ConfigMap["ConfigMap<br/>(OSS)"]
+        CRD["PolicyDomain CRD<br/>(Premium)"]
+    end
+
+    Git --> CI --> Push1 --> ConfigMap
+    Git --> CI --> Push1 --> CRD
+    Git --> Flux --> ConfigMap
+    Git --> Flux --> CRD
+
+    style Domain fill:#1a145f,stroke:#03a3ed,color:#fff
+    style CI fill:#03a3ed,stroke:#0282bd,color:#fff
+    style Flux fill:#03a3ed,stroke:#0282bd,color:#fff
+    style ConfigMap fill:#38a169,stroke:#2f855a,color:#fff
+    style CRD fill:#38a169,stroke:#2f855a,color:#fff
+```
+
+| Pattern | Description |
+|---------|-------------|
+| **Push-based** | Git → CI pipeline → `kubectl apply` to Kubernetes |
+| **Pull-based** | GitOps operators (Flux, ArgoCD) continuously sync from Git |
+
+### Delivery by Edition
+
+**ConfigMap-based delivery** <FeatureChip variant="oss" label="Open Source" />
+
+In the open source edition, PolicyDomains are typically delivered as Kubernetes ConfigMaps. Configure your PDP pods (for HTTP API integration) or application pods (for embedded Go) to trigger a rolling restart when the ConfigMap changes:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-domain
+data:
+  domain.yaml: |
+    apiVersion: iamlite.manetu.io/v1alpha4
+    kind: PolicyDomain
+    metadata:
+      name: my-service
+    spec:
+      # ... PolicyDomain content
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mpe-pdp
+spec:
+  template:
+    metadata:
+      annotations:
+        # Trigger rollout when ConfigMap changes
+        checksum/config: "{{ sha256sum .Values.policyDomain }}"
+```
+
+**CRD-based delivery with dynamic updates** <FeatureChip variant="premium" label="Premium" />
+
+The Premium Edition provides a Kubernetes Custom Resource Definition (CRD) for PolicyDomain resources. When a PolicyDomain CRD instance is created or updated—whether through CI push or a GitOps operator pull—the Policy Administration Point (PAP) automatically distributes the new policies to all PDPs through the cache-coherency mechanism. No pod restarts required.
+
+```yaml
+apiVersion: iamlite.manetu.io/v1alpha4
+kind: PolicyDomain
+metadata:
+  name: my-service
+spec:
+  # ... PolicyDomain content
+```
+
+### Example CI Pipeline
+
+```yaml
+# .github/workflows/policy-ci.yml
+name: Policy CI
+
+on:
+  push:
+    paths:
+      - 'policies/**'
+  pull_request:
+    paths:
+      - 'policies/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MPE
+        run: |
+          curl -L https://github.com/manetu/policyengine/releases/latest/download/mpe-linux-amd64 -o mpe
+          chmod +x mpe
+          sudo mv mpe /usr/local/bin/
+
+      - name: Lint policies
+        run: mpe lint -f policies/domain.yaml
+
+      - name: Run policy tests
+        run: |
+          for test in policies/tests/*.json; do
+            echo "Running test: $test"
+            mpe test decision -b policies/domain.yaml -i "$test" | \
+              jq 'if .decision == "DENY" then "Test failed: access denied" | halt_error(1) else . end'
+          done
+
+      - name: Build for deployment
+        run: mpe build -f policies/domain.yaml -o dist/domain.yaml
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-bundle
+          path: dist/domain.yaml
+```
+
+### Pull Request Reviews
+
+Because PolicyDomains are YAML, policy changes follow standard code review practices:
+
+1. **Author** creates a branch with policy changes
+2. **CI** automatically validates syntax and runs tests
+3. **Reviewers** examine the diff—changes are clear and auditable
+4. **Merge** triggers deployment to staging/production
+
+This approach provides:
+- **Audit trail**: Git history shows who changed what and when
+- **Rollback**: Revert to any previous policy version instantly
+- **Collaboration**: Multiple team members can work on policies
+- **Testing**: Automated validation before deployment
+
 ## Best Practices
 
 1. **One domain per service**: Keep domains focused
@@ -294,6 +456,8 @@ dependencies:
 3. **Use anchors**: Avoid duplicating MRNs
 4. **Use references**: Keep Rego in external files for better editing
 5. **Validate early**: Run `mpe lint` frequently during development
+6. **Version control**: Store PolicyDomains in Git with your application code or in a dedicated policy repository
+7. **Automate testing**: Include policy tests in your CI/CD pipeline
 
 ## Related Concepts
 

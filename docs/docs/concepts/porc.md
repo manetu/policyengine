@@ -6,10 +6,14 @@ sidebar_position: 4
 
 A **PORC Expression** is the normalized input format for policy evaluation. PORC stands for:
 
-- **P**rincipal - Who is making the request
-- **O**peration - What action is being performed
-- **R**esource - What entity is being accessed
-- **C**ontext - Additional contextual information
+| Component | What It Contains | Example |
+|-----------|-----------------|---------|
+| **P**rincipal | Who is making the request | User identity, roles, groups |
+| **O**peration | What action they want to perform | `api:documents:read` |
+| **R**esource | What they want to access | Document ID, owner, classification |
+| **C**ontext | Additional circumstances | Timestamp, IP address, request metadata |
+
+![PORC Expression](./assets/porc.svg)
 
 ## Overview
 
@@ -19,31 +23,6 @@ PORC is the universal language for expressing authorization requests in the Poli
 - Reuse policy logic regardless of the original request format
 - Create consistent audit trails
 - Decouple policy logic from application-specific request formats
-
-```mermaid
-flowchart TB
-    subgraph Requests["Authorization Request Flow"]
-        HTTP["HTTP Request"]
-        GraphQL["GraphQL Query"]
-        gRPC["gRPC Call"]
-        Event["Event"]
-    end
-
-    HTTP & GraphQL & gRPC & Event --> PEP["PEP<br/>(Policy Enforcement Point)<br/>Transforms"]
-    PEP --> PORC["PORC<br/>(Standardized Format)"]
-    PORC --> PDP["PDP<br/>(PolicyEngine)<br/>Evaluates"]
-    PDP --> Decision["GRANT / DENY"]
-
-    style Requests fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style HTTP fill:#1a145f,stroke:#03a3ed,color:#fff
-    style GraphQL fill:#1a145f,stroke:#03a3ed,color:#fff
-    style gRPC fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Event fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PEP fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PORC fill:#03a3ed,stroke:#0282bd,color:#fff
-    style PDP fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Decision fill:#38a169,stroke:#2f855a,color:#fff
-```
 
 ## PORC Structure
 

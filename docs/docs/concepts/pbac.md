@@ -18,6 +18,8 @@ PBAC allows organizations to manage access to resources by defining policies tha
 
 ## Benefits of PBAC
 
+![PBAC Mindmap](./assets/pbac.svg)
+
 ### Governance That Executes
 
 Unlike traditional governance approaches that document policies in prose, PBAC implements governance as executable code. Policies are machine-readable, automatically enforced, and produce auditable decision records. This transforms governance from a compliance exercise into an operational capability.
