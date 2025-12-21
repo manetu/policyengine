@@ -6,6 +6,8 @@ sidebar_position: 3
 
 **Policy Conjunction** is the mechanism by which the Manetu PolicyEngine combines multiple policy phases together dynamically on a request-by-request basis to reach a final access decision.
 
+![Policy Conjunction](./assets/policy-conjunction.svg)
+
 ## Overview
 
 Rather than relying on a single policy to make all access decisions, the PolicyEngine evaluates policies across four distinct phases:
@@ -24,40 +26,7 @@ Each phase represents a different aspect of the access decision, and all phases 
 
 The PolicyEngine processes all phases in **parallel** for maximum performance. However, the final decision requires **at least one GRANT vote from each phase** for the top-level decision to be GRANT.
 
-```mermaid
-flowchart TB
-    PORC["PORC Request"]
-
-    PORC --> Op["Operation<br/>Phase"]
-    PORC --> Id["Identity<br/>Phase"]
-    PORC --> Res["Resource<br/>Phase"]
-    PORC --> Scope["Scope<br/>Phase"]
-
-    Op --> OpQ{"GRANT?"}
-    Id --> IdQ{"GRANT?"}
-    Res --> ResQ{"GRANT?"}
-    Scope --> ScopeQ{"GRANT?"}
-
-    OpQ & IdQ & ResQ & ScopeQ --> Check{"All Required<br/>Phases GRANT?"}
-    OpQ & IdQ & ResQ & ScopeQ --> CheckDeny{"Any Phase<br/>DENY?"}
-
-    Check -->|Yes| GRANT["GRANT"]
-    CheckDeny -->|Yes| DENY["DENY"]
-
-    style PORC fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Op fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Id fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Res fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Scope fill:#1a145f,stroke:#03a3ed,color:#fff
-    style OpQ fill:#1a145f,stroke:#718096,color:#fff
-    style IdQ fill:#1a145f,stroke:#718096,color:#fff
-    style ResQ fill:#1a145f,stroke:#718096,color:#fff
-    style ScopeQ fill:#1a145f,stroke:#718096,color:#fff
-    style Check fill:#1a145f,stroke:#718096,color:#fff
-    style CheckDeny fill:#1a145f,stroke:#718096,color:#fff
-    style GRANT fill:#38a169,stroke:#2f855a,color:#fff
-    style DENY fill:#e53e3e,stroke:#c53030,color:#fff
-```
+![Policy Conjunction Flowchart](./assets/policy-conjunction-flow.svg)
 
 ### Phase Requirements
 

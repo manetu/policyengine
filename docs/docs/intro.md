@@ -9,13 +9,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 <img src={useBaseUrl('/img/mpe-logo.svg')} alt="Manetu PolicyEngine Logo" style={{float: 'right', height: '125px', marginLeft: '20px', marginBottom: '10px'}} />
 
-The Manetu PolicyEngine (MPE) is a programmable access-control and governance layer that organizations use to protect software assets such as Application Programming Interfaces (APIs) and sensitive data using a [Policy-Based Access Control (PBAC)](/concepts/pbac) model.
+The Manetu PolicyEngine (MPE) is a programming language agnostic access-control and governance layer that organizations use to protect software assets such as Application Programming Interfaces (APIs) and sensitive data using a [Policy-Based Access Control (PBAC)](/concepts/pbac) model.
+
+![Authorization Challenges](./assets/challenges.svg)
 
 As a core component of the Manetu governance platform, MPE provides the policy evaluation engine that enables fine-grained, context-aware access control across data, APIs, and services. It features a high-performance, flexible architecture with comprehensive tooling for policy development and testing.
-
-:::tip Language-Agnostic by Design
-While MPE is written in Go, it integrates with **any language or runtime** via its HTTP API. Whether you're building in Python, Java, TypeScript, Rust, or any other language, you can use MPE as a standalone policy decision service. Go developers have the additional option of embedding the policy engine directly for lowest latency.
-:::
 
 ## Open Source and Premium Editions
 
@@ -41,10 +39,16 @@ The Manetu PolicyEngine is available in two editions:
 | <TableSection><IconText icon="extension">**Integration**</IconText></TableSection>        |                                                   |                                                   |
 | Embeddable Go library                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="no" />               |
 | HTTP decision service                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| <TableSection><IconText icon="architecture">**Architecture & Platform**</IconText></TableSection> |                                                   |                                                   |
+| Stateless, horizontally scalable PDPs                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Flexible deployment: embedded, sidecar, or standalone                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Multi-architecture support (amd64, arm64)                                                 |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
+| Update policies without application restart (static reload)                               |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
 | <TableSection><IconText icon="business">**Enterprise Features**</IconText></TableSection> |                                                   |                                                   |
-| ElasticSearch integration for audit storage, indexing, and reporting                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Centralized policy administration                                                         |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Dynamic policy rollout with cache coherency                                               |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 | Kubernetes Operator with auto-scaling sidecars                                            |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Centralized policy administration with GitOps                                             |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| ElasticSearch integration for audit storage, indexing, and reporting                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 | Queryable Audit History                                                                   |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 | Analytics Dashboards                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 | Streaming Live Audit                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
@@ -91,6 +95,18 @@ The `mpe` CLI provides comprehensive tooling for the policy development lifecycl
 - <IconText icon="lint">**`mpe lint`**</IconText>: Validate YAML syntax and lint embedded Rego code
 - <IconText icon="test">**`mpe test`**</IconText>: Test policy decisions with various inputs
 - <IconText icon="serve">**`mpe serve`**</IconText>: Run a local policy decision point for development
+
+Advanced debugging capabilities include `--trace` mode for line-by-line policy evaluation tracing. The Premium Edition adds decision replay with visual code coverage, benchmarking, and historical analysis.
+
+<SectionHeader icon="architecture" level={3}>Cloud-Native Architecture</SectionHeader>
+
+MPE is built for modern, web-scale microservice architectures:
+
+- <IconText icon="language">**Language Agnostic**</IconText>: Protect resources consistently across services written in any language—Go, Python, Java, TypeScript, Rust, and more—using a unified HTTP API
+- <IconText icon="scale">**Horizontally Scalable**</IconText>: Stateless PDPs scale out effortlessly to meet any performance or availability requirements
+- <IconText icon="deployment">**Flexible Deployment**</IconText>: Run the PDP embedded in your application, as a 1:1 sidecar, or as a shared standalone service
+- <IconText icon="update">**Decoupled Updates**</IconText>: Update policies independently without recompiling or redeploying your applications
+- <IconText icon="platform">**Multi-Architecture**</IconText>: Native support for both amd64 and arm64 infrastructure
 
 ## Next Steps
 
