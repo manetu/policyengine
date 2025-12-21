@@ -268,4 +268,20 @@ Expected: GRANT (owner access)
 | 0 | Command executed successfully |
 | 1 | Error (invalid input, missing files, etc.) |
 
-Note: Exit code 0 doesn't mean GRANT - check the output for the decision.
+Note: Exit code 0 doesn't mean GRANT—check the output for the decision.
+
+:::tip CI/CD Integration with jq halt_error
+For CI pipelines that need to fail based on the decision outcome, use `jq`'s [`halt_error`](https://jqlang.github.io/jq/manual/#halt_error) function:
+
+```bash
+# Fail CI if access is denied
+mpe test decision -b domain.yml -i input.json | \
+  jq 'if .decision == "DENY" then "Access denied" | halt_error(1) else . end'
+
+# Fail CI if access is granted (for negative test cases)
+mpe test decision -b domain.yml -i input.json | \
+  jq 'if .decision == "GRANT" then "Expected DENY" | halt_error(1) else . end'
+```
+
+This pipes the AccessRecord through `jq`, which exits with code 1 and prints the error message if the condition is met.
+:::

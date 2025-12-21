@@ -103,6 +103,7 @@ const sidebars: SidebarsConfig = {
       collapsed: true,
       items: [
         'deployment/index',
+        'deployment/architecture',
         'deployment/envoy-integration',
       ],
     },

@@ -6,6 +6,12 @@ sidebar_position: 1
 
 This section covers deploying the Manetu PolicyEngine in production environments.
 
+:::tip Quick Navigation
+- **Just getting started?** Follow the examples on this page
+- **Planning your architecture?** See [Deployment Architecture](/deployment/architecture) for form-factors, scaling patterns, and decision guidance
+- **Using Envoy?** See [Envoy Integration](/deployment/envoy-integration)
+:::
+
 ## Deployment Options
 
 <SectionHeader icon="standalone" level={3}>Standalone Server</SectionHeader>
