@@ -1460,3 +1460,251 @@ allow = 1 {
     jwt != ""
 }
 `
+
+// Test helper to create temp file from testdata
+func createTempFileFromTestData(t *testing.T, testdataFile string) string {
+	content, err := os.ReadFile("../../cmd/mpe/test/" + testdataFile)
+	assert.Nil(t, err, "Failed to read testdata file: %s", testdataFile)
+
+	tmpfile, err := os.CreateTemp("", "test-*.yml")
+	assert.Nil(t, err)
+	t.Cleanup(func() { _ = os.Remove(tmpfile.Name()) })
+
+	_, err = tmpfile.Write(content)
+	assert.Nil(t, err)
+	assert.Nil(t, tmpfile.Close())
+
+	return tmpfile.Name()
+}
+
+// TestNewLocalPolicyEngine_Success tests creating a PolicyEngine from valid domain files
+func TestNewLocalPolicyEngine_Success(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed with valid domain")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	// Verify the backend is accessible
+	backend := pe.GetBackend()
+	assert.NotNil(t, backend, "Backend should not be nil")
+}
+
+// TestNewLocalPolicyEngine_MultipleDomains tests creating a PolicyEngine from multiple domain files
+func TestNewLocalPolicyEngine_MultipleDomains(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	consolidatedFile := createTempFileFromTestData(t, "consolidated.yml")
+	alphaFile := createTempFileFromTestData(t, "valid-alpha.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{consolidatedFile, alphaFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed with multiple valid domains")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+}
+
+// TestNewLocalPolicyEngine_InvalidPath tests that a nonexistent path returns an error
+func TestNewLocalPolicyEngine_InvalidPath(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	pe, err := core.NewLocalPolicyEngine([]string{"/nonexistent/path/domain.yml"})
+	assert.NotNil(t, err, "Should return error for nonexistent path")
+	assert.Nil(t, pe, "PolicyEngine should be nil on error")
+}
+
+// TestNewLocalPolicyEngine_InvalidDomain tests that an invalid domain returns an error
+func TestNewLocalPolicyEngine_InvalidDomain(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	brokenFile := createTempFileFromTestData(t, "broken-alpha.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{brokenFile})
+	assert.NotNil(t, err, "Should return error for invalid domain")
+	assert.Nil(t, pe, "PolicyEngine should be nil on error")
+}
+
+// TestNewLocalPolicyEngine_BadRego tests that a domain with invalid rego returns an error
+func TestNewLocalPolicyEngine_BadRego(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	badRegoFile := createTempFileFromTestData(t, "bad-rego.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{badRegoFile})
+	assert.NotNil(t, err, "Should return error for bad rego")
+	assert.Nil(t, pe, "PolicyEngine should be nil on error")
+}
+
+// TestNewLocalPolicyEngine_EmptyPaths tests behavior with empty domain paths
+func TestNewLocalPolicyEngine_EmptyPaths(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	pe, err := core.NewLocalPolicyEngine([]string{})
+	// Empty paths may return an error or empty engine depending on implementation
+	// At minimum, we should not panic
+	if err != nil {
+		assert.Nil(t, pe, "PolicyEngine should be nil on error")
+	}
+}
+
+// TestNewLocalPolicyEngine_WithAccessLog tests that access log options are passed through
+func TestNewLocalPolicyEngine_WithAccessLog(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+	mockLog := &mockAccessLog{}
+	mockFactory := &mockAccessLogFactory{stream: mockLog}
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile}, options.WithAccessLog(mockFactory))
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed with access log option")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+}
+
+// TestNewLocalPolicyEngine_Authorize tests end-to-end authorization with local domains
+func TestNewLocalPolicyEngine_Authorize(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	// Test authorization with admin role (should be granted via allow-all policy)
+	porc := `{
+		"principal": {
+			"sub": "alice@example.com",
+			"mrealm": "test",
+			"aud": "manetu.io",
+			"mroles": ["mrn:iam:role:admin"]
+		},
+		"resource": "mrn:app:document:12345",
+		"operation": "documents:read"
+	}`
+
+	allowed, err := pe.Authorize(ctx, porc)
+	assert.Nil(t, err, "Authorization should not return error")
+	assert.True(t, allowed, "Admin role should be granted access")
+}
+
+// TestNewLocalPolicyEngine_AuthorizeDenied tests authorization denial with local domains
+func TestNewLocalPolicyEngine_AuthorizeDenied(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	// Test authorization with no-access role (should be denied)
+	porc := `{
+		"principal": {
+			"sub": "bob@example.com",
+			"mrealm": "test",
+			"aud": "manetu.io",
+			"mroles": ["mrn:iam:role:no-access"]
+		},
+		"resource": "mrn:app:document:12345",
+		"operation": "documents:write"
+	}`
+
+	allowed, err := pe.Authorize(ctx, porc)
+	assert.Nil(t, err, "Authorization should not return error")
+	assert.False(t, allowed, "No-access role should be denied access")
+}
+
+// TestNewLocalPolicyEngine_AuthorizeWithProbeMode tests probe mode with local domains
+func TestNewLocalPolicyEngine_AuthorizeWithProbeMode(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	porc := `{
+		"principal": {
+			"sub": "alice@example.com",
+			"mrealm": "test",
+			"aud": "manetu.io",
+			"mroles": ["mrn:iam:role:admin"]
+		},
+		"resource": "mrn:app:document:12345",
+		"operation": "documents:read"
+	}`
+
+	// Enable probe mode to skip access logging
+	allowed, err := pe.Authorize(ctx, porc, options.SetProbeMode(true))
+	assert.Nil(t, err, "Authorization with probe mode should not return error")
+	assert.True(t, allowed, "Admin role should be granted access in probe mode")
+}
+
+// TestNewLocalPolicyEngine_MapInput tests authorization with map input instead of JSON string
+func TestNewLocalPolicyEngine_MapInput(t *testing.T) {
+	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	// Test with map input instead of JSON string
+	porc := map[string]interface{}{
+		"principal": map[string]interface{}{
+			"sub":    "alice@example.com",
+			"mrealm": "test",
+			"aud":    "manetu.io",
+			"mroles": []interface{}{"mrn:iam:role:admin"},
+		},
+		"resource":  "mrn:app:document:12345",
+		"operation": "documents:read",
+	}
+
+	allowed, err := pe.Authorize(ctx, porc)
+	assert.Nil(t, err, "Authorization with map input should not return error")
+	assert.True(t, allowed, "Admin role should be granted access")
+}

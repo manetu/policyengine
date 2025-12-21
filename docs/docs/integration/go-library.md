@@ -19,6 +19,8 @@ go get github.com/manetu/policyengine
 
 ## Basic Usage
 
+The simplest way to create a PolicyEngine is with `NewLocalPolicyEngine`, which loads policy domains from YAML files:
+
 ```go
 package main
 
@@ -30,8 +32,10 @@ import (
 )
 
 func main() {
-    // Create a new PolicyEngine instance
-    pe, err := core.NewPolicyEngine()
+    // Create a PolicyEngine from local policy domain files
+    pe, err := core.NewLocalPolicyEngine([]string{
+        "./policies/policydomain.yaml",
+    })
     if err != nil {
         log.Fatalf("Failed to create PolicyEngine: %v", err)
     }
@@ -63,6 +67,17 @@ func main() {
         log.Println("Access DENIED")
     }
 }
+```
+
+### Loading Multiple Domains
+
+You can load multiple policy domain files. Domains are loaded in order, with later domains taking precedence for name collisions:
+
+```go
+pe, err := core.NewLocalPolicyEngine([]string{
+    "./policies/base-domain.yaml",      // Common policies
+    "./policies/app-domain.yaml",       // Application-specific policies
+})
 ```
 
 ## Using Maps for Efficiency
@@ -111,7 +126,8 @@ import (
     "github.com/manetu/policyengine/pkg/core/accesslog"
 )
 
-pe, err := core.NewPolicyEngine(
+pe, err := core.NewLocalPolicyEngine(
+    []string{"./policies/policydomain.yaml"},
     options.WithAccessLog(accesslog.NewStdoutFactory()),
     // Add additional options as needed
 )
@@ -122,7 +138,6 @@ pe, err := core.NewPolicyEngine(
 | Option | Description |
 |--------|-------------|
 | `WithAccessLog(factory)` | Configure access logging |
-| `WithBackend(factory)` | Configure the backend service |
 | `WithCompilerOptions(opts...)` | Configure OPA compiler options |
 
 ## Probe Mode
@@ -164,8 +179,8 @@ type AuthMiddleware struct {
     pe core.PolicyEngine
 }
 
-func NewAuthMiddleware() (*AuthMiddleware, error) {
-    pe, err := core.NewPolicyEngine()
+func NewAuthMiddleware(policyDomains []string) (*AuthMiddleware, error) {
+    pe, err := core.NewLocalPolicyEngine(policyDomains)
     if err != nil {
         return nil, err
     }
@@ -239,7 +254,10 @@ func extractResourceMRN(path string) string {
 }
 
 func main() {
-    middleware, err := NewAuthMiddleware()
+    // Load policy domains from YAML files
+    policyDomains := []string{"./policies/policydomain.yaml"}
+
+    middleware, err := NewAuthMiddleware(policyDomains)
     if err != nil {
         log.Fatalf("Failed to create auth middleware: %v", err)
     }
