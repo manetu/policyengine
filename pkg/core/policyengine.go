@@ -58,9 +58,11 @@ import (
 	"github.com/manetu/policyengine/internal/logging"
 	"github.com/manetu/policyengine/pkg/core/accesslog"
 	"github.com/manetu/policyengine/pkg/core/backend"
+	"github.com/manetu/policyengine/pkg/core/backend/local"
 	"github.com/manetu/policyengine/pkg/core/config"
 	"github.com/manetu/policyengine/pkg/core/options"
 	"github.com/manetu/policyengine/pkg/core/types"
+	"github.com/manetu/policyengine/pkg/policydomain/registry"
 	"github.com/pkg/errors"
 )
 
@@ -142,6 +144,39 @@ func NewPolicyEngine(engineOptions ...options.EngineOptionsFunc) (PolicyEngine, 
 	return &PolicyEngineImpl{
 		instance: *instance,
 	}, nil
+}
+
+// NewLocalPolicyEngine creates and initializes a new [PolicyEngine] instance
+// from local policydomain files.
+//
+// Each domainPath should be a file containing a policy domain YAML file
+// (policydomain.yaml or similar). Domains are loaded in the order provided,
+// with later domains taking precedence for name collisions.
+//
+// Other defaults are inherited from [NewPolicyEngine].
+//
+// Use functional options to configure a production backend and access log:
+//
+//	pe, err := core.NewLocalPolicyEngine(policydomains,
+//	    options.WithAccessLog(kafka.NewFactory()),
+//	    options.WithCompilerOptions(opa.WithRegoVersion(ast.RegoV1)),
+//	)
+//
+// Returns an error if configuration loading fails or if the backend cannot
+// be initialized.
+func NewLocalPolicyEngine(domainPaths []string, engineOptions ...options.EngineOptionsFunc) (PolicyEngine, error) {
+	err := config.Load()
+	if err != nil {
+		return nil, errors.Wrap(err, "error loading config")
+	}
+
+	r, err := registry.NewRegistry(domainPaths)
+	if err != nil {
+		return nil, err
+	}
+
+	engineOptions = append(engineOptions, options.WithBackend(local.NewFactory(r)))
+	return NewPolicyEngine(engineOptions...)
 }
 
 // Authorize evaluates an authorization request and returns the decision.
