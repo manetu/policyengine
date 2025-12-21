@@ -98,7 +98,7 @@ func (r *Registry) ResolveDependencies(model *policydomain.IntermediateModel, de
 
 // NewRegistry loads and validates policy domains from the specified paths.
 //
-// Each path should be a directory containing a policy domain YAML file
+// Each path should be a file containing a policy domain YAML file
 // (policydomain.yaml or similar). Domains are loaded in the order provided,
 // with later domains taking precedence for name collisions.
 //
