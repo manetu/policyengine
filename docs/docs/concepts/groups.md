@@ -6,6 +6,10 @@ sidebar_position: 6
 
 **Groups** provide a mechanism to organize and assign multiple [Roles](/concepts/roles) to principals efficiently. Instead of assigning roles individually to each user or service, you can assign a group that bundles related roles together.
 
+<div class="centered-image">
+![Group Mindmap](./assets/groups.svg)
+</div>
+
 ## Overview
 
 A group is a named collection of roles. When a principal belongs to a group, they automatically inherit all the roles defined in that group. Groups simplify identity management by:
@@ -34,63 +38,17 @@ When a request is processed, the PolicyEngine resolves the principal's effective
 2. Expanding groups from the `mgroups` claim into their constituent roles
 3. Evaluating all resolved roles in Phase 2 (Identity Phase)
 
-```mermaid
-flowchart LR
-    subgraph Claims["Principal Claims"]
-        mroles["mroles:<br/>viewer"]
-        mgroups["mgroups:<br/>developers"]
-    end
-
-    subgraph GroupDef["Group Definition"]
-        devGroup["developers:<br/>code-reader<br/>deploy-staging"]
-    end
-
-    subgraph Effective["Effective Roles"]
-        viewer["viewer<br/>(direct)"]
-        codeReader["code-reader<br/>(from group)"]
-        deployStaging["deploy-staging<br/>(from group)"]
-    end
-
-    mroles --> viewer
-    mgroups --> devGroup
-    devGroup --> codeReader
-    devGroup --> deployStaging
-
-    style Claims fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style GroupDef fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style Effective fill:transparent,stroke:#38a169,stroke-width:2px
-    style mroles fill:#1a145f,stroke:#03a3ed,color:#fff
-    style mgroups fill:#1a145f,stroke:#03a3ed,color:#fff
-    style devGroup fill:#1a145f,stroke:#03a3ed,color:#fff
-    style viewer fill:#1a145f,stroke:#38a169,color:#fff
-    style codeReader fill:#1a145f,stroke:#38a169,color:#fff
-    style deployStaging fill:#1a145f,stroke:#38a169,color:#fff
-```
+<div class="centered-image">
+![Role Resolution](./assets/role-resolution.svg)
+</div>
 
 ### Phase 2 Evaluation
 
 All effective roles—whether direct or group-inherited—are evaluated together in Phase 2:
 
-```mermaid
-flowchart TB
-    subgraph Identity["Identity Phase Evaluation"]
-        direction TB
-        viewer["viewer policy"] --> viewerResult["DENY<br/>(read-only)"]
-        codeReader["code-reader policy"] --> codeResult["DENY<br/>(read-only)"]
-        deployStaging["deploy-staging policy"] --> deployResult["GRANT<br/>(can deploy)"]
-    end
-
-    viewerResult & codeResult & deployResult --> result["Identity Phase Result:<br/>GRANT<br/>(at least one role granted)"]
-
-    style Identity fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style viewer fill:#1a145f,stroke:#03a3ed,color:#fff
-    style codeReader fill:#1a145f,stroke:#03a3ed,color:#fff
-    style deployStaging fill:#1a145f,stroke:#03a3ed,color:#fff
-    style viewerResult fill:#e53e3e,stroke:#c53030,color:#fff
-    style codeResult fill:#e53e3e,stroke:#c53030,color:#fff
-    style deployResult fill:#38a169,stroke:#2f855a,color:#fff
-    style result fill:#38a169,stroke:#2f855a,color:#fff
-```
+<div class="centered-image">
+![Identity Eval Flow](./assets/identity-eval-flow.svg)
+</div>
 
 ## Defining Groups
 

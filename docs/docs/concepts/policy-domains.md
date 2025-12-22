@@ -6,7 +6,9 @@ sidebar_position: 9
 
 A **PolicyDomain** is a self-contained bundle that defines all policy-related artifacts for a specific domain or service.
 
+<div class="centered-image">
 ![PolicyDomain Model](./assets/policydomain.svg)
+</div>
 
 ## Overview
 
@@ -305,37 +307,9 @@ PolicyDomains are fundamentally GitOps-friendly because they are plain files—Y
 
 Because PolicyDomains are just files, they integrate with any GitOps-oriented deployment flow:
 
-```mermaid
-flowchart TB
-    subgraph Git["Git Repository"]
-        Domain["PolicyDomain<br/>YAML"]
-    end
-
-    subgraph Push["Push-Based (CI/CD)"]
-        CI["CI Pipeline"]
-        Push1["kubectl apply"]
-    end
-
-    subgraph Pull["Pull-Based (GitOps Operators)"]
-        Flux["Flux / ArgoCD"]
-    end
-
-    subgraph K8s["Kubernetes"]
-        ConfigMap["ConfigMap<br/>(OSS)"]
-        CRD["PolicyDomain CRD<br/>(Premium)"]
-    end
-
-    Git --> CI --> Push1 --> ConfigMap
-    Git --> CI --> Push1 --> CRD
-    Git --> Flux --> ConfigMap
-    Git --> Flux --> CRD
-
-    style Domain fill:#1a145f,stroke:#03a3ed,color:#fff
-    style CI fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Flux fill:#03a3ed,stroke:#0282bd,color:#fff
-    style ConfigMap fill:#38a169,stroke:#2f855a,color:#fff
-    style CRD fill:#38a169,stroke:#2f855a,color:#fff
-```
+<div class="centered-image">
+![GitOps](./assets/gitops.svg)
+</div>
 
 | Pattern | Description |
 |---------|-------------|
