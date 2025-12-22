@@ -187,7 +187,7 @@ The PolicyEngine supports two document formats that serve different purposes in 
 | **Rego code** | Inline `rego` field only | Either `rego` (inline) or `rego_filename` (external file) |
 | **Primary use** | Deployment, runtime evaluation | Development, source control |
 | **Kubernetes Operator** | Supported (Premium) | Must convert with `mpe build` first |
-| **OSS tooling** | Fully supported | Fully supported |
+| **Community tooling** | Fully supported | Fully supported |
 
 ### PolicyDomainReference Format
 
@@ -245,7 +245,7 @@ The build process:
 
 ### Which Format Should I Use?
 
-**OSS Users**: All tooling (`mpe test`, `mpe serve`, Go API) accepts both formats interchangeably. Choose based on your preference:
+**Community Users**: All tooling (`mpe test`, `mpe serve`, Go API) accepts both formats interchangeably. Choose based on your preference:
 - Use `PolicyDomainReference` if you prefer separate `.rego` files
 - Use `PolicyDomain` if you prefer everything in one file
 
@@ -318,9 +318,9 @@ Because PolicyDomains are just files, they integrate with any GitOps-oriented de
 
 ### Delivery by Edition
 
-**ConfigMap-based delivery** <FeatureChip variant="oss" label="Open Source" />
+**ConfigMap-based delivery** <FeatureChip variant="community" label="Community" />
 
-In the open source edition, PolicyDomains are typically delivered as Kubernetes ConfigMaps. Configure your PDP pods (for HTTP API integration) or application pods (for embedded Go) to trigger a rolling restart when the ConfigMap changes:
+In the Community Edition, PolicyDomains are typically delivered as Kubernetes ConfigMaps. Configure your PDP pods (for HTTP API integration) or application pods (for embedded Go) to trigger a rolling restart when the ConfigMap changes:
 
 ```yaml
 apiVersion: v1

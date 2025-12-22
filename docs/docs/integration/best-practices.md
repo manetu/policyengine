@@ -39,7 +39,7 @@ roles:
 Monitor the AccessRecord stream for denied requests. These denials are your evidence of what additional access may be needed:
 
 ```bash
-# Find denied requests (OSS example)
+# Find denied requests (Community example)
 mpe serve ... 2>&1 | jq 'select(.decision == "DENY")'
 
 # Analyze denial patterns

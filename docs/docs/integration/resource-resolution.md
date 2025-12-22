@@ -293,7 +293,7 @@ porc := map[string]interface{}{
 
 ## Configuring Selector Resolution
 
-For the OSS edition, configure resource resolution in the PolicyDomain's `resources` section (v1alpha4+):
+For the Community Edition, configure resource resolution in the PolicyDomain's `resources` section (v1alpha4+):
 
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4

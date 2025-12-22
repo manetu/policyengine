@@ -90,7 +90,7 @@ spec:
 ```
 
 :::tip Premium Feature: Kubernetes Operator
-The open source edition requires manual deployment and configuration of decision points. The **Premium Edition** includes a Kubernetes Operator that automatically configures policy decision points as sidecars. This approach offers significant advantages:
+The Community Edition requires manual deployment and configuration of decision points. The **Premium Edition** includes a Kubernetes Operator that automatically configures policy decision points as sidecars. This approach offers significant advantages:
 
 - **Automatic scaling** — Decision points scale naturally with your application pods, eliminating the need to manually tune PDP capacity
 - **Lower latency** — Sidecar deployment places the decision point adjacent to the PEP, minimizing network hops
@@ -166,7 +166,7 @@ export MPE_LOG_LEVEL=.:info
 ```
 
 :::tip Premium Feature: Advanced Observability
-The open source edition provides basic metrics and logging. The **Premium Edition** adds enterprise-grade observability including:
+The Community Edition provides basic metrics and logging. The **Premium Edition** adds enterprise-grade observability including:
 - **Audit storage and indexing** — Searchable history of all policy decisions
 - **Audit history query** — Query past decisions by principal, resource, time range, and outcome
 - **Decision replay with visual code coverage** — Replay historical decisions and visualize which policy paths were evaluated

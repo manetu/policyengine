@@ -68,7 +68,7 @@ The PolicyEngine supports two related document kinds:
 
 - **For deployment**: Use `PolicyDomain` with inline `rego`. Convert from `PolicyDomainReference` using [`mpe build`](/reference/cli/build).
 
-- **OSS users**: All tooling (`mpe test`, `mpe serve`, Go API) accepts both formats. Choose based on your workflow preference.
+- **Community users**: All tooling (`mpe test`, `mpe serve`, Go API) accepts both formats. Choose based on your workflow preference.
 
 - **Premium users**: The Kubernetes Operator requires `PolicyDomain` format. Develop in either format, but run `mpe build` before deployment.
 
