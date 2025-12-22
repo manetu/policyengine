@@ -14,7 +14,7 @@ sidebar_position: 3
 
 Rather than relying on a single policy to make all access decisions, the PolicyEngine evaluates policies across four distinct phases:
 
-1. **Operation** - Request-level routing and control (public endpoints, JWT validation, bypass rules) - see [Operations](/concepts/operations)
+1. **Operation** - Coarse-grained request control (public endpoints, JWT validation) - see [Operations](/concepts/operations)
 2. **Identity** - Who the principal is and what they can do - see [Roles](/concepts/roles) and [Groups](/concepts/groups)
 3. **Resource** - What can be done to the target resource - see [Resources](/concepts/resources) and [Resource Groups](/concepts/resource-groups)
 4. **Scope** - Access-method constraints (tokens, federation, etc.) - see [Scopes](/concepts/scopes)
@@ -45,95 +45,6 @@ The PolicyEngine processes all phases in **parallel** for maximum performance. H
 If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, it defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
 :::
 
-## Operation Phase: Tri-Level Policies {#tri-level}
-
-The operation phase uses **tri-level policy output** (negative, zero, positive) instead of simple boolean GRANT/DENY. A negative outcome is equivalent to DENY, and a zero outcome is equivalent to GRANT in other phases. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
-
-:::tip Terminology
-This feature is sometimes called "tri-state" in conversation, referring to the three possible outcomes. The documentation uses "tri-level" to emphasize that the actual output is an integer with magnitude, not just three discrete states—the specific value can serve as a reason code for auditing.
-:::
-
-### Why Tri-Level?
-
-Consider a public health-check endpoint that requires no authentication:
-
-- The caller has no JWT (by design—it's a public endpoint)
-- Without a JWT, there are no roles or groups
-- The identity phase would vote DENY (no roles = no GRANT)
-- The request fails, even though it should succeed
-
-The operation phase's ability to return a **positive value** solves this by granting access immediately, bypassing the identity, resource, and scope phases entirely.
-
-### Tri-Level Values
-
-Operation phase policies return an integer instead of a boolean:
-
-| Value | Meaning | Effect |
-|-------|---------|--------|
-| Negative (e.g., `-1`) | **DENY** | Same as any phase voting DENY |
-| Zero (`0`) | **GRANT** | Same as any phase voting GRANT; other phases still evaluated |
-| Positive (e.g., `1`) | **GRANT Override** | Immediately grant; **skip all other phases** |
-
-:::info Note
-The specific integer value can serve as a reason code for auditing purposes. For example, `-1` vs `-2` could indicate different denial reasons, and `1` vs `2` could indicate different bypass scenarios. The sign determines the behavior; the magnitude provides additional context.
-:::
-
-### Example: Public Endpoints
-
-```rego
-package authz
-
-default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
-
-# Public endpoints - GRANT Override, skip identity/resource phases
-allow = 1 {
-    input.operation in public_operations
-}
-
-# Deny requests without JWT for non-public operations
-allow = -1 {
-    input.principal == {}
-    not input.operation in public_operations
-}
-
-public_operations := {
-    "public:health:check",
-    "public:docs:read",
-    "public:metrics:scrape"
-}
-```
-
-### When to Use Each Value
-
-| Scenario | Return Value | Rationale |
-|----------|--------------|-----------|
-| Normal authenticated request | `0` | Grant from operation phase; let identity/resource phases also evaluate |
-| Public endpoint (no auth required) | Positive (`1`) | **GRANT Override** — bypass identity phase which would fail |
-| Internal service bypass | Positive (`2`) | **GRANT Override** — trusted service, skip detailed checks |
-| Missing JWT on protected endpoint | Negative (`-1`) | Deny (same as any phase denying) |
-| Known bad actor (IP blocklist) | Negative (`-2`) | Deny with different reason code |
-
-### Contrast with Other Phases
-
-Other phases (identity, resource, scope) use boolean policies:
-
-```rego
-# Identity/Resource/Scope phases - boolean output
-package authz
-default allow = false
-allow { ... }  # true or false
-```
-
-Only operation phase policies use integer output:
-
-```rego
-# Operation phase - tri-level integer output (not boolean)
-package authz
-default allow = 0   # GRANT (other phases still evaluated)
-allow = 1 { ... }   # GRANT Override (bypass other phases)
-allow = -1 { ... }  # DENY
-```
-
 ## Multiple Policies Within a Phase
 
 Some phases, particularly **identity** and **scope**, can have multiple policies associated with a single request. Within a phase:
@@ -152,6 +63,14 @@ Identity Phase:
 
 Identity Phase Result: GRANT
 ```
+
+## GRANT Override
+
+The operation phase has a unique capability: it can issue a **GRANT Override** that immediately grants access, bypassing the identity, resource, and scope phases entirely.
+
+This solves an important problem for public endpoints. Consider a health-check endpoint that requires no authentication—without a JWT, there are no roles, so the identity phase would vote DENY. GRANT Override allows the operation phase to short-circuit the evaluation and grant access without requiring the other phases to participate.
+
+For implementation details on how to express GRANT Override in operation phase policies, see [Tri-Level Policies](/concepts/policies#tri-level).
 
 ## Policy Evaluation Failures
 
@@ -201,8 +120,8 @@ resource:
 
 The PolicyEngine evaluates:
 
-1. **Operation Phase** (1 policy, tri-level)
-    - Returns `0` (GRANT) — authenticated request, proceed normally
+1. **Operation Phase** (1 policy)
+    - Policy votes GRANT — authenticated request, proceed normally
     - Phase result: **GRANT**
 
 2. **Identity Phase** (2 policies, one per role)
@@ -272,15 +191,13 @@ The phase-based structure provides clear visibility into why access was granted 
 
 1. **Ensure all mandatory phases are defined**: Missing operation, identity, or resource policies will result in DENY.
 
-2. **Use tri-level output correctly in operation phase**: Return `0` (GRANT) for normal requests, positive values (GRANT Override) only for truly public endpoints, and negative values (DENY) for early rejection of invalid requests.
+2. **Handle scope intentionally**: Decide whether your application uses scopes (for PATs, federation, etc.). If not, omit them from the PORC for implicit GRANT.
 
-3. **Handle scope intentionally**: Decide whether your application uses scopes (for PATs, federation, etc.). If not, omit them from the PORC for implicit GRANT.
+3. **Monitor for evaluation failures**: Use audit logs to detect policies that fail to evaluate, as these may indicate configuration or infrastructure issues.
 
-4. **Monitor for evaluation failures**: Use audit logs to detect policies that fail to evaluate, as these may indicate configuration or infrastructure issues.
+4. **Test each phase independently**: Verify that each phase grants access appropriately before combining them.
 
-5. **Test each phase independently**: Verify that each phase grants access appropriately before combining them.
-
-6. **Document phase ownership**: Clearly assign responsibility for each phase to avoid gaps in policy coverage.
+5. **Document phase ownership**: Clearly assign responsibility for each phase to avoid gaps in policy coverage.
 
 ## Related Concepts
 
