@@ -150,7 +150,20 @@ flowchart TB
 
 ### Least Privilege
 
-The PolicyEngine defaults to **DENY**. Access must be explicitly granted by policies.
+The PolicyEngine is designed from the ground up to support the **Principle of Least Privilege**—granting principals only the minimum access necessary to perform their functions.
+
+**Default DENY**: The PolicyEngine defaults to DENY. Access must be explicitly granted by policies. This means new principals start with zero access, and you consciously decide what to allow.
+
+**Start Strict, Iterate Based on Evidence**: The recommended approach is to begin with restrictive policies and then iteratively expand access based on observed needs. The PolicyEngine's comprehensive [audit capabilities](/concepts/audit) make this practical:
+
+1. **Deploy strict policies** that may initially be more restrictive than necessary
+2. **Observe access patterns** through AccessRecords to understand actual usage
+3. **Identify legitimate access gaps** where users are being blocked from valid operations
+4. **Refine policies incrementally** using [policy replay](/concepts/audit#policy-replay) to validate changes before deployment
+
+This iterative approach transforms access control from guesswork into an evidence-based practice. Rather than granting broad permissions "just in case," you grant specific permissions based on demonstrated need.
+
+**Auditability Enables Least Privilege**: Traditional systems often fail at least privilege because it's too difficult to understand what access is actually needed. The PolicyEngine's observable architecture—where every decision is recorded with full context—makes it practical to start strict and refine based on real data.
 
 ### Policy Conjunction
 

@@ -222,7 +222,7 @@ allow {
 
 ### 1. Follow Least Privilege
 
-Assign the minimum roles necessary for each principal to perform their function:
+Assign the minimum roles necessary for each principal to perform their function. Start with restrictive roles and expand based on observed needs using [AccessRecords](/concepts/audit):
 
 ```yaml
 # Good: Specific role for specific function
@@ -233,6 +233,15 @@ Assign the minimum roles necessary for each principal to perform their function:
 - mrn: "mrn:iam:role:super-user"
   policy: "mrn:iam:policy:allow-all"
 ```
+
+The PolicyEngine's observable architecture makes least privilege practical:
+
+1. **Start strict**: Assign minimal roles when onboarding principals
+2. **Observe denials**: Monitor AccessRecords for legitimate access being blocked
+3. **Expand precisely**: Add only the specific roles demonstrated necessary
+4. **Validate with replay**: Use [policy replay](/concepts/audit#policy-replay) to preview changes before deployment
+
+See [Iterative Policy Refinement](/concepts/audit#iterative-policy-refinement) for a detailed workflow.
 
 ### 2. Use Descriptive Names
 
