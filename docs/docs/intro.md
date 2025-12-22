@@ -71,6 +71,17 @@ Interested in Premium features? Contact [Manetu](https://manetu.com) to learn mo
 
 ## Key Features
 
+<SectionHeader icon="security" level={3}>Least Privilege by Design</SectionHeader>
+
+The PolicyEngine is architected to make the [Principle of Least Privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) practical at scale:
+
+- <IconText icon="block">**Default DENY**</IconText>: Access is denied unless explicitly granted—new principals start with zero permissions
+- <IconText icon="visibility">**Observable Decisions**</IconText>: Every authorization decision generates an [AccessRecord](/concepts/audit) with full context
+- <IconText icon="replay">**Policy Replay**</IconText>: Test policy changes against real traffic before deploying
+- <IconText icon="trending">**Evidence-Based Refinement**</IconText>: Start with strict policies and iteratively expand access based on observed needs, not guesswork
+
+This observable architecture transforms access control from a guessing game into an evidence-based practice. Rather than granting broad permissions "just in case," you can safely start restrictive and expand access precisely where it's demonstrated necessary. See [Audit & Access Records](/concepts/audit) for details on the iterative refinement workflow.
+
 <SectionHeader icon="integration" level={3}>Open Policy Agent Integration</SectionHeader>
 
 The Manetu PolicyEngine is built on [Open Policy Agent (OPA)](https://www.openpolicyagent.org/), an open-source engine for executing policy statements. You can use the rich ecosystem for designing and debugging policy expressions in the [Rego](https://www.openpolicyagent.org/docs/latest/policy-language/) language to precisely control access to your resources.

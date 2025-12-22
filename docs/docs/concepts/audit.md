@@ -21,6 +21,19 @@ In distributed systems, access control decisions happen across many services, ma
 
 The AccessRecord stream solves these challenges by providing a consistent, structured record of every decision.
 
+### Enabling the Principle of Least Privilege
+
+The PolicyEngine's comprehensive audit capabilities are what make the **Principle of Least Privilege** practical at scale. Traditional systems often fail at least privilege because it's too difficult to know what access is actually needed—so administrators grant broad permissions "just in case."
+
+With AccessRecords, you can take a different approach:
+
+1. **Start with strict policies** that grant minimal access
+2. **Observe denials** to understand what access is actually being requested
+3. **Identify patterns** that reveal legitimate access needs
+4. **Refine policies incrementally** with confidence, knowing exactly what will change
+
+This transforms access control from guesswork into an evidence-based practice. See [Iterative Policy Refinement](#iterative-policy-refinement) for a detailed workflow.
+
 ## The AccessRecord
 
 Just as [PORC](/concepts/porc) normalizes authorization **inputs**, the AccessRecord normalizes authorization **outputs**. This symmetry allows you to reason about access control decisions consistently, regardless of where they originated in your system.
@@ -148,6 +161,75 @@ Because AccessRecords include the complete PORC, you can replay decisions agains
 4. Identify any changes in behavior before deploying
 
 This enables safe policy updates by understanding the impact before deployment.
+
+### Iterative Policy Refinement
+
+The combination of comprehensive audit logging and policy replay creates a powerful workflow for implementing the **Principle of Least Privilege**:
+
+#### The Recommended Workflow
+
+**Phase 1: Deploy Strict Policies**
+
+Start with policies that are intentionally restrictive. It's easier to safely expand access than to identify and close security gaps:
+
+```yaml
+# Start with deny-by-default policies that only grant essential access
+roles:
+  - mrn: "mrn:iam:role:new-service"
+    name: new-service
+    policy: "mrn:iam:policy:minimal-access"  # Only the operations you're certain are needed
+```
+
+**Phase 2: Observe Access Patterns**
+
+Monitor AccessRecords to understand actual usage. Look for denied requests that represent legitimate access needs:
+
+```bash
+# Find denied requests for analysis (OSS example)
+mpe serve ... 2>&1 | jq 'select(.decision == "DENY")' > denied-requests.jsonl
+
+# Analyze denial patterns by operation
+cat denied-requests.jsonl | jq -r '.operation' | sort | uniq -c | sort -rn
+```
+
+**Phase 3: Validate Policy Changes**
+
+Before expanding access, use policy replay to understand the impact of proposed changes:
+
+1. Collect a sample of AccessRecords (including both grants and denials)
+2. Create a candidate policy with expanded permissions
+3. Replay the collected PORCs against the candidate policy
+4. Review which denials would become grants—are these all legitimate?
+
+**Phase 4: Deploy and Monitor**
+
+After validating that the expanded policy only grants intended access:
+
+1. Deploy the refined policy
+2. Continue monitoring for new denial patterns
+3. Iterate as needed
+
+#### Why This Works
+
+This approach is effective because:
+
+- **Evidence-based decisions**: You expand access based on observed needs, not speculation
+- **Minimal attack surface**: You never grant more access than demonstrated necessary
+- **Safe iteration**: Policy replay lets you preview changes before they affect production
+- **Continuous improvement**: The workflow supports ongoing refinement as needs evolve
+
+#### Example: Onboarding a New Service
+
+When onboarding a new service, rather than guessing what permissions it needs:
+
+1. **Deploy with minimal access**: The service can authenticate but do very little
+2. **Run integration tests**: Observe which operations are denied
+3. **Analyze denials**: Determine which represent legitimate needs vs. unnecessary operations
+4. **Expand precisely**: Grant only the specific operations that were legitimately denied
+5. **Validate with replay**: Confirm the new policy would have allowed the test cases
+6. **Deploy and monitor**: Watch for any additional denials in production
+
+This evidence-based approach results in tightly scoped permissions that precisely match actual needs.
 
 ### Analytics
 
