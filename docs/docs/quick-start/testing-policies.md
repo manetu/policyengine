@@ -20,7 +20,7 @@ Before diving into the commands, it helps to understand what each command output
 
 ### Decision and Envoy Output: AccessRecord
 
-The `mpe test decision` and `mpe test envoy` commands output an **AccessRecord**—a JSON document that captures everything about the policy evaluation. The most important field is `decision`, which will be either `"GRANT"` or `"DENY"`.
+The `mpe test decision` and `mpe test envoy` commands output an [**AccessRecord**](/concepts/audit#the-accessrecord)—a JSON document that captures everything about the policy evaluation. The most important field is `decision`, which will be either `"GRANT"` or `"DENY"`.
 
 ```json
 {

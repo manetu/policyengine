@@ -119,6 +119,10 @@ table tr:has(.table-section) {
   color: rgba(255, 255, 255, 0.6);
 }
 
+.centered-image {
+    text-align: center
+}
+
 [data-theme='dark'] .footer {
   background-color: var(--ifm-color-emphasis-200);
 }

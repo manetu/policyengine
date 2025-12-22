@@ -8,15 +8,7 @@ The `mpe` CLI provides tools for developing, testing, and serving policies.
 
 ## Installation
 
-```bash
-# From source
-git clone https://github.com/manetu/policyengine.git
-cd policyengine
-make build
-
-# Using go install
-go install github.com/manetu/policyengine/cmd/mpe@latest
-```
+See [Installing the CLI](/getting-started/installation#installing-the-cli) within the Getting Started guide.
 
 ## Global Options
 

@@ -6,6 +6,10 @@ sidebar_position: 15
 
 Every policy decision generates a normalized **AccessRecord** that captures the complete evaluation context. This audit trail is fundamental to understanding, debugging, and analyzing access control behavior across your system.
 
+<div class="centered-image">
+![PBAC Mindmap](./assets/audit.svg)
+</div>
+
 ## Why Audit Matters
 
 In distributed systems, access control decisions happen across many services, making it difficult to answer questions like:
