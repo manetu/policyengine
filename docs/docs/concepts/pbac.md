@@ -68,7 +68,7 @@ The **Policy Administration Point** manages access control policies, including t
 
 In the Manetu PolicyEngine, policies are defined using PolicyDomain YAML files and the `mpe` CLI for building and validation. The deployment model differs by offering:
 
-**OSS Offering**: Policies are deployed directly using the `mpe` CLI or Go API.
+**Community Edition**: Policies are deployed directly using the `mpe` CLI or Go API.
 
 **Premium Offering**: A centralized PAP service orchestrates policy configuration across distributed PDPs, including stand-alone PolicyEngine services and operator-managed sidecars in Kubernetes environments.
 

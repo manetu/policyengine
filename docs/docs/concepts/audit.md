@@ -67,12 +67,12 @@ The fingerprint is particularly valuable—it uniquely identifies the exact poli
 
 | Feature | Availability | Description |
 |---------|--------------|-------------|
-| JSON to stdout | <FeatureChip variant="oss" /> | Stream AccessRecords as JSON for custom processing |
+| JSON to stdout | <FeatureChip variant="community" /> | Stream AccessRecords as JSON for custom processing |
 | ElasticSearch Integration | <FeatureChip variant="premium" /> | Durable storage with indexing, dashboards, and alerting |
 
-### JSON Output <FeatureChip variant="oss" />
+### JSON Output <FeatureChip variant="community" />
 
-In the open-source PolicyEngine, AccessRecords are emitted as JSON to stdout:
+In the Community PolicyEngine, AccessRecords are emitted as JSON to stdout:
 
 ```json
 {
@@ -137,7 +137,7 @@ AccessRecords provide the evidence trail required for compliance audits:
 When users report access problems, AccessRecords reveal exactly what happened:
 
 ```bash
-# Find recent denials for a specific user (OSS example)
+# Find recent denials for a specific user (Community example)
 mpe serve ... 2>&1 | jq 'select(.principal.subject == "alice@example.com" and .decision == "DENY")'
 ```
 
@@ -185,7 +185,7 @@ roles:
 Monitor AccessRecords to understand actual usage. Look for denied requests that represent legitimate access needs:
 
 ```bash
-# Find denied requests for analysis (OSS example)
+# Find denied requests for analysis (Community example)
 mpe serve ... 2>&1 | jq 'select(.decision == "DENY")' > denied-requests.jsonl
 
 # Analyze denial patterns by operation

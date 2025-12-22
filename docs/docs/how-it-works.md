@@ -136,7 +136,7 @@ Because policies live outside your application code, you can update access contr
 </div>
 
 :::tip Premium Feature: Dynamic Updates
-In the open source edition, the PDP loads policies at startup. The **Premium Edition** adds dynamic policy rollout with a sophisticated cache-coherency algorithm—policies are updated across all PDPs in real-time without any restarts, keeping policy management centralized while decisions scale out to the edge of your network.
+In the Community Edition, the PDP loads policies at startup. The **Premium Edition** adds dynamic policy rollout with a sophisticated cache-coherency algorithm—policies are updated across all PDPs in real-time without any restarts, keeping policy management centralized while decisions scale out to the edge of your network.
 :::
 
 ### Flexible Deployment Patterns

@@ -58,14 +58,14 @@ The PolicyEngine provides two integration options:
 
 | Method                                                                                                                                                      | Best For |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> <FeatureChip variant="oss" label="OSS"/> <FeatureChip variant="premium" label="Premium"/> | Any language — Python, Java, TypeScript, Go, and more |
-| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="oss" label="OSS Only"/>                               | Go applications needing lowest latency |
+| <IconText icon="api">[HTTP API](/integration/http-api)</IconText> <FeatureChip variant="community" label="Community"/> <FeatureChip variant="premium" label="Premium"/> | Any language — Python, Java, TypeScript, Go, and more |
+| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="community" label="Community Only"/>                               | Go applications needing lowest latency |
 
 #### Considerations for Future Growth
 
 When choosing an integration method, consider your long-term needs:
 
-| Consideration              | HTTP API                                                                    | Embedded Go Library <FeatureChip variant="oss" label="OSS Only"/> |
+| Consideration              | HTTP API                                                                    | Embedded Go Library <FeatureChip variant="community" label="Community Only"/> |
 |----------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------|
 | Language support           | Any language                                                                | Go only                                                           |
 | Latency                    | Low (network call)                                                          | Lowest (in-process)                                               |

@@ -17,17 +17,17 @@ The Manetu PolicyEngine (MPE) is a programming language agnostic access-control 
 
 As a core component of the Manetu governance platform, MPE provides the policy evaluation engine that enables fine-grained, context-aware access control across data, APIs, and services. It features a high-performance, flexible architecture with comprehensive tooling for policy development and testing.
 
-## Open Source and Premium Editions
+## Community and Premium Editions
 
 The Manetu PolicyEngine is available in two editions:
 
-- <FeatureChip variant="oss" label="Open-source Edition" size="medium"/> — (this project) A fully functional policy engine that you can embed in your applications or run as a standalone service. It provides everything you need to author, test, and enforce policies.
+- <FeatureChip variant="community" label="Community Edition" size="medium"/> — (this project) A fully functional policy engine that you can embed in your applications or run as a standalone service. It provides everything you need to author, test, and enforce policies.
 
-- <FeatureChip variant="premium" label="Premium Edition" size="medium"/> — Commercial enhancements available through a licensing arrangement with Manetu. Premium builds on the open source foundation to add enterprise-grade capabilities for organizations with advanced governance, observability, and operational requirements.
+- <FeatureChip variant="premium" label="Premium Edition" size="medium"/> — Commercial enhancements available through a licensing arrangement with Manetu. Premium builds on the Community foundation to add enterprise-grade capabilities for organizations with advanced governance, observability, and operational requirements.
 
 ### Feature Comparison
 
-| Feature                                                                                   | <FeatureChip variant="oss" label="Open Source" /> | <FeatureChip variant="premium" label="Premium" /> |
+| Feature                                                                                   | <FeatureChip variant="community" label="Community" /> | <FeatureChip variant="premium" label="Premium" /> |
 |-------------------------------------------------------------------------------------------|:-------------------------------------------------:|:-------------------------------------------------:|
 | <TableSection><IconText icon="settings">**Core Policy Engine**</IconText></TableSection>  |                                                   |                                                   |
 | OPA/Rego policy evaluation                                                                |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
@@ -58,7 +58,7 @@ The Manetu PolicyEngine is available in two editions:
 | External resource resolution integration (Databases, APIs, etc)                           |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
 
 :::info
-The Premium Edition requires integration via the HTTP interface to enable enterprise features such as centralized audit and policy coordination. The embeddable Go library is available only in the open source edition.
+The Premium Edition requires integration via the HTTP interface to enable enterprise features such as centralized audit and policy coordination. The embeddable Go library is available only in the Community Edition.
 :::
 
 Interested in Premium features? Contact [Manetu](https://manetu.com) to learn more.
