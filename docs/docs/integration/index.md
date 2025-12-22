@@ -10,24 +10,9 @@ This section explains how to integrate the Manetu PolicyEngine into your applica
 
 The Manetu PolicyEngine serves as a **Policy Decision Point (PDP)**—it evaluates policies and returns access control decisions. To integrate the PolicyEngine, you create one or more **Policy Enforcement Points (PEPs)** in your application that call the PDP.
 
-```mermaid
-flowchart TB
-    subgraph APP["Your Application"]
-        PEP1["PEP 1<br/>(API)"]
-        PEP2["PEP 2<br/>(Data)"]
-        PEP3["PEP 3<br/>(Admin)"]
-    end
-
-    PEP1 & PEP2 & PEP3 -->|PORC| PDP["PolicyEngine<br/>(PDP)"]
-    PDP --> Decision["GRANT / DENY"]
-
-    style APP fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style PEP1 fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PEP2 fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PEP3 fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PDP fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Decision fill:#38a169,stroke:#2f855a,color:#fff
-```
+<div class="centered-image">
+![PORC Expression](../assets/pep.svg)
+</div>
 
 ## Key Components
 

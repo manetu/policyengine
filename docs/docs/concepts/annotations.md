@@ -8,6 +8,10 @@ sidebar_position: 12
 
 ## Overview
 
+<div class="centered-image">
+![Annotations](./assets/annotations.svg)
+</div> 
+
 Annotations provide flexible metadata that:
 
 - Can be attached to roles, groups, scopes, resource groups, resources, and principals
@@ -87,16 +91,9 @@ Annotations follow inheritance hierarchies where conflicts are resolved by prece
 
 For identity-related annotations (available in `input.principal.mannotations`), the inheritance order from **least to most dominant** is:
 
-```
-Roles → Groups → Scopes → Principal Claims
-```
-
-| Precedence | Source | Description |
-|------------|--------|-------------|
-| 1 (lowest) | Roles | Annotations defined on roles |
-| 2 | Groups | Annotations defined on groups |
-| 3 | Scopes | Annotations defined on scopes |
-| 4 (highest) | Principal | Annotations in JWT claims (`mannotations`) |
+<div class="centered-image">
+![Identity Inheritance](./assets/annotation-identity-inheritance.svg)
+</div>
 
 **Example**: If the same annotation key `department` is defined on both a Role and a Group that apply to a request, the Group's value takes precedence. If also defined in the principal's JWT claims, that value wins.
 
@@ -145,14 +142,9 @@ principal:
 
 For resource-related annotations (available in `input.resource.annotations`), the inheritance order from **least to most dominant** is:
 
-```
-Resource Group → Resource
-```
-
-| Precedence | Source | Description |
-|------------|--------|-------------|
-| 1 (lowest) | Resource Group | Annotations defined on the resource group |
-| 2 (highest) | Resource | Annotations on the specific resource |
+<div class="centered-image">
+![Resource Inheritance](./assets/annotation-resource-inheritance.svg)
+</div>
 
 **Example**: If a resource belongs to a resource group, annotations from the resource group are inherited, but any annotations defined directly on the resource take precedence.
 

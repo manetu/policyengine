@@ -6,14 +6,9 @@ sidebar_position: 4
 
 A **PORC Expression** is the normalized input format for policy evaluation. PORC stands for:
 
-| Component | What It Contains | Example |
-|-----------|-----------------|---------|
-| **P**rincipal | Who is making the request | User identity, roles, groups |
-| **O**peration | What action they want to perform | `api:documents:read` |
-| **R**esource | What they want to access | Document ID, owner, classification |
-| **C**ontext | Additional circumstances | Timestamp, IP address, request metadata |
-
+<div class="centered-image">
 ![PORC Expression](./assets/porc.svg)
+</div> 
 
 ## Overview
 
@@ -242,6 +237,10 @@ weekend_restricted {
 
 The PORC expression drives the [Policy Conjunction](/concepts/policy-conjunction) evaluation:
 
+<div class="centered-image">
+![PORC Mapping](./assets/porc-mapping.svg)
+</div> 
+
 | PORC Component | Used By |
 |----------------|---------|
 | `operation` | Phase 1 - Routes to operation policy |
@@ -249,31 +248,6 @@ The PORC expression drives the [Policy Conjunction](/concepts/policy-conjunction
 | `principal.mgroups` | Phase 2 - Expands to additional roles |
 | `resource.group` | Phase 3 - Selects resource policy |
 | `principal.scopes` | Phase 4 - Selects scope policies |
-
-```mermaid
-flowchart LR
-    PORC["PORC<br/>Expression"]
-
-    PORC --> Op["operation"]
-    PORC --> Roles["principal.mroles<br/>principal.mgroups"]
-    PORC --> ResGrp["resource.group"]
-    PORC --> Scopes["principal.scopes"]
-
-    Op --> Phase1["Phase 1:<br/>Operation Policy"]
-    Roles --> Phase2["Phase 2:<br/>Identity Policies"]
-    ResGrp --> Phase3["Phase 3:<br/>Resource Policy"]
-    Scopes --> Phase4["Phase 4:<br/>Scope Policies"]
-
-    style PORC fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Op fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Roles fill:#1a145f,stroke:#03a3ed,color:#fff
-    style ResGrp fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Scopes fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Phase1 fill:#38a169,stroke:#2f855a,color:#fff
-    style Phase2 fill:#38a169,stroke:#2f855a,color:#fff
-    style Phase3 fill:#38a169,stroke:#2f855a,color:#fff
-    style Phase4 fill:#38a169,stroke:#2f855a,color:#fff
-```
 
 ## Complete PORC Example
 
