@@ -75,12 +75,12 @@ spec:
 ```
 
 :::info[Operation Policies Are Different]
-Operation policies use [tri-level](/concepts/policy-conjunction#tri-level) integer output instead of simple true/false:
+Operation policies use [tri-level](/concepts/policies#tri-level) integer output instead of simple true/false:
 - **Negative** (e.g., `-1`): DENY
 - **Zero** (`0`): GRANT (other phases still evaluated)
 - **Positive** (e.g., `1`): GRANT Override (skip other phases)
 
-Using `default allow = 0` keeps this example simple by deferring all decisions to the identity and resource phases. In practice, operation policies often perform checks like verifying authentication (e.g., `input.principal != {}`). See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics and real-world patterns.
+Using `default allow = 0` keeps this example simple by deferring all decisions to the identity and resource phases. In practice, operation policies often perform checks like verifying authentication (e.g., `input.principal != {}`). See [Tri-Level Policies](/concepts/policies#tri-level) for complete semantics and real-world patterns.
 :::
 
 :::tip[YAML Anchors]
@@ -291,7 +291,7 @@ This creates a `PolicyDomain` with the Rego content inlined.
 Once you're comfortable with the basics, explore these advanced features:
 
 - **[Policy Libraries](/concepts/policy-libraries)** — Extract reusable Rego code into shared libraries that multiple policies can import
-- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the evaluation phases work together, including [tri-level policies](/concepts/policy-conjunction#tri-level) for early grant/deny decisions
+- **[Policy Conjunction](/concepts/policy-conjunction)** — Understand how the evaluation phases work together, including [tri-level policies](/concepts/policies#tri-level) for early grant/deny decisions
 - **[Resource Routing](/concepts/resources#resource-routing-v1alpha4)** — Route resources to groups based on MRN patterns
 - **[Scopes](/concepts/scopes)** — Add access-method constraints for scenarios like API keys vs. interactive sessions
 
