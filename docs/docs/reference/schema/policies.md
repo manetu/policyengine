@@ -71,7 +71,7 @@ rego: |
   allow = 1 { is_public_operation }     # GRANT Override
 ```
 
-See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics and usage guidance.
+See [Tri-Level Policies](/concepts/policies#tri-level) for complete semantics and usage guidance.
 
 ## Examples
 

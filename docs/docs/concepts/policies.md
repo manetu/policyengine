@@ -56,7 +56,7 @@ is_public_operation {
 }
 ```
 
-The GRANT Override (positive value) is essential for public endpoints that have no JWT—without it, the identity phase would always deny them. See [Tri-Level Policies](/concepts/policy-conjunction#tri-level) for complete semantics, return value meanings, and usage guidance.
+The GRANT Override (positive value) is essential for public endpoints that have no JWT—without it, the identity phase would always deny them. See [Tri-Level Policies](#tri-level) below for complete semantics, return value meanings, and usage guidance.
 
 ## Policy Inputs
 
@@ -184,7 +184,7 @@ allow {
 
 While all four phases (operation, identity, resource, scope) evaluate Rego policies drawn from the same pool of Policy entities, the **goals of each phase are different**. Understanding these differences helps you write cleaner, more maintainable policies.
 
-### Operation Phase (Phase 1): Coarse-Grained Request Control
+### Operation Phase (Phase 1): Tri-Level Policies {#tri-level}
 
 Operation phase policies focus on **request-level requirements** that apply regardless of specific resources or detailed identity attributes:
 
@@ -193,21 +193,106 @@ Operation phase policies focus on **request-level requirements** that apply rega
 - Implementing IP allowlists/blocklists
 - Rejecting requests that fail basic sanity checks
 
+Unlike other phases that use boolean output, operation phase policies use **tri-level integer output** (negative, zero, positive). A negative outcome is equivalent to DENY, and a zero outcome is equivalent to GRANT. The **positive outcome is unique**: it acts as a "GRANT Override" that bypasses all other phases.
+
+:::tip Terminology
+This feature is sometimes called "tri-state" in conversation, referring to the three possible outcomes. The documentation uses "tri-level" to emphasize that the actual output is an integer with magnitude, not just three discrete states—the specific value can serve as a reason code for auditing.
+:::
+
+#### Why Tri-Level?
+
+Consider a public health-check endpoint that requires no authentication:
+
+- The caller has no JWT (by design—it's a public endpoint)
+- Without a JWT, there are no roles or groups
+- The identity phase would vote DENY (no roles = no GRANT)
+- The request fails, even though it should succeed
+
+The operation phase's ability to return a **positive value** solves this by granting access immediately, bypassing the identity, resource, and scope phases entirely.
+
+#### Tri-Level Values
+
+Operation phase policies return an integer instead of a boolean:
+
+| Value | Meaning | Effect |
+|-------|---------|--------|
+| Negative (e.g., `-1`) | **DENY** | Same as any phase voting DENY |
+| Zero (`0`) | **GRANT** | Same as any phase voting GRANT; other phases still evaluated |
+| Positive (e.g., `1`) | **GRANT Override** | Immediately grant; **skip all other phases** |
+
+:::info Note
+The specific integer value can serve as a reason code for auditing purposes. For example, `-1` vs `-2` could indicate different denial reasons, and `1` vs `2` could indicate different bypass scenarios. The sign determines the behavior; the magnitude provides additional context.
+:::
+
+#### Example: Public Endpoints
+
 ```rego
 package authz
 
 default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
 
-# Public endpoints bypass identity/resource phases
+# Public endpoints - GRANT Override, skip identity/resource phases
 allow = 1 {
-    input.operation in {"public:health:check", "public:docs:read"}
+    input.operation in public_operations
 }
 
-# Reject unauthenticated requests to protected endpoints
+# Deny requests without JWT for non-public operations
 allow = -1 {
     input.principal == {}
+    not input.operation in public_operations
+}
+
+public_operations := {
+    "public:health:check",
+    "public:docs:read",
+    "public:metrics:scrape"
 }
 ```
+
+#### When to Use Each Value
+
+| Scenario | Return Value | Rationale |
+|----------|--------------|-----------|
+| Normal authenticated request | `0` | Grant from operation phase; let identity/resource phases also evaluate |
+| Public endpoint (no auth required) | Positive (`1`) | **GRANT Override** — bypass identity phase which would fail |
+| Internal service bypass | Positive (`2`) | **GRANT Override** — trusted service, skip detailed checks |
+| Missing JWT on protected endpoint | Negative (`-1`) | Deny (same as any phase denying) |
+| Known bad actor (IP blocklist) | Negative (`-2`) | Deny with different reason code |
+
+#### Contrast with Other Phases
+
+Other phases (identity, resource, scope) use boolean policies:
+
+```rego
+# Identity/Resource/Scope phases - boolean output
+package authz
+default allow = false
+allow { ... }  # true or false
+```
+
+Only operation phase policies use integer output:
+
+```rego
+# Operation phase - tri-level integer output (not boolean)
+package authz
+default allow = 0   # GRANT (other phases still evaluated)
+allow = 1 { ... }   # GRANT Override (bypass other phases)
+allow = -1 { ... }  # DENY
+```
+
+#### Audit Visibility
+
+Tri-level outcomes are captured in the [AccessRecord](/concepts/audit) with specific fields that distinguish them from normal GRANT/DENY votes:
+
+| Outcome | AccessRecord Fields |
+|---------|---------------------|
+| Negative (DENY) | `decision: DENY`, `value` contains the integer (e.g., `-1`, `-2`) |
+| Zero (GRANT) | `decision: GRANT`, normal policy outcome |
+| Positive (GRANT Override) | `decision: GRANT`, `override: true`, `value` contains the integer |
+
+When a GRANT Override occurs, the AccessRecord also reflects that the identity, resource, and scope phases were **not evaluated**—their references will be absent from the record. This makes it clear in the audit trail that the operation phase short-circuited the evaluation.
+
+Using distinct integer values (e.g., `-1` for missing JWT, `-2` for IP blocklist) provides granular audit visibility without requiring separate policies for each denial reason.
 
 **Key insight**: Operation policies answer "Should this request be processed at all?" rather than "Does this specific principal have access to this specific resource?"
 
