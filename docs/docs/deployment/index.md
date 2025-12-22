@@ -108,17 +108,6 @@ Deploy multiple replicas for high availability:
 - Load balancer distributes requests
 - No shared state between replicas
 
-### Health Checks
-
-The server exposes gRPC health checks:
-
-```yaml
-readinessProbe:
-  grpc:
-    port: 9000
-  initialDelaySeconds: 5
-```
-
 ## Security
 
 ### Network Policy
@@ -147,15 +136,6 @@ spec:
 
 For production, configure TLS at the load balancer or service mesh level.
 
-## Monitoring
-
-### Metrics
-
-Monitor these key metrics:
-- Request latency (p50, p95, p99)
-- Decision rate (allow/deny)
-- Error rate
-
 ### Logging
 
 Use structured logging for observability:
@@ -166,7 +146,7 @@ export MPE_LOG_LEVEL=.:info
 ```
 
 :::tip Premium Feature: Advanced Observability
-The Community Edition provides basic metrics and logging. The **Premium Edition** adds enterprise-grade observability including:
+The Community Edition provides basic logging. The **Premium Edition** adds enterprise-grade observability including:
 - **Audit storage and indexing** — Searchable history of all policy decisions
 - **Audit history query** — Query past decisions by principal, resource, time range, and outcome
 - **Decision replay with visual code coverage** — Replay historical decisions and visualize which policy paths were evaluated
