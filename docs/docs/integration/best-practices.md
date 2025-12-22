@@ -6,6 +6,68 @@ sidebar_position: 6
 
 This guide covers recommended patterns for implementing Policy Enforcement Points (PEPs) and integrating with the PolicyEngine.
 
+## Policy Development: Start Strict, Iterate with Evidence
+
+The PolicyEngine's observable architecture enables a powerful approach to access control: **start with strict policies and iteratively expand access based on observed needs**.
+
+### Why This Matters
+
+Traditional approaches to access control often fail at the Principle of Least Privilege because:
+
+- It's hard to know what access is actually needed upfront
+- Administrators grant broad permissions "just in case" to avoid blocking users
+- Once granted, overly permissive access is rarely reviewed or tightened
+
+The PolicyEngine solves this by making every decision observable through [AccessRecords](/concepts/audit), enabling evidence-based policy refinement.
+
+### The Recommended Workflow
+
+**1. Deploy Strict Initial Policies**
+
+Start with policies that may be more restrictive than necessary. It's easier to safely expand access than to identify and close security gaps later:
+
+```yaml
+# Start with minimal access - only grant what you're certain is needed
+roles:
+  - mrn: "mrn:iam:role:new-service"
+    name: new-service
+    policy: "mrn:iam:policy:read-only"  # Start conservative
+```
+
+**2. Observe and Analyze Denials**
+
+Monitor the AccessRecord stream for denied requests. These denials are your evidence of what additional access may be needed:
+
+```bash
+# Find denied requests (OSS example)
+mpe serve ... 2>&1 | jq 'select(.decision == "DENY")'
+
+# Analyze denial patterns
+... | jq -r '.operation' | sort | uniq -c | sort -rn
+```
+
+**3. Validate Before Expanding**
+
+Use [policy replay](/concepts/audit#policy-replay) to understand the impact of proposed changes before deployment:
+
+1. Collect AccessRecords from production (including grants and denials)
+2. Create a candidate policy with expanded permissions
+3. Replay collected PORCs and compare decisions
+4. Review which denials would become grants—are these all legitimate?
+
+**4. Expand Precisely**
+
+Grant only the specific access that was demonstrated necessary, then continue monitoring.
+
+### Benefits of This Approach
+
+- **Minimal attack surface**: Never grant more access than proven necessary
+- **Evidence over speculation**: Decisions based on actual usage, not guesswork
+- **Safe iteration**: Policy replay lets you preview changes before production impact
+- **Continuous improvement**: Supports ongoing refinement as needs evolve
+
+For a detailed walkthrough with examples, see [Iterative Policy Refinement](/concepts/audit#iterative-policy-refinement).
+
 ## PEP Design
 
 ### Keep PEPs Simple
