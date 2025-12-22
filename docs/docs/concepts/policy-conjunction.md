@@ -6,7 +6,9 @@ sidebar_position: 3
 
 **Policy Conjunction** is the mechanism by which the Manetu PolicyEngine combines multiple policy phases together dynamically on a request-by-request basis to reach a final access decision.
 
+<div class="centered-image">
 ![Policy Conjunction](./assets/policy-conjunction.svg)
+</div>
 
 ## Overview
 
@@ -26,7 +28,9 @@ Each phase represents a different aspect of the access decision, and all phases 
 
 The PolicyEngine processes all phases in **parallel** for maximum performance. However, the final decision requires **at least one GRANT vote from each phase** for the top-level decision to be GRANT.
 
+<div class="centered-image">
 ![Policy Conjunction Flowchart](./assets/policy-conjunction-flow.svg)
+</div>
 
 ### Phase Requirements
 

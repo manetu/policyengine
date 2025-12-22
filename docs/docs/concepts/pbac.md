@@ -18,7 +18,9 @@ PBAC allows organizations to manage access to resources by defining policies tha
 
 ## Benefits of PBAC
 
+<div class="centered-image">
 ![PBAC Mindmap](./assets/pbac.svg)
+</div>
 
 ### Governance That Executes
 
