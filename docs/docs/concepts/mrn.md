@@ -8,6 +8,10 @@ sidebar_position: 3
 
 ## Overview
 
+<div class="centered-image">
+![MRN](./assets/mrn.svg)
+</div>
+
 MRNs provide:
 
 - **Universal identification**: A single format for all entity types

@@ -89,50 +89,6 @@ Every PDP decision produces an **AccessRecord** that captures the input PORC, th
 
 - **[Mappers](/concepts/mappers)**: Transform external inputs to PORC expressions (only needed for Envoy/Istio integration or other fixed-protocol systems)
 
-## How It All Fits Together
-
-```mermaid
-flowchart TB
-    subgraph PD["PolicyDomain"]
-        Libraries["Policy<br/>Libraries"]
-
-        subgraph Policies["Policies"]
-            Operation["Operation<br/>(Phase 1)"]
-            Identity["Identity<br/>(Phase 2)"]
-            Resource["Resource<br/>(Phase 3)"]
-            Scope["Scope<br/>(Phase 4)"]
-        end
-
-        Libraries --> Policies
-
-        RolesGroups["Roles/Groups<br/>(assigned to principals)"]
-        Scopes["Scopes<br/>(based on access method)"]
-        Operations["Operations"]
-        ResourceGroups["Resource Groups"]
-
-        Operation --> Operations
-        Identity --> RolesGroups
-        Scope --> Scopes
-        Resource --> ResourceGroups
-    end
-
-    PORC["PORC<br/>Input"]
-    PD --> PORC
-
-    style PD fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style Policies fill:transparent,stroke:#718096,stroke-width:1px
-    style Libraries fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Operation fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Identity fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Resource fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Scope fill:#03a3ed,stroke:#0282bd,color:#fff
-    style RolesGroups fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Scopes fill:#1a145f,stroke:#03a3ed,color:#fff
-    style Operations fill:#1a145f,stroke:#03a3ed,color:#fff
-    style ResourceGroups fill:#1a145f,stroke:#03a3ed,color:#fff
-    style PORC fill:#38a169,stroke:#2f855a,color:#fff
-```
-
 ## Evaluation Flow
 
 1. **Request arrives** at a Policy Enforcement Point (PEP)
