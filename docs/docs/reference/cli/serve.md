@@ -126,10 +126,6 @@ clusters:
               port_value: 9001
 ```
 
-## Health Checks
-
-The server exposes a health endpoint for Kubernetes/load balancer integration.
-
 ## Logging
 
 Configure logging via environment variables:
