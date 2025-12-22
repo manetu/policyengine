@@ -85,7 +85,7 @@ flowchart TB
     style PDP3c fill:#03a3ed,stroke:#0282bd,color:#fff
 ```
 
-### 1. Embedded Library <FeatureChip variant="oss" label="OSS Only" />
+### 1. Embedded Library <FeatureChip variant="community" label="Community Only" />
 
 The embedded Go library compiles the PolicyEngine directly into your application binary.
 
@@ -117,7 +117,7 @@ allowed, err := pe.Authorize(ctx, porc)
 See [Embedded Go Library](/integration/go-library) for complete usage details and configuration options.
 
 :::info
-The embedded library is available only in the Open Source Edition. Premium Edition features require the HTTP API integration.
+The embedded library is available only in the Community Edition. Premium Edition features require the HTTP API integration.
 :::
 
 ### 2. Sidecar Pattern
@@ -310,9 +310,9 @@ spec:
 
 ## Policy Updates
 
-### Static Reload <FeatureChip variant="oss" label="Open Source" />
+### Static Reload <FeatureChip variant="community" label="Community" />
 
-In the open source edition, PDPs load policies at startup:
+In the Community Edition, PDPs load policies at startup:
 
 ```mermaid
 sequenceDiagram
@@ -392,7 +392,7 @@ flowchart TD
     K8s -->|No| Standalone["Use Standalone Service"]
 
     WantAuto -->|Yes, Premium| Sidecar["Use Sidecar (Operator)"]
-    WantAuto -->|No/OSS| ManualChoice{"Prefer 1:1 scaling<br/>with apps?"}
+    WantAuto -->|No/Community| ManualChoice{"Prefer 1:1 scaling<br/>with apps?"}
 
     ManualChoice -->|Yes| SidecarManual["Use Sidecar (Manual)"]
     ManualChoice -->|No| Standalone

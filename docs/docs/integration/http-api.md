@@ -19,7 +19,7 @@ This works for both **local development** and **production deployments**:
 | Use Case | Description |
 |----------|-------------|
 | **Development** | Test HTTP-based PEP integration locally before deploying |
-| **Production (OSS)** | Run as a production PDP when Premium features aren't needed |
+| **Production (Community)** | Run as a production PDP when Premium features aren't needed |
 | **Premium migration** | Develop against the same API that Premium exposes |
 
 The server exposes an HTTP endpoint at `POST /decision`. A SwaggerUI interface is available at http://localhost:9000/swagger-ui/ for interactive testing.
@@ -431,11 +431,11 @@ session.mount('http://', HTTPAdapter(max_retries=retries))
 
 ## Premium Considerations <FeatureChip variant="premium" label="Premium Only" size="medium"/>
 
-All HTTP-based options use the same API.  This guide helps you navigate as you migrate from OSS to Premium.
+All HTTP-based options use the same API.  This guide helps you navigate as you migrate from Community to Premium.
 
-### Migration from OSS
+### Migration from Community
 
-Migrating from OSS to Premium—whether as a sidecar or standalone service-is as simple as updating your endpoint URL. No code changes required.
+Migrating from Community to Premium—whether as a sidecar or standalone service-is as simple as updating your endpoint URL. No code changes required.
 
 ### Development
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import Chip from '@mui/material/Chip';
 
-type ChipVariant = 'premium' | 'oss' | 'new' | 'beta' | 'deprecated';
+type ChipVariant = 'premium' | 'community' | 'new' | 'beta' | 'deprecated';
 
 interface FeatureChipProps {
   variant?: ChipVariant;
@@ -15,7 +15,7 @@ const variantStyles: Record<ChipVariant, { borderColor: string; backgroundColor:
     backgroundColor: 'rgba(3, 163, 237, 0.15)',
     color: 'rgba(3, 163, 237, 1)',
   },
-  oss: {
+  community: {
     borderColor: 'rgba(56, 161, 105, 1)', // Green
     backgroundColor: 'rgba(56, 161, 105, 0.15)',
     color: 'rgba(56, 161, 105, 1)',
@@ -39,7 +39,7 @@ const variantStyles: Record<ChipVariant, { borderColor: string; backgroundColor:
 
 const variantLabels: Record<ChipVariant, string> = {
   premium: 'Premium',
-  oss: 'Open Source',
+  community: 'Community',
   new: 'New',
   beta: 'Beta',
   deprecated: 'Deprecated',

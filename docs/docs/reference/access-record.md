@@ -12,7 +12,7 @@ The AccessRecord captures the complete context of a policy evaluation, enabling 
 
 | Output | Availability | Description |
 |--------|--------------|-------------|
-| JSON to stdout | <FeatureChip variant="oss" /> | Stream records for custom processing pipelines |
+| JSON to stdout | <FeatureChip variant="community" /> | Stream records for custom processing pipelines |
 | ElasticSearch | <FeatureChip variant="premium" /> | Durable storage with indexing and analytics |
 
 ## Top-Level Structure

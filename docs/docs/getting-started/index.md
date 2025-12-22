@@ -13,7 +13,7 @@ The Manetu PolicyEngine provides:
 1. **A [CLI tool](/reference/cli)** (`mpe`) for developing, testing, and serving policies
 2. **A [PolicyDomain](/concepts/policy-domains) schema** for organizing policies into deployable bundles
 3. **An [HTTP API](/integration/http-api)** for integrating with applications in any language
-4. **An [embedded Go library](/integration/go-library)** for Go applications needing lowest latency <FeatureChip variant="oss" label="OSS Only"/>
+4. **An [embedded Go library](/integration/go-library)** for Go applications needing lowest latency <FeatureChip variant="community" label="Community Only"/>
 
 :::note Use MPE with Any Language
 MPE is written in Go, but you don't need Go to use it. Install `mpe` via Homebrew (or download a binary), author your policies, and integrate via the HTTP API from Python, Java, TypeScript, or any other language. Go is only required if you want to build `mpe` from source or use the embedded library.

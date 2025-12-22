@@ -9,9 +9,9 @@
 
 A high-performance, programmable access-control and governance layer for protecting APIs and sensitive data using [Policy-Based Access Control (PBAC)](https://manetu.github.io/policyengine/concepts/pbac).
 
-## Open Source Edition
+## Community Edition
 
-This is the **open source edition** of the Manetu PolicyEngine — a fully functional policy engine that you can embed in your applications or run as a standalone service. It provides everything you need to author, test, and enforce access control policies.
+This is the **Community Edition** of the Manetu PolicyEngine — a fully functional policy engine that you can embed in your applications or run as a standalone service. It provides everything you need to author, test, and enforce access control policies.
 
 For organizations requiring enterprise-grade audit storage, centralized policy administration, a Kubernetes Operator for sidecar automation, and advanced observability features, a **Premium Edition** is available through [Manetu](https://manetu.com). See the [documentation](https://manetu.github.io/policyengine/) for a full feature comparison.
 
