@@ -23,26 +23,14 @@ Like identity entities ([Roles](/concepts/roles), [Groups](/concepts/groups), [S
 
 When a request involves a resource:
 
+<div class="centered-image">
+![Resource Group Flow](./assets/resource-group-flow.svg)
+</div> 
+
 1. The PolicyEngine identifies which Resource Group the resource belongs to
 2. The group's associated policy is loaded for Phase 3 (Resource Phase) evaluation
 3. The policy evaluates the PORC expression and returns GRANT or DENY
 4. This decision contributes to the overall [Policy Conjunction](/concepts/policy-conjunction)
-
-```mermaid
-flowchart LR
-    subgraph ResourceAccess["Resource Access"]
-        Resource["Resource<br/>(MRN)<br/><i>mrn:data:doc:123</i>"]
-        ResourceGroup["Resource Group<br/>(group MRN)<br/><i>mrn:iam:resource-<br/>group:sensitive</i>"]
-        Policy["Policy<br/>(Rego code)<br/><i>Evaluates access<br/>based on PORC</i>"]
-
-        Resource --> ResourceGroup --> Policy
-    end
-
-    style ResourceAccess fill:transparent,stroke:#03a3ed,stroke-width:2px
-    style Resource fill:#1a145f,stroke:#03a3ed,color:#fff
-    style ResourceGroup fill:#03a3ed,stroke:#0282bd,color:#fff
-    style Policy fill:#38a169,stroke:#2f855a,color:#fff
-```
 
 ## Defining Resource Groups
 
