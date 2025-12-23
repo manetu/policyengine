@@ -50,6 +50,19 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Examples',
+      collapsed: false,
+      items: [
+        'examples/index',
+        'examples/unix-filesystem',
+        'examples/mcp-server',
+        'examples/multi-tenant-saas',
+        'examples/healthcare-hipaa',
+        'examples/api-quotas',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Integration',
       collapsed: false,
       items: [
