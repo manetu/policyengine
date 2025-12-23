@@ -444,3 +444,5 @@ This approach provides:
 - **[Scopes](/concepts/scopes)**: Define access-method constraints
 - **[Resources](/concepts/resources)**: Define resource routing patterns
 - **[Mappers](/concepts/mappers)**: Transform non-PORC inputs
+
+See also: **[Examples](/examples)** for complete, production ready PolicyDomains for a deeper understanding. 

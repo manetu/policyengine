@@ -260,7 +260,7 @@ spec:
       policy: *operation-default
 ```
 
-For a more comprehensive example, see `cmd/mpe/test/example-domain.yml` in the repository.
+For a deeper dive, see [Examples](/examples).
 
 ## Using External Rego Files
 
@@ -298,4 +298,5 @@ Once you're comfortable with the basics, explore these advanced features:
 ## Next Steps
 
 - [Testing Policies](/quick-start/testing-policies) - Test your PolicyDomain
+- [Examples](/examples) - Complete, production ready use-cases for a deeper understanding. 
 - [PolicyDomain Schema Reference](/reference/schema) - Complete schema documentation
