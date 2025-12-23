@@ -7,6 +7,20 @@ spec:
   # Policy Libraries
   # ============================================================
   policy-libraries:
+    - mrn: &lib-utils "mrn:iam:library:utils"
+      name: utils
+      description: "Common utility functions"
+      rego: |
+        package utils
+
+        import rego.v1
+
+        # Check if request has a valid principal (authenticated)
+        has_principal if {
+            input.principal != {}
+            input.principal.sub != ""
+        }
+
     - mrn: &lib-hipaa-helpers "mrn:iam:library:hipaa-helpers"
       name: hipaa-helpers
       description: "HIPAA compliance helper functions"
@@ -125,43 +139,37 @@ spec:
     - mrn: &policy-require-auth "mrn:iam:policy:require-auth"
       name: require-auth
       description: "Require authentication for PHI access"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
         # Default deny - only grant if authenticated
         default allow = -1
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Grant authenticated requests
-        allow = 0 if has_principal
+        allow = 0 if utils.has_principal
 
     # Identity phase - healthcare staff access
     - mrn: &policy-healthcare-staff "mrn:iam:policy:healthcare-staff"
       name: healthcare-staff
       description: "Allow healthcare staff to proceed"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         default allow = false
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Allow authenticated healthcare staff
-        allow if has_principal
+        allow if utils.has_principal
 
     # Resource phase - patient records access with HIPAA rules
     - mrn: &policy-phi-access "mrn:iam:policy:phi-access"

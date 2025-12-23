@@ -67,6 +67,20 @@ spec:
   # Policy Libraries
   # ============================================================
   policy-libraries:
+    - mrn: &lib-utils "mrn:iam:library:utils"
+      name: utils
+      description: "Common utility functions"
+      rego: |
+        package utils
+
+        import rego.v1
+
+        # Check if request has a valid principal (authenticated)
+        has_principal if {
+            input.principal != {}
+            input.principal.sub != ""
+        }
+
     - mrn: &lib-tenant-helpers "mrn:iam:library:tenant-helpers"
       name: tenant-helpers
       description: "Multi-tenant helper functions"
@@ -135,43 +149,37 @@ spec:
     - mrn: &policy-require-auth "mrn:iam:policy:require-auth"
       name: require-auth
       description: "Require authentication for all operations"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
         # Default deny - only grant if authenticated
         default allow = -1
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Grant authenticated requests
-        allow = 0 if has_principal
+        allow = 0 if utils.has_principal
 
     # Identity phase - any authenticated user proceeds
     - mrn: &policy-authenticated "mrn:iam:policy:authenticated"
       name: authenticated
       description: "Allow any authenticated user"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         default allow = false
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Allow authenticated users
-        allow if has_principal
+        allow if utils.has_principal
 
     # Resource phase - tenant isolation
     - mrn: &policy-tenant-isolation "mrn:iam:policy:tenant-isolation"
