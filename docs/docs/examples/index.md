@@ -7,7 +7,7 @@ sidebar_position: 1
 This section contains complete, production-ready examples demonstrating the power and flexibility of the Manetu PolicyEngine. Each example includes:
 
 - <IconText icon="gavel">A **complete PolicyDomain** definition with all necessary policies, roles, groups, and resource groups</IconText>
-- <IconText icon="test">**Test cases** that you can run with `mpe test decision` to verify behavior</IconText>
+- <IconText icon="test">**Test cases** that you can run with [`mpe test decision`](/reference/cli/test#test-decision) to verify behavior</IconText>
 - <IconText icon="school">**Detailed explanations** of the design decisions and patterns used</IconText>
 
 <SectionHeader icon="storage" level={2}>Featured Examples</SectionHeader>
