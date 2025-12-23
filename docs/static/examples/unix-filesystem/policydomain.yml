@@ -7,6 +7,20 @@ spec:
   # Policy Libraries - Reusable helper functions
   # ============================================================
   policy-libraries:
+    - mrn: &lib-utils "mrn:iam:library:utils"
+      name: utils
+      description: "Common utility functions"
+      rego: |
+        package utils
+
+        import rego.v1
+
+        # Check if request has a valid principal (authenticated)
+        has_principal if {
+            input.principal != {}
+            input.principal.sub != ""
+        }
+
     - mrn: &lib-unix-perms "mrn:iam:library:unix-perms"
       name: unix-perms
       description: "Unix permission checking utilities"
@@ -55,44 +69,38 @@ spec:
     - mrn: &policy-require-auth "mrn:iam:policy:require-auth"
       name: require-auth
       description: "Require authentication for file operations"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
         # Default deny - only grant if authenticated
         default allow = -1
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Grant authenticated requests
-        allow = 0 if has_principal
+        allow = 0 if utils.has_principal
 
     # Identity phase - any authenticated user can attempt file operations
     # The actual permission check happens in the resource phase
     - mrn: &policy-authenticated-user "mrn:iam:policy:authenticated-user"
       name: authenticated-user
       description: "Allow any authenticated user to proceed to resource phase"
+      dependencies:
+        - *lib-utils
       rego: |
         package authz
 
         import rego.v1
+        import data.utils
 
         default allow = false
 
-        # Helper: check if request has a valid principal
-        has_principal if {
-            input.principal != {}
-            input.principal.sub != ""
-        }
-
         # Grant if authenticated
-        allow if has_principal
+        allow if utils.has_principal
 
     # Resource phase - Unix permission bit checking
     - mrn: &policy-unix-permissions "mrn:iam:policy:unix-permissions"
