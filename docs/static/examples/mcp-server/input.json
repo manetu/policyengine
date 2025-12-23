@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "dev-alice",
+    "mroles": ["mrn:iam:role:mcp-user"],
+    "mgroups": ["mrn:iam:group:developers"],
+    "mannotations": {
+      "mcp_servers": ["mrn:mcp:server:github", "mrn:mcp:server:filesystem", "mrn:mcp:server:git"],
+      "mcp_tools": ["mrn:mcp:github:tool:*", "mrn:mcp:filesystem:tool:read_file", "mrn:mcp:filesystem:tool:list_directory", "mrn:mcp:git:tool:*"]
+    }
+  },
+  "operation": "mcp:tool:call",
+  "resource": {
+    "id": "mrn:mcp:github:tool:create-issue",
+    "group": "mrn:iam:resource-group:mcp-tools"
+  }
+}
