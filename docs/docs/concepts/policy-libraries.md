@@ -102,6 +102,86 @@ spec:
 
 ## Common Library Patterns
 
+### The Utils Library Pattern
+
+A recommended pattern is to create a `utils` library with common helpers that are used across multiple policies. This eliminates duplication and ensures consistency:
+
+```yaml
+spec:
+  policy-libraries:
+    - mrn: &lib-utils "mrn:iam:library:utils"
+      name: utils
+      description: "Common utility functions"
+      rego: |
+        package utils
+
+        import rego.v1
+
+        # Check if request has a valid principal (authenticated)
+        has_principal if {
+            input.principal != {}
+            input.principal.sub != ""
+        }
+
+    # Domain-specific library can coexist with utils
+    - mrn: &lib-domain-helpers "mrn:iam:library:domain-helpers"
+      name: domain-helpers
+      description: "Domain-specific helper functions"
+      rego: |
+        package domain_helpers
+        # ... domain-specific helpers
+```
+
+Policies can then use the utils library:
+
+```yaml
+policies:
+  - mrn: "mrn:iam:policy:require-auth"
+    name: require-auth
+    dependencies:
+      - *lib-utils
+    rego: |
+      package authz
+
+      import rego.v1
+      import data.utils
+
+      # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+      # Default deny - only grant if authenticated
+      default allow = -1
+
+      # Grant authenticated requests
+      allow = 0 if utils.has_principal
+```
+
+This pattern:
+- **Reduces duplication**: Define `has_principal` once, use everywhere
+- **Ensures consistency**: All policies use the same authentication check
+- **Simplifies maintenance**: Update the check in one place
+
+### Using Multiple Libraries
+
+Policies can depend on multiple libraries simultaneously. This is useful when combining general utilities with domain-specific helpers:
+
+```yaml
+policies:
+  - mrn: "mrn:iam:policy:mcp-operation"
+    dependencies:
+      - *lib-utils        # Common utilities
+      - *lib-mcp-helpers  # MCP-specific helpers
+    rego: |
+      package authz
+
+      import rego.v1
+      import data.utils
+      import data.mcp_helpers
+
+      default allow = -1
+
+      allow = 1 if mcp_helpers.is_health_check
+      allow = 0 if utils.has_principal
+```
+
 ### Operation Helpers
 
 ```rego
