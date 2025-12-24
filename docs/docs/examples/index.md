@@ -95,6 +95,18 @@ These examples are designed to be starting points. Feel free to:
 2. <IconText icon="extension">**Combine patterns** from multiple examples</IconText>
 3. <IconText icon="library">**Extract reusable logic** into [Policy Libraries](/concepts/policy-libraries)</IconText>
 
+<SectionHeader icon="school" level={2}>Best Practices Demonstrated</SectionHeader>
+
+These examples showcase several recommended patterns:
+
+- <IconText icon="security">**Default deny for tri-level policies**: Using `default allow = -1` with positive grants instead of explicit denies</IconText>
+- <IconText icon="library">**Utils library pattern**: Extracting common helpers like `has_principal` into a shared `utils` library</IconText>
+- <IconText icon="code">**Set iteration**: Using `some x in {...}` for concise, maintainable Rego</IconText>
+- <IconText icon="extension">**Operation prefixes**: Using prefixes like `mcp:` to enable meaningful identity phase checks</IconText>
+- <IconText icon="layers">**Multiple libraries**: Combining general utilities with domain-specific helpers</IconText>
+
+For more details on these patterns, see [Writing Concise Rego](/concepts/policies#writing-concise-rego) and [The Utils Library Pattern](/concepts/policy-libraries#the-utils-library-pattern).
+
 For more information on building PolicyDomains, see:
 
 - <IconText icon="rocket">[Creating Your First PolicyDomain](/quick-start/first-policy-domain)</IconText>
