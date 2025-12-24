@@ -41,22 +41,36 @@ allow {
 
 ### Tri-Level Policy (Operation Phase)
 
-Operation phase policies use **tri-level integer output** instead of boolean:
+Operation phase policies use **tri-level integer output** instead of boolean. The recommended pattern is **default deny** with positive grants:
 
 ```rego
 package authz
 
-default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+import rego.v1
 
-allow = 1 { is_public_operation }     # GRANT Override (bypass other phases)
-allow = -1 { input.principal == {} }  # Deny
+# Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+# Default deny - only grant if authenticated or public
+default allow = -1
 
-is_public_operation {
+# Helper: check if this is a public operation
+is_public if {
     input.operation in {"public:health:check", "public:docs:read"}
 }
+
+# Helper: check if request has a valid principal
+has_principal if {
+    input.principal != {}
+    input.principal.sub != ""
+}
+
+# Public operations bypass auth (grant-override)
+allow = 1 if is_public
+
+# Grant authenticated requests
+allow = 0 if has_principal
 ```
 
-The GRANT Override (positive value) is essential for public endpoints that have no JWT—without it, the identity phase would always deny them. See [Tri-Level Policies](#tri-level) below for complete semantics, return value meanings, and usage guidance.
+This "default deny" approach is safer and cleaner than using `default allow = 0` with explicit deny rules. The GRANT Override (positive value) is essential for public endpoints that have no JWT—without it, the identity phase would always deny them. See [Tri-Level Policies](#tri-level) below for complete semantics, return value meanings, and usage guidance.
 
 ## Policy Inputs
 
@@ -226,21 +240,33 @@ The specific integer value can serve as a reason code for auditing purposes. For
 
 #### Example: Public Endpoints
 
+The recommended pattern uses **default deny** with positive grants:
+
 ```rego
 package authz
 
-default allow = 0  # Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+import rego.v1
 
-# Public endpoints - GRANT Override, skip identity/resource phases
-allow = 1 {
+# Tri-level: negative=DENY, 0=GRANT, positive=GRANT Override
+# Default deny - only grant if authenticated or public
+default allow = -1
+
+# Helper: check if this is a public endpoint
+is_public if {
     input.operation in public_operations
 }
 
-# Deny requests without JWT for non-public operations
-allow = -1 {
-    input.principal == {}
-    not input.operation in public_operations
+# Helper: check if request has a valid principal
+has_principal if {
+    input.principal != {}
+    input.principal.sub != ""
 }
+
+# Public endpoints bypass auth (grant-override)
+allow = 1 if is_public
+
+# Grant authenticated requests
+allow = 0 if has_principal
 
 public_operations := {
     "public:health:check",
@@ -248,6 +274,8 @@ public_operations := {
     "public:metrics:scrape"
 }
 ```
+
+This approach is cleaner than using `default allow = 0` with explicit deny rules like `allow = -1 { not has_principal; not is_public }`. With default deny, forgetting a grant condition results in denial (safe), whereas with default grant, forgetting a deny condition could allow unauthorized access.
 
 #### When to Use Each Value
 
@@ -266,18 +294,26 @@ Other phases (identity, resource, scope) use boolean policies:
 ```rego
 # Identity/Resource/Scope phases - boolean output
 package authz
+
+import rego.v1
+
 default allow = false
-allow { ... }  # true or false
+allow if { ... }  # true or false
 ```
 
-Only operation phase policies use integer output:
+Only operation phase policies use integer output. The recommended pattern is **default deny**:
 
 ```rego
 # Operation phase - tri-level integer output (not boolean)
 package authz
-default allow = 0   # GRANT (other phases still evaluated)
-allow = 1 { ... }   # GRANT Override (bypass other phases)
-allow = -1 { ... }  # DENY
+
+import rego.v1
+
+# Default deny - safer than default grant
+default allow = -1
+
+allow = 1 if { ... }  # GRANT Override (bypass other phases)
+allow = 0 if { ... }  # GRANT (other phases still evaluated)
 ```
 
 #### Audit Visibility
@@ -522,13 +558,63 @@ policies:
       }
 ```
 
+## Writing Concise Rego
+
+### Set Iteration Instead of Repeated Rules
+
+Instead of writing multiple separate rules for similar conditions, use set iteration with `some ... in`:
+
+```rego
+# ❌ Verbose: Multiple rules for similar patterns
+required_permission(op) := "read" if endswith(op, ":read")
+required_permission(op) := "read" if endswith(op, ":list")
+required_permission(op) := "read" if endswith(op, ":get")
+
+# ✅ Concise: Set iteration
+required_permission(op) := "read" if {
+    some suffix in {":read", ":list", ":get"}
+    endswith(op, suffix)
+}
+```
+
+This pattern is cleaner, easier to maintain, and performs the same function.
+
+### Meaningful Helper Functions
+
+Extract commonly used checks into well-named helper functions:
+
+```rego
+# ✅ Good: Descriptive helper names
+is_public if {
+    glob.match("api:public:.*", [], input.operation)
+}
+
+has_principal if {
+    input.principal != {}
+    input.principal.sub != ""
+}
+
+is_read_only if {
+    some pattern in {"*:read", "*:list", "*:get"}
+    glob.match(pattern, [], input.operation)
+}
+
+# Use helpers in rules
+allow = 1 if is_public
+allow = 0 if has_principal
+```
+
+For helpers used across multiple policies, extract them into a [Policy Library](/concepts/policy-libraries).
+
 ## Best Practices
 
-1. **Default to deny**: Always use `default allow = false`
-2. **Be explicit**: Clear conditions are easier to audit
-3. **Use libraries**: Extract reusable logic
-4. **Test thoroughly**: Cover both grant and deny cases
-5. **Document decisions**: Comment complex logic
+1. **Default to deny**: Use `default allow = false` for boolean policies; use `default allow = -1` for tri-level operation policies
+2. **Use default deny for tri-level**: Prefer `default allow = -1` with positive grants over `default allow = 0` with explicit denies—it's safer and cleaner
+3. **Extract common helpers**: Move repeated logic like `has_principal` into a shared [Policy Library](/concepts/policy-libraries)
+4. **Use set iteration**: Write `some x in {...}` instead of multiple separate rules
+5. **Be explicit**: Clear conditions are easier to audit
+6. **Test thoroughly**: Cover both grant and deny cases
+7. **Document decisions**: Comment complex logic
 
 ## Related Concepts
 

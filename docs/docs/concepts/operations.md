@@ -186,10 +186,54 @@ operations:
 ## Best Practices
 
 1. **Use consistent naming**: Follow `subsystem:resource:verb` pattern
-2. **Order selectors carefully**: Put specific matches before general ones
-3. **Document operations**: Keep a reference of available operations
-4. **Use verbs consistently**: `create`, `read`, `update`, `delete`, `list`
-5. **Avoid overlapping selectors**: Make patterns mutually exclusive when possible
+2. **Use domain prefixes for clarity**: When integrating multiple systems, use unique prefixes (e.g., `mcp:tool:call`, `api:users:read`) to enable meaningful policy checks based on operation origin
+3. **Order selectors carefully**: Put specific matches before general ones
+4. **Document operations**: Keep a reference of available operations
+5. **Use verbs consistently**: `create`, `read`, `update`, `delete`, `list`
+6. **Avoid overlapping selectors**: Make patterns mutually exclusive when possible
+
+### Operation Prefixes for Multi-Domain Policies
+
+When your PolicyDomain integrates multiple systems or protocols, use distinct prefixes to enable meaningful identity phase checks:
+
+```yaml
+# MCP protocol operations
+operations:
+  - name: mcp-operations
+    selector:
+      - "mcp:.*"
+    policy: *policy-mcp-operation
+
+# API operations
+  - name: api-operations
+    selector:
+      - "api:.*"
+    policy: *policy-api-operation
+```
+
+This allows identity policies to check the operation prefix and apply appropriate rules:
+
+```rego
+package authz
+
+import rego.v1
+
+default allow = false
+
+# Allow MCP operations for MCP users
+allow if {
+    startswith(input.operation, "mcp:")
+    "mrn:iam:role:mcp-user" in input.principal.mroles
+}
+
+# Allow API operations for API users
+allow if {
+    startswith(input.operation, "api:")
+    "mrn:iam:role:api-user" in input.principal.mroles
+}
+```
+
+Without prefixes, the identity policy would have no way to distinguish which system the operation belongs to.
 
 ## Related Concepts
 
