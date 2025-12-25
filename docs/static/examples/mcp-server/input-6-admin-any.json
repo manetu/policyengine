@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "admin@example.com",
+    "mroles": ["mrn:iam:role:mcp-admin"],
+    "mgroups": ["mrn:iam:group:platform"],
+    "mannotations": {
+      "mcp_servers": ["mrn:mcp:server:*"],
+      "mcp_tools": ["mrn:mcp:*:tool:*"]
+    }
+  },
+  "operation": "mcp:tool:call",
+  "resource": {
+    "id": "mrn:mcp:secret-server:tool:dangerous-operation",
+    "group": "mrn:iam:resource-group:mcp-tools"
+  }
+}

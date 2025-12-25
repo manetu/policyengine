@@ -53,8 +53,6 @@ flowchart TD
 
 <SectionHeader icon="security" level={2}>Complete PolicyDomain</SectionHeader>
 
-**[Download PolicyDomain](/examples/api-quotas/policydomain.yml)** | **[Download Test Input](/examples/api-quotas/input.json)**
-
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
 kind: PolicyDomain
@@ -176,7 +174,7 @@ spec:
 
         # Helper: check if this is a public endpoint
         is_public if {
-            glob.match("api:public:.*", [], input.operation)
+            glob.match("api:public:*", [], input.operation)
         }
 
         # Public endpoints bypass auth (grant-override)
@@ -380,6 +378,10 @@ spec:
       policy: *policy-api-auth
 ```
 
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a>
+</div>
+
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
 ### Test 1: Free Tier Basic Access
@@ -407,7 +409,11 @@ A free tier user can access basic endpoints:
 }
 ```
 
-**Expected**: GRANT
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-1-free-basic.json" download title="Download input-1-free-basic.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" />
 
 ### Test 2: Free Tier Advanced Endpoint Denied
 
@@ -434,7 +440,11 @@ A free tier user cannot access pro endpoints:
 }
 ```
 
-**Expected**: DENY (advanced requires pro tier)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-2-free-advanced-denied.json" download title="Download input-2-free-advanced-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (advanced requires pro tier)
 
 ### Test 3: Pro Tier Advanced Access
 
@@ -461,7 +471,11 @@ A pro tier user can access advanced endpoints:
 }
 ```
 
-**Expected**: GRANT
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-3-pro-advanced.json" download title="Download input-3-pro-advanced.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" />
 
 ### Test 4: Pro Tier Enterprise Endpoint Denied
 
@@ -488,7 +502,11 @@ A pro tier user cannot access enterprise endpoints:
 }
 ```
 
-**Expected**: DENY (admin requires enterprise tier)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-4-pro-enterprise-denied.json" download title="Download input-4-pro-enterprise-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (admin requires enterprise tier)
 
 ### Test 5: Feature Flag Enabled
 
@@ -515,7 +533,11 @@ A pro user with CSV export feature can export:
 }
 ```
 
-**Expected**: GRANT (export_csv feature is enabled)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-5-feature-enabled.json" download title="Download input-5-feature-enabled.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (export_csv feature is enabled)
 
 ### Test 6: Feature Flag Disabled
 
@@ -542,7 +564,11 @@ A pro user without PDF export feature cannot export PDF:
 }
 ```
 
-**Expected**: DENY (export_pdf feature not enabled for pro)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-6-feature-disabled.json" download title="Download input-6-feature-disabled.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (export_pdf feature not enabled for pro)
 
 ### Test 7: Within Quota
 
@@ -574,7 +600,11 @@ A user within their quota can proceed:
 }
 ```
 
-**Expected**: GRANT (50000 < 200000 quota)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-7-within-quota.json" download title="Download input-7-within-quota.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (50000 < 200000 quota)
 
 ### Test 8: Over Quota
 
@@ -606,7 +636,11 @@ A user over their quota is denied:
 }
 ```
 
-**Expected**: DENY (1500 >= 1000 quota)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-8-over-quota.json" download title="Download input-8-over-quota.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (1500 >= 1000 quota)
 
 ### Test 9: Enterprise Full Access
 
@@ -633,7 +667,11 @@ An enterprise user has access to everything:
 }
 ```
 
-**Expected**: GRANT (enterprise has access to all endpoints)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-9-enterprise-full.json" download title="Download input-9-enterprise-full.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (enterprise has access to all endpoints)
 
 ### Test 10: Public Endpoint No Auth
 
@@ -651,7 +689,11 @@ Public endpoints work without authentication:
 }
 ```
 
-**Expected**: GRANT (public endpoints use tri-level override)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-10-public-noauth.json" download title="Download input-10-public-noauth.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (public endpoints use tri-level override)
 
 ### Test 11: Read-Only API Key Scope
 
@@ -679,7 +721,11 @@ An API key with read-only scope cannot write:
 }
 ```
 
-**Expected**: DENY (read-only scope blocks write operations)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/api-quotas/input-11-readonly-scope.json" download title="Download input-11-readonly-scope.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (read-only scope blocks write operations)
 
 <SectionHeader icon="version" level={2}>Key Concepts Demonstrated</SectionHeader>
 

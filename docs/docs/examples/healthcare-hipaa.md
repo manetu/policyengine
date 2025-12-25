@@ -46,8 +46,6 @@ flowchart TD
 
 <SectionHeader icon="security" level={2}>Complete PolicyDomain</SectionHeader>
 
-**[Download PolicyDomain](/examples/healthcare-hipaa/policydomain.yml)** | **[Download Test Input](/examples/healthcare-hipaa/input.json)**
-
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
 kind: PolicyDomain
@@ -478,6 +476,10 @@ spec:
       policy: *policy-require-auth
 ```
 
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a>
+</div>
+
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
 ### Test 1: Patient Can Read Own Records
@@ -509,7 +511,11 @@ A patient can view their own medical records:
 }
 ```
 
-**Expected**: GRANT (patient accessing own records)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-1-patient-own.json" download title="Download input-1-patient-own.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (patient accessing own records)
 
 ### Test 2: Attending Physician Full Access
 
@@ -538,7 +544,11 @@ The attending physician can access all patient data:
 }
 ```
 
-**Expected**: GRANT (attending physician has full access)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-2-attending-full.json" download title="Download input-2-attending-full.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (attending physician has full access)
 
 ### Test 3: Nurse Care Team Clinical Access
 
@@ -567,7 +577,11 @@ A nurse on the care team can access clinical records:
 }
 ```
 
-**Expected**: GRANT (nurse has clinical clearance)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-3-nurse-clinical.json" download title="Download input-3-nurse-clinical.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (nurse has clinical clearance)
 
 ### Test 4: Nurse Cannot Access Sensitive Records
 
@@ -598,7 +612,11 @@ A nurse cannot access sensitive records without consent:
 }
 ```
 
-**Expected**: DENY (nurse clearance < sensitive, and no consent)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-4-nurse-sensitive-denied.json" download title="Download input-4-nurse-sensitive-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (nurse clearance < sensitive, and no consent)
 
 ### Test 5: Non-Care-Team Physician Limited Access
 
@@ -627,7 +645,11 @@ A physician not on the care team can only access administrative data:
 }
 ```
 
-**Expected**: DENY (not on care team, record is clinical not administrative)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-5-non-careteam-denied.json" download title="Download input-5-non-careteam-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (not on care team, record is clinical not administrative)
 
 ### Test 6: Break-Glass Emergency Access
 
@@ -659,7 +681,11 @@ Any licensed provider can use break-glass access:
 }
 ```
 
-**Expected**: GRANT (break-glass access for emergency)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-6-break-glass.json" download title="Download input-6-break-glass.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (break-glass access for emergency)
 
 ### Test 7: Researcher De-identified Access
 
@@ -687,7 +713,11 @@ A researcher can access de-identified data:
 }
 ```
 
-**Expected**: GRANT (researcher accessing de-identified data)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-7-researcher-deidentified.json" download title="Download input-7-researcher-deidentified.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (researcher accessing de-identified data)
 
 ### Test 8: Researcher Cannot Access Identified Data
 
@@ -718,7 +748,11 @@ A researcher cannot access identified patient data:
 }
 ```
 
-**Expected**: DENY (researcher cannot access PHI)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-8-researcher-phi-denied.json" download title="Download input-8-researcher-phi-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (researcher cannot access PHI)
 
 ### Test 9: Admin Can Access Demographics
 
@@ -744,7 +778,11 @@ An admin can access administrative records:
 }
 ```
 
-**Expected**: GRANT (admin accessing administrative records)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/healthcare-hipaa/input-9-admin-demographics.json" download title="Download input-9-admin-demographics.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (admin accessing administrative records)
 
 <SectionHeader icon="version" level={2}>Key Concepts Demonstrated</SectionHeader>
 

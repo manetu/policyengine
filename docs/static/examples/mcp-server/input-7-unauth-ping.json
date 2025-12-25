@@ -1,0 +1,8 @@
+{
+  "principal": {},
+  "operation": "mcp:server:ping",
+  "resource": {
+    "id": "mrn:mcp:github:server",
+    "group": "mrn:iam:resource-group:mcp-lifecycle"
+  }
+}

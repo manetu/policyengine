@@ -1,0 +1,20 @@
+{
+  "principal": {
+    "sub": "dr-smith",
+    "mroles": ["mrn:iam:role:attending-physician"],
+    "mgroups": ["mrn:iam:group:attending-physicians"],
+    "mannotations": {}
+  },
+  "operation": "record:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:record:patient-12345:psychiatric-notes",
+    "group": "mrn:iam:resource-group:phi",
+    "annotations": {
+      "patient_id": "patient-12345",
+      "sensitivity": "restricted",
+      "care_team": ["dr-smith", "nurse-jones"],
+      "attending_physicians": ["dr-smith"]
+    }
+  },
+  "context": {}
+}

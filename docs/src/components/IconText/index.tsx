@@ -37,6 +37,18 @@ import TransformIcon from '@mui/icons-material/Transform';
 import LinkIcon from '@mui/icons-material/Link';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import BusinessIcon from '@mui/icons-material/Business';
+import DownloadIcon from '@mui/icons-material/Download';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ArchitectureIcon from '@mui/icons-material/Architecture';
+import BlockIcon from '@mui/icons-material/Block';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ReplayIcon from '@mui/icons-material/Replay';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import LanguageIcon from '@mui/icons-material/Language';
+import ScaleIcon from '@mui/icons-material/Scale';
+import PublishIcon from '@mui/icons-material/Publish';
+import UpdateIcon from '@mui/icons-material/Update';
+import DevicesIcon from '@mui/icons-material/Devices';
 
 const iconMap: Record<string, React.ElementType> = {
   // Navigation & Sections
@@ -85,6 +97,22 @@ const iconMap: Record<string, React.ElementType> = {
 
   // Enterprise
   'business': BusinessIcon,
+
+  // Downloads
+  'download': DownloadIcon,
+  'file-download': FileDownloadIcon,
+
+  // Architecture & Platform
+  'architecture': ArchitectureIcon,
+  'block': BlockIcon,
+  'visibility': VisibilityIcon,
+  'replay': ReplayIcon,
+  'trending': TrendingUpIcon,
+  'language': LanguageIcon,
+  'scale': ScaleIcon,
+  'deployment': PublishIcon,
+  'update': UpdateIcon,
+  'platform': DevicesIcon,
 };
 
 type IconSize = 'small' | 'medium' | 'large';

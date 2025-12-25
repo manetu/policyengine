@@ -1,0 +1,17 @@
+{
+  "principal": {
+    "sub": "admin-mary",
+    "mroles": ["mrn:iam:role:admin"],
+    "mgroups": [],
+    "mannotations": {}
+  },
+  "operation": "demographics:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:demographics:patient-12345",
+    "group": "mrn:iam:resource-group:admin-records",
+    "annotations": {
+      "patient_id": "patient-12345"
+    }
+  },
+  "context": {}
+}

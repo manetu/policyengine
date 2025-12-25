@@ -1,0 +1,23 @@
+{
+  "principal": {
+    "sub": "user-free-123",
+    "mroles": ["mrn:iam:role:free-tier"],
+    "mgroups": ["mrn:iam:group:hobby-developers"],
+    "mannotations": {
+      "subscription_tier": "free",
+      "enabled_features": [],
+      "quotas": {"api_calls": 1000, "storage_mb": 100}
+    }
+  },
+  "operation": "api:basic:data:read",
+  "resource": {
+    "id": "mrn:api:data",
+    "group": "mrn:iam:resource-group:api-resources",
+    "annotations": {
+      "resource_type": "api_calls"
+    }
+  },
+  "context": {
+    "current_usage": 1500
+  }
+}

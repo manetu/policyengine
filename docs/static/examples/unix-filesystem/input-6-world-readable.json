@@ -1,0 +1,21 @@
+{
+  "principal": {
+    "sub": "charlie",
+    "mroles": ["mrn:iam:role:user"],
+    "mgroups": ["mrn:iam:group:finance"]
+  },
+  "operation": "file:document:read",
+  "resource": {
+    "id": "mrn:fs:public:readme.txt",
+    "owner": "system",
+    "group": "mrn:iam:resource-group:files",
+    "annotations": {
+      "group": "mrn:iam:group:admins",
+      "mode": {
+        "owner": { "read": true, "write": true },
+        "group": { "read": true, "write": true },
+        "other": { "read": true, "write": false }
+      }
+    }
+  }
+}

@@ -55,8 +55,6 @@ flowchart TD
 
 <SectionHeader icon="security" level={2}>Complete PolicyDomain</SectionHeader>
 
-**[Download PolicyDomain](/examples/multi-tenant-saas/policydomain.yml)** | **[Download Test Input](/examples/multi-tenant-saas/input.json)**
-
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
 kind: PolicyDomain
@@ -423,6 +421,10 @@ spec:
       policy: *policy-require-auth
 ```
 
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a>
+</div>
+
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
 ### Test 1: Member Can Read Own Tenant Resources
@@ -448,7 +450,11 @@ An Acme Corp member can read resources in their tenant:
 }
 ```
 
-**Expected**: GRANT
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-1-member-read.json" download title="Download input-1-member-read.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" />
 
 ### Test 2: Member Can Create in Own Tenant
 
@@ -473,7 +479,11 @@ An Acme Corp member can create resources in their tenant:
 }
 ```
 
-**Expected**: GRANT (members can create)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-2-member-create.json" download title="Download input-2-member-create.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (members can create)
 
 ### Test 3: Member Cannot Delete (Admin Required)
 
@@ -498,7 +508,11 @@ An Acme Corp member cannot delete resources:
 }
 ```
 
-**Expected**: DENY (delete requires admin role)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-3-member-delete-denied.json" download title="Download input-3-member-delete-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (delete requires admin role)
 
 ### Test 4: Admin Can Delete
 
@@ -523,7 +537,11 @@ An Acme Corp admin can delete resources:
 }
 ```
 
-**Expected**: GRANT
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-4-admin-delete.json" download title="Download input-4-admin-delete.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" />
 
 ### Test 5: Cross-Tenant Access Denied
 
@@ -548,7 +566,11 @@ An Acme Corp member cannot access Globex Corp resources:
 }
 ```
 
-**Expected**: DENY (tenant boundary violation)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-5-cross-tenant-denied.json" download title="Download input-5-cross-tenant-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (tenant boundary violation)
 
 ### Test 6: Platform Admin Cross-Tenant Access
 
@@ -570,7 +592,11 @@ A platform admin can access any tenant's resources:
 }
 ```
 
-**Expected**: GRANT (platform admin bypasses tenant boundaries)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-6-platform-admin.json" download title="Download input-6-platform-admin.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (platform admin bypasses tenant boundaries)
 
 ### Test 7: Only Owner Can Access Billing
 
@@ -595,7 +621,11 @@ A member cannot access billing:
 }
 ```
 
-**Expected**: DENY (billing requires owner role)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-7-member-billing-denied.json" download title="Download input-7-member-billing-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (billing requires owner role)
 
 ### Test 8: Owner Can Access Billing
 
@@ -620,7 +650,11 @@ A tenant owner can access billing:
 }
 ```
 
-**Expected**: GRANT
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-8-owner-billing.json" download title="Download input-8-owner-billing.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" />
 
 ### Test 9: Shared Resources Cross-Tenant Read
 
@@ -649,7 +683,11 @@ Any authenticated user can read shared resources:
 }
 ```
 
-**Expected**: GRANT (shared resources allow cross-tenant read)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/multi-tenant-saas/input-9-shared-resources.json" download title="Download input-9-shared-resources.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (shared resources allow cross-tenant read)
 
 <SectionHeader icon="version" level={2}>Key Concepts Demonstrated</SectionHeader>
 
