@@ -65,7 +65,7 @@ flowchart TD
     H -->|No| C
 ```
 
-<SectionHeader icon="security" level={2}>Complete PolicyDomain</SectionHeader>
+<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="/examples/mcp-server/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
@@ -462,13 +462,9 @@ spec:
       policy: *policy-mcp-operation
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a>
-</div>
-
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
-### Test 1: Developer Can List GitHub Tools
+### Test 1: Developer Can List GitHub Tools <a href="/examples/mcp-server/input-1-list-tools.json" download title="Download input-1-list-tools.json"><IconText icon="download" /></a>
 
 A developer can discover available tools on the GitHub server:
 
@@ -491,13 +487,9 @@ A developer can discover available tools on the GitHub server:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-1-list-tools.json" download title="Download input-1-list-tools.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 2: Developer Can Call GitHub Tool
+### Test 2: Developer Can Call GitHub Tool <a href="/examples/mcp-server/input-2-call-tool.json" download title="Download input-2-call-tool.json"><IconText icon="download" /></a>
 
 A developer can invoke the create-issue tool:
 
@@ -520,13 +512,9 @@ A developer can invoke the create-issue tool:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-2-call-tool.json" download title="Download input-2-call-tool.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="grant" /> (developer has wildcard tool access)
 
-### Test 3: Developer Cannot Access Database Tools
+### Test 3: Developer Cannot Access Database Tools <a href="/examples/mcp-server/input-3-no-access.json" download title="Download input-3-no-access.json"><IconText icon="download" /></a>
 
 A developer cannot access database tools they're not assigned:
 
@@ -549,13 +537,9 @@ A developer cannot access database tools they're not assigned:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-3-no-access.json" download title="Download input-3-no-access.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="deny" /> (developer lacks database server access)
 
-### Test 4: Data Analyst Can Query Database
+### Test 4: Data Analyst Can Query Database <a href="/examples/mcp-server/input-4-analyst-query.json" download title="Download input-4-analyst-query.json"><IconText icon="download" /></a>
 
 A data analyst can use the database query tool:
 
@@ -578,13 +562,9 @@ A data analyst can use the database query tool:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-4-analyst-query.json" download title="Download input-4-analyst-query.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 5: Analyst Cannot Delete Database Entries
+### Test 5: Analyst Cannot Delete Database Entries <a href="/examples/mcp-server/input-5-analyst-no-delete.json" download title="Download input-5-analyst-no-delete.json"><IconText icon="download" /></a>
 
 An analyst has query access but not delete access:
 
@@ -607,13 +587,9 @@ An analyst has query access but not delete access:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-5-analyst-no-delete.json" download title="Download input-5-analyst-no-delete.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="deny" /> (analyst only has query tool access)
 
-### Test 6: Admin Can Access Any Tool
+### Test 6: Admin Can Access Any Tool <a href="/examples/mcp-server/input-6-admin-any.json" download title="Download input-6-admin-any.json"><IconText icon="download" /></a>
 
 A platform admin can access any MCP tool:
 
@@ -636,13 +612,9 @@ A platform admin can access any MCP tool:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-6-admin-any.json" download title="Download input-6-admin-any.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="grant" /> (admin role bypasses tool-level checks)
 
-### Test 7: Unauthenticated Ping Allowed
+### Test 7: Unauthenticated Ping Allowed <a href="/examples/mcp-server/input-7-unauth-ping.json" download title="Download input-7-unauth-ping.json"><IconText icon="download" /></a>
 
 Health checks work without authentication:
 
@@ -657,13 +629,9 @@ Health checks work without authentication:
 }
 ```
 
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-7-unauth-ping.json" download title="Download input-7-unauth-ping.json"><IconText icon="download" /></a>
-</div>
-
 **Expected**: <DecisionChip decision="grant" /> (ping uses tri-level override)
 
-### Test 8: Unauthenticated Tool Call Denied
+### Test 8: Unauthenticated Tool Call Denied <a href="/examples/mcp-server/input-8-unauth-denied.json" download title="Download input-8-unauth-denied.json"><IconText icon="download" /></a>
 
 Tool calls require authentication:
 
@@ -677,10 +645,6 @@ Tool calls require authentication:
   }
 }
 ```
-
-<div style={{textAlign: 'right'}}>
-  <a href="/examples/mcp-server/input-8-unauth-denied.json" download title="Download input-8-unauth-denied.json"><IconText icon="download" /></a>
-</div>
 
 **Expected**: <DecisionChip decision="deny" /> (no authentication)
 
