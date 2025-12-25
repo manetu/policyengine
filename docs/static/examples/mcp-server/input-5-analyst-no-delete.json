@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "analyst@example.com",
+    "mroles": ["mrn:iam:role:mcp-user"],
+    "mgroups": ["mrn:iam:group:data-analysts"],
+    "mannotations": {
+      "mcp_servers": ["mrn:mcp:server:database"],
+      "mcp_tools": ["mrn:mcp:database:tool:query"]
+    }
+  },
+  "operation": "mcp:tool:call",
+  "resource": {
+    "id": "mrn:mcp:database:tool:delete",
+    "group": "mrn:iam:resource-group:mcp-tools"
+  }
+}

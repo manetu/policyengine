@@ -1,0 +1,21 @@
+{
+  "principal": {
+    "sub": "alice",
+    "mroles": ["mrn:iam:role:user"],
+    "mgroups": ["mrn:iam:group:developers"]
+  },
+  "operation": "file:document:write",
+  "resource": {
+    "id": "mrn:fs:home:alice:document.txt",
+    "owner": "alice",
+    "group": "mrn:iam:resource-group:files",
+    "annotations": {
+      "group": "mrn:iam:group:developers",
+      "mode": {
+        "owner": { "read": true, "write": true },
+        "group": { "read": true, "write": false },
+        "other": { "read": false, "write": false }
+      }
+    }
+  }
+}

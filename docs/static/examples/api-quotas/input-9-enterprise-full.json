@@ -1,0 +1,18 @@
+{
+  "principal": {
+    "sub": "user-enterprise-789",
+    "mroles": ["mrn:iam:role:enterprise-tier"],
+    "mgroups": ["mrn:iam:group:enterprise-customer"],
+    "mannotations": {
+      "subscription_tier": "enterprise",
+      "enabled_features": ["export_csv", "export_pdf", "realtime_analytics", "bulk_import", "bulk_export"],
+      "quotas": {"api_calls": -1, "storage_mb": -1}
+    }
+  },
+  "operation": "api:admin:users:create",
+  "resource": {
+    "id": "mrn:api:admin:users",
+    "group": "mrn:iam:resource-group:api-resources"
+  },
+  "context": {}
+}

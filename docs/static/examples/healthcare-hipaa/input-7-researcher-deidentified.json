@@ -1,0 +1,19 @@
+{
+  "principal": {
+    "sub": "researcher-jane",
+    "mroles": ["mrn:iam:role:researcher"],
+    "mgroups": ["mrn:iam:group:research-team"],
+    "mannotations": {
+      "irb_approved": true
+    }
+  },
+  "operation": "dataset:read",
+  "resource": {
+    "id": "mrn:research:study-123:dataset:outcomes",
+    "group": "mrn:iam:resource-group:research-data",
+    "annotations": {
+      "de_identified": true
+    }
+  },
+  "context": {}
+}

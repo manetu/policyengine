@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "ceo@acme.com",
+    "mroles": ["mrn:iam:role:tenant-owner"],
+    "mgroups": ["mrn:iam:group:acme-corp:owners"],
+    "mannotations": {
+      "tenant_id": "acme-corp",
+      "tenant_roles": ["owner", "admin", "member", "viewer"]
+    }
+  },
+  "operation": "billing:read",
+  "resource": {
+    "id": "mrn:saas:acme-corp:billing:subscription",
+    "group": "mrn:iam:resource-group:billing"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "principal": {
+    "sub": "root",
+    "mroles": ["mrn:iam:role:superuser"],
+    "mgroups": ["mrn:iam:group:admins"]
+  },
+  "operation": "file:document:write",
+  "resource": {
+    "id": "mrn:fs:home:alice:locked.txt",
+    "owner": "alice",
+    "group": "mrn:iam:resource-group:files",
+    "annotations": {
+      "group": "mrn:iam:group:developers",
+      "mode": {
+        "owner": { "read": true, "write": false },
+        "group": { "read": false, "write": false },
+        "other": { "read": false, "write": false }
+      }
+    }
+  }
+}

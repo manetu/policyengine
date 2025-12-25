@@ -144,7 +144,10 @@
     "unmarshalling",
     "Parameterizing",
     "Mindmap",
-    "rwxrwxrwx"
+    "rwxrwxrwx",
+    "noauth",
+    "careteam",
+    "deidentified"
   ],
   "flagWords": [],
   "dictionaries": [
