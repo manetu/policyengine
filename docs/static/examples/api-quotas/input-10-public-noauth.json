@@ -1,0 +1,9 @@
+{
+  "principal": {},
+  "operation": "api:public:health:check",
+  "resource": {
+    "id": "mrn:api:health",
+    "group": "mrn:iam:resource-group:api-resources"
+  },
+  "context": {}
+}

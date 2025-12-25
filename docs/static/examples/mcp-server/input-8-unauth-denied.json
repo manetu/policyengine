@@ -1,0 +1,8 @@
+{
+  "principal": {},
+  "operation": "mcp:tool:call",
+  "resource": {
+    "id": "mrn:mcp:github:tool:list-repos",
+    "group": "mrn:iam:resource-group:mcp-tools"
+  }
+}

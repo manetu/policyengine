@@ -1,0 +1,18 @@
+{
+  "principal": {
+    "sub": "user-pro-456",
+    "mroles": ["mrn:iam:role:pro-tier"],
+    "mgroups": ["mrn:iam:group:small-business"],
+    "mannotations": {
+      "subscription_tier": "pro",
+      "enabled_features": ["export_csv", "realtime_analytics"],
+      "quotas": {"api_calls": 200000, "storage_mb": 20000}
+    }
+  },
+  "operation": "api:admin:users:create",
+  "resource": {
+    "id": "mrn:api:admin:users",
+    "group": "mrn:iam:resource-group:api-resources"
+  },
+  "context": {}
+}

@@ -1,0 +1,22 @@
+{
+  "principal": {
+    "sub": "nurse-jones",
+    "mroles": ["mrn:iam:role:nurse"],
+    "mgroups": ["mrn:iam:group:clinical-staff"],
+    "mannotations": {}
+  },
+  "operation": "record:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:record:patient-12345:mental-health",
+    "group": "mrn:iam:resource-group:phi",
+    "annotations": {
+      "patient_id": "patient-12345",
+      "sensitivity": "sensitive",
+      "care_team": ["dr-smith", "nurse-jones"],
+      "attending_physicians": ["dr-smith"],
+      "consent_required": true,
+      "consented_providers": ["dr-smith"]
+    }
+  },
+  "context": {}
+}

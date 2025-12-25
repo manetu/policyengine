@@ -1,0 +1,20 @@
+{
+  "principal": {
+    "sub": "dr-other",
+    "mroles": ["mrn:iam:role:physician"],
+    "mgroups": ["mrn:iam:group:clinical-staff"],
+    "mannotations": {}
+  },
+  "operation": "record:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:record:patient-12345:lab-results",
+    "group": "mrn:iam:resource-group:phi",
+    "annotations": {
+      "patient_id": "patient-12345",
+      "sensitivity": "clinical",
+      "care_team": ["dr-smith", "nurse-jones"],
+      "attending_physicians": ["dr-smith"]
+    }
+  },
+  "context": {}
+}

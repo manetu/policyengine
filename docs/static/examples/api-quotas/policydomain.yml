@@ -118,7 +118,7 @@ spec:
 
         # Helper: check if this is a public endpoint
         is_public if {
-            glob.match("api:public:.*", [], input.operation)
+            glob.match("api:public:*", [], input.operation)
         }
 
         # Public endpoints bypass auth (grant-override)

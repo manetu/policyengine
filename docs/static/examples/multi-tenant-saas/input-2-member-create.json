@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "alice@acme.com",
+    "mroles": ["mrn:iam:role:tenant-member"],
+    "mgroups": ["mrn:iam:group:acme-corp:members"],
+    "mannotations": {
+      "tenant_id": "acme-corp",
+      "tenant_roles": ["member", "viewer"]
+    }
+  },
+  "operation": "project:create",
+  "resource": {
+    "id": "mrn:saas:acme-corp:project:new-project",
+    "group": "mrn:iam:resource-group:tenant"
+  }
+}

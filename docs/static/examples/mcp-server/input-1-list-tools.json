@@ -1,0 +1,16 @@
+{
+  "principal": {
+    "sub": "dev@example.com",
+    "mroles": ["mrn:iam:role:mcp-user"],
+    "mgroups": ["mrn:iam:group:developers"],
+    "mannotations": {
+      "mcp_servers": ["mrn:mcp:server:github", "mrn:mcp:server:filesystem"],
+      "mcp_tools": ["mrn:mcp:github:tool:*", "mrn:mcp:filesystem:tool:read_file"]
+    }
+  },
+  "operation": "mcp:tool:list",
+  "resource": {
+    "id": "mrn:mcp:github:server",
+    "group": "mrn:iam:resource-group:mcp-servers"
+  }
+}

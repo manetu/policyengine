@@ -1,0 +1,22 @@
+{
+  "principal": {
+    "sub": "researcher-jane",
+    "mroles": ["mrn:iam:role:researcher"],
+    "mgroups": ["mrn:iam:group:research-team"],
+    "mannotations": {
+      "irb_approved": true
+    }
+  },
+  "operation": "record:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:record:patient-12345:lab-results",
+    "group": "mrn:iam:resource-group:phi",
+    "annotations": {
+      "patient_id": "patient-12345",
+      "sensitivity": "clinical",
+      "care_team": ["dr-smith"],
+      "attending_physicians": ["dr-smith"]
+    }
+  },
+  "context": {}
+}

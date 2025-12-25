@@ -1,0 +1,23 @@
+{
+  "principal": {
+    "sub": "dr-emergency",
+    "mroles": ["mrn:iam:role:physician"],
+    "mgroups": ["mrn:iam:group:clinical-staff"],
+    "mannotations": {}
+  },
+  "operation": "record:read",
+  "resource": {
+    "id": "mrn:ehr:hospital:record:patient-12345:allergies",
+    "group": "mrn:iam:resource-group:phi",
+    "annotations": {
+      "patient_id": "patient-12345",
+      "sensitivity": "clinical",
+      "care_team": ["dr-smith"],
+      "attending_physicians": ["dr-smith"]
+    }
+  },
+  "context": {
+    "break_glass": true,
+    "emergency_reason": "Patient unconscious in ER, need allergy history"
+  }
+}

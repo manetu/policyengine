@@ -59,8 +59,6 @@ flowchart TD
 
 <SectionHeader icon="security" level={2}>Complete PolicyDomain</SectionHeader>
 
-**[Download PolicyDomain](/examples/unix-filesystem/policydomain.yml)** | **[Download Test Input](/examples/unix-filesystem/input.json)**
-
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
 kind: PolicyDomain
@@ -264,6 +262,10 @@ spec:
       policy: *policy-require-auth
 ```
 
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a>
+</div>
+
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
 ### Test 1: Owner Read Access
@@ -294,9 +296,11 @@ The owner can read their own file with owner read permission:
 }
 ```
 
-**Expected**: GRANT (alice is owner, owner has read permission)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-1-owner-read.json" download title="Download input-1-owner-read.json"><IconText icon="download" /></a>
+</div>
 
-**[Download PolicyDomain](/examples/unix-filesystem/policydomain.yml)** | **[Download Test Input](/examples/unix-filesystem/input.json)**
+**Expected**: <DecisionChip decision="grant" /> (alice is owner, owner has read permission)
 
 ```bash
 mpe test decision -b policydomain.yml -i input.json | jq .decision
@@ -331,7 +335,11 @@ The owner can write to their own file:
 }
 ```
 
-**Expected**: GRANT (alice is owner, owner has write permission)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-2-owner-write.json" download title="Download input-2-owner-write.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (alice is owner, owner has write permission)
 
 ### Test 3: Group Read Access
 
@@ -361,7 +369,11 @@ A group member can read a file with group read permission:
 }
 ```
 
-**Expected**: GRANT (bob is in developers group, group has read permission)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-3-group-read.json" download title="Download input-3-group-read.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (bob is in developers group, group has read permission)
 
 ### Test 4: Group Write Denied
 
@@ -391,7 +403,11 @@ A group member cannot write to a file without group write permission:
 }
 ```
 
-**Expected**: DENY (bob is in group, but group lacks write permission)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-4-group-write-denied.json" download title="Download input-4-group-write-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (bob is in group, but group lacks write permission)
 
 ### Test 5: Other User Denied
 
@@ -421,7 +437,11 @@ A user not in the file's group falls back to "other" permissions:
 }
 ```
 
-**Expected**: DENY (charlie is not owner or in developers group, other has no read)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-5-other-denied.json" download title="Download input-5-other-denied.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (charlie is not owner or in developers group, other has no read)
 
 ### Test 6: World-Readable File
 
@@ -451,7 +471,11 @@ Any authenticated user can read a world-readable file:
 }
 ```
 
-**Expected**: GRANT (other has read permission)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-6-world-readable.json" download title="Download input-6-world-readable.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (other has read permission)
 
 ### Test 7: Superuser Override
 
@@ -481,7 +505,11 @@ A superuser can access any file regardless of permissions:
 }
 ```
 
-**Expected**: GRANT (superuser bypasses all permission checks)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-7-superuser.json" download title="Download input-7-superuser.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="grant" /> (superuser bypasses all permission checks)
 
 ### Test 8: Unauthenticated Access Denied
 
@@ -507,7 +535,11 @@ An unauthenticated request is denied at the operation phase:
 }
 ```
 
-**Expected**: DENY (no authentication)
+<div style={{textAlign: 'right'}}>
+  <a href="/examples/unix-filesystem/input-8-unauth.json" download title="Download input-8-unauth.json"><IconText icon="download" /></a>
+</div>
+
+**Expected**: <DecisionChip decision="deny" /> (no authentication)
 
 <SectionHeader icon="version" level={2}>Key Concepts Demonstrated</SectionHeader>
 
