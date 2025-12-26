@@ -50,8 +50,8 @@ When a principal has multiple roles, the policies are evaluated with OR semantic
 
 | Role Evaluations | Phase Result |
 |-----------------|--------------|
-| All DENY | DENY |
-| At least one GRANT | GRANT |
+| All DENY | <DecisionChip decision="deny" /> |
+| At least one GRANT | <DecisionChip decision="grant" /> |
 
 This means permissions are effectively additive—a principal gains the union of all their roles' permissions.
 

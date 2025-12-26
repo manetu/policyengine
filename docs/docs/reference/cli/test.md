@@ -228,7 +228,7 @@ This shows:
 }
 ```
 
-Expected: DENY (no principal — fails at operation phase before identity evaluation)
+Expected: <DecisionChip decision="deny" /> (no principal — fails at operation phase before identity evaluation)
 
 ### Test Role Access
 
@@ -243,7 +243,7 @@ Expected: DENY (no principal — fails at operation phase before identity evalua
 }
 ```
 
-Expected: DENY (viewer can't write)
+Expected: <DecisionChip decision="deny" /> (viewer can't write)
 
 ### Test Owner Access
 
@@ -259,7 +259,7 @@ Expected: DENY (viewer can't write)
 }
 ```
 
-Expected: GRANT (owner access)
+Expected: <DecisionChip decision="grant" /> (owner access)
 
 ## Exit Codes
 
