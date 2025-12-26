@@ -95,12 +95,12 @@ Every PDP decision produces an **AccessRecord** that captures the input PORC, th
 2. **PEP constructs** a [PORC expression](/concepts/porc) from the request context
 3. **Operation routing** selects the appropriate operation phase policy
 4. **Policy evaluation** happens in multiple phases:
-    - Phase 1: Operation policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policies#tri-level)
+    - Phase 1: [Operation](/concepts/operations) policies (public endpoints, JWT validation, bypass rules) — uses [tri-level output](/concepts/policies#tri-level)
     - Phase 2: Identity policies (role-based via [Roles](/concepts/roles) and [Groups](/concepts/groups))
     - Phase 3: Resource policies (via [Resource Groups](/concepts/resource-groups) — each resource belongs to a group that determines which policy applies)
-    - Phase 4: Scope policies (access-method constraints)
+    - Phase 4: [Scope](/concepts/scopes) policies (access-method constraints)
 5. **[AccessRecord](/concepts/audit) written**: Captures PORC, decision, and all evaluated policies
-6. **Decision returned**: GRANT or DENY
+6. **Decision returned**: <DecisionChip decision="grant" /> or <DecisionChip decision="deny" />
 
 ## Key Principles
 
