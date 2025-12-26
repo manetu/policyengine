@@ -9,18 +9,24 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/manetu/policyengine/internal/core/test"
 	"github.com/manetu/policyengine/pkg/core/config"
 	"github.com/stretchr/testify/assert"
 )
 
+// setupTestConfig configures the test environment to use the testdata config
+func setupTestConfig() {
+	_ = test.SetupTestConfig()
+}
+
 func TestInitConfig(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 	config.ResetConfig()
 	assert.NotNil(t, config.VConfig)
 }
 
 func TestConfigDefaults(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	// Check some default values
@@ -29,15 +35,12 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigWithCustomFilename(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
-	_ = os.Setenv(config.ConfigFileNameEnv, "mpe-config")
-	defer func() { _ = os.Unsetenv(config.ConfigFileNameEnv) }()
-
+	setupTestConfig()
 	config.ResetConfig()
 }
 
 func TestGetAuditEnvEmpty(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	// With no audit.env configuration, should return empty map
@@ -47,7 +50,7 @@ func TestGetAuditEnvEmpty(t *testing.T) {
 }
 
 func TestGetAuditEnvWithConfig(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	// Set up the audit.env configuration manually via Viper
@@ -71,7 +74,7 @@ func TestGetAuditEnvWithConfig(t *testing.T) {
 }
 
 func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	// Set up the audit.env configuration with an env var that doesn't exist
@@ -91,7 +94,7 @@ func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
 // TestConcurrentLoad tests that concurrent calls to Load() are race-free.
 // Run with: go test -race -run TestConcurrentLoad
 func TestConcurrentLoad(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../../..")
+	setupTestConfig()
 
 	const numGoroutines = 10
 

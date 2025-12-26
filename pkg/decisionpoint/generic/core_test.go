@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/manetu/policyengine/internal/core/test"
 	"github.com/manetu/policyengine/pkg/core"
 	"github.com/manetu/policyengine/pkg/core/accesslog"
 	"github.com/manetu/policyengine/pkg/core/config"
@@ -25,8 +26,8 @@ import (
 
 // setupTestPolicyEngine creates a PolicyEngine with mock mode enabled
 func setupTestPolicyEngine(t *testing.T) core.PolicyEngine {
-	// Set config path to find mpe-config.yaml (project root from pkg/decisionpoint/generic)
-	err := os.Setenv(config.ConfigPathEnv, "../../..")
+	// Set config path and filename to the testdata directory
+	err := test.SetupTestConfig()
 	require.NoError(t, err)
 
 	// Reset config to ensure clean state

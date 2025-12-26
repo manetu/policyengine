@@ -26,6 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// setupTestConfig configures the test environment to use the testdata config
+func setupTestConfig() {
+	_ = test.SetupTestConfig()
+}
+
 func createPE(t *testing.T, opa string) (chan *events.AccessRecord, core.PolicyEngine) {
 	pe, ch, err := test.NewTestPolicyEngine(1024)
 	assert.Nil(t, err)
@@ -66,7 +71,7 @@ func getBundleRefById(record *events.AccessRecord, ph events.AccessRecord_Bundle
 	return nil
 }
 func TestAuditDecision(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	ctx := context.Background()
 
@@ -1170,7 +1175,7 @@ func TestConcurrentPORC(t *testing.T) {
 // run in parallel, each initializing their own PolicyEngine.
 // Run with: go test -race -run TestConcurrentPolicyEngineInit
 func TestConcurrentPolicyEngineInit(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	const numGoroutines = 10
@@ -1307,7 +1312,7 @@ func TestWithAccessLog(t *testing.T) {
 
 // TestWithBackend verifies that WithBackend option properly configures the backend factory
 func TestWithBackend(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, false)
@@ -1324,7 +1329,7 @@ func TestWithBackend(t *testing.T) {
 
 // TestWithBackendMockModeEnabled verifies that WithBackend ignores the factory when mock mode is enabled
 func TestWithBackendMockModeEnabled(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, true)
@@ -1371,7 +1376,7 @@ func TestSetProbeMode(t *testing.T) {
 
 // TestEngineOptionsMultipleFuncs verifies that multiple option functions can be applied
 func TestEngineOptionsMultipleFuncs(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 
 	config.VConfig.Set(config.MockEnabled, false)
@@ -1479,7 +1484,7 @@ func createTempFileFromTestData(t *testing.T, testdataFile string) string {
 
 // TestNewLocalPolicyEngine_Success tests creating a PolicyEngine from valid domain files
 func TestNewLocalPolicyEngine_Success(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1497,7 +1502,7 @@ func TestNewLocalPolicyEngine_Success(t *testing.T) {
 
 // TestNewLocalPolicyEngine_MultipleDomains tests creating a PolicyEngine from multiple domain files
 func TestNewLocalPolicyEngine_MultipleDomains(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1512,7 +1517,7 @@ func TestNewLocalPolicyEngine_MultipleDomains(t *testing.T) {
 
 // TestNewLocalPolicyEngine_InvalidPath tests that a nonexistent path returns an error
 func TestNewLocalPolicyEngine_InvalidPath(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1524,7 +1529,7 @@ func TestNewLocalPolicyEngine_InvalidPath(t *testing.T) {
 
 // TestNewLocalPolicyEngine_InvalidDomain tests that an invalid domain returns an error
 func TestNewLocalPolicyEngine_InvalidDomain(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1538,7 +1543,7 @@ func TestNewLocalPolicyEngine_InvalidDomain(t *testing.T) {
 
 // TestNewLocalPolicyEngine_BadRego tests that a domain with invalid rego returns an error
 func TestNewLocalPolicyEngine_BadRego(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1552,7 +1557,7 @@ func TestNewLocalPolicyEngine_BadRego(t *testing.T) {
 
 // TestNewLocalPolicyEngine_EmptyPaths tests behavior with empty domain paths
 func TestNewLocalPolicyEngine_EmptyPaths(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1567,7 +1572,7 @@ func TestNewLocalPolicyEngine_EmptyPaths(t *testing.T) {
 
 // TestNewLocalPolicyEngine_WithAccessLog tests that access log options are passed through
 func TestNewLocalPolicyEngine_WithAccessLog(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1583,7 +1588,7 @@ func TestNewLocalPolicyEngine_WithAccessLog(t *testing.T) {
 
 // TestNewLocalPolicyEngine_Authorize tests end-to-end authorization with local domains
 func TestNewLocalPolicyEngine_Authorize(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1615,7 +1620,7 @@ func TestNewLocalPolicyEngine_Authorize(t *testing.T) {
 
 // TestNewLocalPolicyEngine_AuthorizeDenied tests authorization denial with local domains
 func TestNewLocalPolicyEngine_AuthorizeDenied(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1647,7 +1652,7 @@ func TestNewLocalPolicyEngine_AuthorizeDenied(t *testing.T) {
 
 // TestNewLocalPolicyEngine_AuthorizeWithProbeMode tests probe mode with local domains
 func TestNewLocalPolicyEngine_AuthorizeWithProbeMode(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
@@ -1679,7 +1684,7 @@ func TestNewLocalPolicyEngine_AuthorizeWithProbeMode(t *testing.T) {
 
 // TestNewLocalPolicyEngine_MapInput tests authorization with map input instead of JSON string
 func TestNewLocalPolicyEngine_MapInput(t *testing.T) {
-	_ = os.Setenv(config.ConfigPathEnv, "../..")
+	setupTestConfig()
 	config.ResetConfig()
 	config.VConfig.Set(config.MockEnabled, false)
 	defer config.VConfig.Set(config.MockEnabled, true)
