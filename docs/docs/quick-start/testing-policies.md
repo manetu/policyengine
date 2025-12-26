@@ -251,7 +251,7 @@ You may omit '-i -' when you wish to use stdin-based input because it is the def
 }
 ```
 
-Expected: DENY (no principal)
+Expected: <DecisionChip decision="deny" /> (no principal)
 
 ### Test Role-Based Access
 
@@ -269,7 +269,7 @@ Expected: DENY (no principal)
 }
 ```
 
-Expected: DENY (viewer role typically lacks write permissions)
+Expected: <DecisionChip decision="deny" /> (viewer role typically lacks write permissions)
 
 ### Test Resource Ownership
 
@@ -288,7 +288,7 @@ Expected: DENY (viewer role typically lacks write permissions)
 }
 ```
 
-Expected: GRANT (owner access, assuming role and resource-group policies permit owner operations)
+Expected: <DecisionChip decision="grant" /> (owner access, assuming role and resource-group policies permit owner operations)
 
 ## Best Practices
 

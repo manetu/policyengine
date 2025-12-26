@@ -51,7 +51,7 @@ The **Policy Decision Point** is responsible for evaluating access control polic
 In the Manetu PolicyEngine, the PDP is the core engine that:
 - Receives PORC expressions
 - Evaluates policies using OPA/Rego
-- Returns GRANT or DENY decisions
+- Returns <DecisionChip decision="grant" /> or <DecisionChip decision="deny" /> decisions
 
 ### Policy Enforcement Point (PEP)
 

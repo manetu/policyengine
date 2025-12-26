@@ -36,10 +36,10 @@ The PolicyEngine processes all phases in **parallel** for maximum performance. H
 
 | Phase | Mandatory | Default if Missing |
 |-------|-----------|-------------------|
-| Operation | Yes | DENY |
-| Identity | Yes | DENY |
-| Resource | Yes | DENY |
-| Scope | No | GRANT |
+| Operation | Yes | <DecisionChip decision="deny" /> |
+| Identity | Yes | <DecisionChip decision="deny" /> |
+| Resource | Yes | <DecisionChip decision="deny" /> |
+| Scope | No | <DecisionChip decision="grant" /> |
 
 :::warning Important
 If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, it defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
