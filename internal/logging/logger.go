@@ -7,6 +7,7 @@ package logging
 import (
 	"io"
 	"os"
+	"sync"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,6 +17,7 @@ import (
 
 // Logger is a wrapper around zap.Logger
 type Logger struct {
+	mu     sync.RWMutex
 	module string
 	logger *zap.Logger
 	sugar  *zap.SugaredLogger
@@ -83,16 +85,23 @@ func newLogger(module string) *Logger {
 //	         logger.Debugf()
 //	     }
 func (l *Logger) IsDebugEnabled() bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	return l.level <= zapcore.DebugLevel
 }
 
 // IsTraceEnabled ...
 func (l *Logger) IsTraceEnabled() bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	return l.level <= zapcore.DebugLevel // zap doesn't have trace, use debug
 }
 
 // SetLevel sets the logging level
 func (l *Logger) SetLevel(level zapcore.Level) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	l.level = level
 	// Recreate the logger with the new level
 	encoderConfig := zap.NewProductionEncoderConfig()
@@ -131,11 +140,15 @@ func (l *Logger) SetLevel(level zapcore.Level) {
 
 // IsLevelEnabled checks if a level is enabled
 func (l *Logger) IsLevelEnabled(level zapcore.Level) bool {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	return l.level <= level
 }
 
 // Out is for compatibility with tests and viper - returns the output writer
 func (l *Logger) Out() io.Writer {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	if l.writer != nil {
 		return l.writer
 	}
@@ -144,6 +157,9 @@ func (l *Logger) Out() io.Writer {
 
 // SetOut sets the output writer (for tests)
 func (l *Logger) SetOut(w io.Writer) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	l.writer = w
 	// Recreate logger with custom writer
 	encoderConfig := zap.NewProductionEncoderConfig()
@@ -173,9 +189,16 @@ func (l *Logger) SetOut(w io.Writer) {
 	l.sugar = l.logger.Sugar()
 }
 
+// getSugar returns the sugared logger with proper read locking
+func (l *Logger) getSugar() *zap.SugaredLogger {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	return l.sugar
+}
+
 // Fatal logs fatal message
 func (l *Logger) Fatal(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -184,7 +207,7 @@ func (l *Logger) Fatal(actorID, actionID string, args ...interface{}) {
 
 // Fatalf logs fatal message
 func (l *Logger) Fatalf(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -193,7 +216,7 @@ func (l *Logger) Fatalf(actorID, actionID string, format string, args ...interfa
 
 // Panic logs panic message
 func (l *Logger) Panic(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -202,7 +225,7 @@ func (l *Logger) Panic(actorID, actionID string, args ...interface{}) {
 
 // Panicf logs panic message
 func (l *Logger) Panicf(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -211,7 +234,7 @@ func (l *Logger) Panicf(actorID, actionID string, format string, args ...interfa
 
 // Trace log trace message
 func (l *Logger) Trace(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -220,7 +243,7 @@ func (l *Logger) Trace(actorID, actionID string, args ...interface{}) {
 
 // Tracef log trace message
 func (l *Logger) Tracef(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -229,7 +252,7 @@ func (l *Logger) Tracef(actorID, actionID string, format string, args ...interfa
 
 // Debug log debug message
 func (l *Logger) Debug(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -238,7 +261,7 @@ func (l *Logger) Debug(actorID, actionID string, args ...interface{}) {
 
 // Debugf log debug message
 func (l *Logger) Debugf(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -247,7 +270,7 @@ func (l *Logger) Debugf(actorID, actionID string, format string, args ...interfa
 
 // Info logs info message
 func (l *Logger) Info(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -256,7 +279,7 @@ func (l *Logger) Info(actorID, actionID string, args ...interface{}) {
 
 // Infof logs info message
 func (l *Logger) Infof(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -265,7 +288,7 @@ func (l *Logger) Infof(actorID, actionID string, format string, args ...interfac
 
 // Warn logs warning message
 func (l *Logger) Warn(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -274,7 +297,7 @@ func (l *Logger) Warn(actorID, actionID string, args ...interface{}) {
 
 // Warnf logs warning message
 func (l *Logger) Warnf(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -283,7 +306,7 @@ func (l *Logger) Warnf(actorID, actionID string, format string, args ...interfac
 
 // Error logs error message
 func (l *Logger) Error(actorID, actionID string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
@@ -292,7 +315,7 @@ func (l *Logger) Error(actorID, actionID string, args ...interface{}) {
 
 // Errorf logs error message
 func (l *Logger) Errorf(actorID, actionID string, format string, args ...interface{}) {
-	l.sugar.With(
+	l.getSugar().With(
 		zap.String(actor, actorID),
 		zap.String(action, actionID),
 		zap.String(module, l.module),
