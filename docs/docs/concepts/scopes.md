@@ -74,11 +74,11 @@ Effective Access: Constrained by OAuth scope policies
 
 Scopes are evaluated in **Phase 4** of [Policy Conjunction](/concepts/policy-conjunction). The scope phase runs in parallel with other phases but has unique behavior:
 
-| Condition | Scope Phase Result |
-|-----------|-------------------|
-| No scopes in PORC | **GRANT** (phase is skipped) |
-| Scopes present, at least one GRANT | **GRANT** |
-| Scopes present, all DENY | **DENY** |
+| Condition | Scope Phase Result                                   |
+|-----------|------------------------------------------------------|
+| No scopes in PORC | <DecisionChip decision="grant" /> (phase is skipped) |
+| Scopes present, at least one GRANT | <DecisionChip decision="grant" />                    |
+| Scopes present, all DENY | <DecisionChip decision="deny" />                     |
 
 ### Multiple Scopes
 

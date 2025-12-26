@@ -29,7 +29,7 @@ When a request involves a resource:
 
 1. The PolicyEngine identifies which Resource Group the resource belongs to
 2. The group's associated policy is loaded for Phase 3 (Resource Phase) evaluation
-3. The policy evaluates the PORC expression and returns GRANT or DENY
+3. The policy evaluates the PORC expression and returns <DecisionChip decision="grant" /> or <DecisionChip decision="deny" />
 4. This decision contributes to the overall [Policy Conjunction](/concepts/policy-conjunction)
 
 ## Defining Resource Groups
