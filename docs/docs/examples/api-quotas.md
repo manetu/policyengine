@@ -51,7 +51,7 @@ flowchart TD
     H -->|Yes| J[GRANT]
 ```
 
-<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="/examples/api-quotas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
+<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="api-quotas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
@@ -380,7 +380,7 @@ spec:
 
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
-### Test 1: Free Tier Basic Access <a href="/examples/api-quotas/input-1-free-basic.json" download title="Download input-1-free-basic.json"><IconText icon="download" /></a>
+### Test 1: Free Tier Basic Access <a href="api-quotas/input-1-free-basic.json" download title="Download input-1-free-basic.json"><IconText icon="download" /></a>
 
 A free tier user can access basic endpoints:
 
@@ -407,7 +407,7 @@ A free tier user can access basic endpoints:
 
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 2: Free Tier Advanced Endpoint Denied <a href="/examples/api-quotas/input-2-free-advanced-denied.json" download title="Download input-2-free-advanced-denied.json"><IconText icon="download" /></a>
+### Test 2: Free Tier Advanced Endpoint Denied <a href="api-quotas/input-2-free-advanced-denied.json" download title="Download input-2-free-advanced-denied.json"><IconText icon="download" /></a>
 
 A free tier user cannot access pro endpoints:
 
@@ -434,7 +434,7 @@ A free tier user cannot access pro endpoints:
 
 **Expected**: <DecisionChip decision="deny" /> (advanced requires pro tier)
 
-### Test 3: Pro Tier Advanced Access <a href="/examples/api-quotas/input-3-pro-advanced.json" download title="Download input-3-pro-advanced.json"><IconText icon="download" /></a>
+### Test 3: Pro Tier Advanced Access <a href="api-quotas/input-3-pro-advanced.json" download title="Download input-3-pro-advanced.json"><IconText icon="download" /></a>
 
 A pro tier user can access advanced endpoints:
 
@@ -461,7 +461,7 @@ A pro tier user can access advanced endpoints:
 
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 4: Pro Tier Enterprise Endpoint Denied <a href="/examples/api-quotas/input-4-pro-enterprise-denied.json" download title="Download input-4-pro-enterprise-denied.json"><IconText icon="download" /></a>
+### Test 4: Pro Tier Enterprise Endpoint Denied <a href="api-quotas/input-4-pro-enterprise-denied.json" download title="Download input-4-pro-enterprise-denied.json"><IconText icon="download" /></a>
 
 A pro tier user cannot access enterprise endpoints:
 
@@ -488,7 +488,7 @@ A pro tier user cannot access enterprise endpoints:
 
 **Expected**: <DecisionChip decision="deny" /> (admin requires enterprise tier)
 
-### Test 5: Feature Flag Enabled <a href="/examples/api-quotas/input-5-feature-enabled.json" download title="Download input-5-feature-enabled.json"><IconText icon="download" /></a>
+### Test 5: Feature Flag Enabled <a href="api-quotas/input-5-feature-enabled.json" download title="Download input-5-feature-enabled.json"><IconText icon="download" /></a>
 
 A pro user with CSV export feature can export:
 
@@ -515,7 +515,7 @@ A pro user with CSV export feature can export:
 
 **Expected**: <DecisionChip decision="grant" /> (export_csv feature is enabled)
 
-### Test 6: Feature Flag Disabled <a href="/examples/api-quotas/input-6-feature-disabled.json" download title="Download input-6-feature-disabled.json"><IconText icon="download" /></a>
+### Test 6: Feature Flag Disabled <a href="api-quotas/input-6-feature-disabled.json" download title="Download input-6-feature-disabled.json"><IconText icon="download" /></a>
 
 A pro user without PDF export feature cannot export PDF:
 
@@ -542,7 +542,7 @@ A pro user without PDF export feature cannot export PDF:
 
 **Expected**: <DecisionChip decision="deny" /> (export_pdf feature not enabled for pro)
 
-### Test 7: Within Quota <a href="/examples/api-quotas/input-7-within-quota.json" download title="Download input-7-within-quota.json"><IconText icon="download" /></a>
+### Test 7: Within Quota <a href="api-quotas/input-7-within-quota.json" download title="Download input-7-within-quota.json"><IconText icon="download" /></a>
 
 A user within their quota can proceed:
 
@@ -574,7 +574,7 @@ A user within their quota can proceed:
 
 **Expected**: <DecisionChip decision="grant" /> (50000 < 200000 quota)
 
-### Test 8: Over Quota <a href="/examples/api-quotas/input-8-over-quota.json" download title="Download input-8-over-quota.json"><IconText icon="download" /></a>
+### Test 8: Over Quota <a href="api-quotas/input-8-over-quota.json" download title="Download input-8-over-quota.json"><IconText icon="download" /></a>
 
 A user over their quota is denied:
 
@@ -606,7 +606,7 @@ A user over their quota is denied:
 
 **Expected**: <DecisionChip decision="deny" /> (1500 >= 1000 quota)
 
-### Test 9: Enterprise Full Access <a href="/examples/api-quotas/input-9-enterprise-full.json" download title="Download input-9-enterprise-full.json"><IconText icon="download" /></a>
+### Test 9: Enterprise Full Access <a href="api-quotas/input-9-enterprise-full.json" download title="Download input-9-enterprise-full.json"><IconText icon="download" /></a>
 
 An enterprise user has access to everything:
 
@@ -633,7 +633,7 @@ An enterprise user has access to everything:
 
 **Expected**: <DecisionChip decision="grant" /> (enterprise has access to all endpoints)
 
-### Test 10: Public Endpoint No Auth <a href="/examples/api-quotas/input-10-public-noauth.json" download title="Download input-10-public-noauth.json"><IconText icon="download" /></a>
+### Test 10: Public Endpoint No Auth <a href="api-quotas/input-10-public-noauth.json" download title="Download input-10-public-noauth.json"><IconText icon="download" /></a>
 
 Public endpoints work without authentication:
 
@@ -651,7 +651,7 @@ Public endpoints work without authentication:
 
 **Expected**: <DecisionChip decision="grant" /> (public endpoints use tri-level override)
 
-### Test 11: Read-Only API Key Scope <a href="/examples/api-quotas/input-11-readonly-scope.json" download title="Download input-11-readonly-scope.json"><IconText icon="download" /></a>
+### Test 11: Read-Only API Key Scope <a href="api-quotas/input-11-readonly-scope.json" download title="Download input-11-readonly-scope.json"><IconText icon="download" /></a>
 
 An API key with read-only scope cannot write:
 
