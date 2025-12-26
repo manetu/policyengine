@@ -44,7 +44,7 @@ flowchart TD
 | **Sensitive** | Mental health, HIV, substance abuse | Physician (with consent) |
 | **Restricted** | Psychiatric notes, genetic data | Attending physician only |
 
-<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="/examples/healthcare-hipaa/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
+<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="healthcare-hipaa/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
@@ -478,7 +478,7 @@ spec:
 
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
-### Test 1: Patient Can Read Own Records <a href="/examples/healthcare-hipaa/input-1-patient-own.json" download title="Download input-1-patient-own.json"><IconText icon="download" /></a>
+### Test 1: Patient Can Read Own Records <a href="healthcare-hipaa/input-1-patient-own.json" download title="Download input-1-patient-own.json"><IconText icon="download" /></a>
 
 A patient can view their own medical records:
 
@@ -509,7 +509,7 @@ A patient can view their own medical records:
 
 **Expected**: <DecisionChip decision="grant" /> (patient accessing own records)
 
-### Test 2: Attending Physician Full Access <a href="/examples/healthcare-hipaa/input-2-attending-full.json" download title="Download input-2-attending-full.json"><IconText icon="download" /></a>
+### Test 2: Attending Physician Full Access <a href="healthcare-hipaa/input-2-attending-full.json" download title="Download input-2-attending-full.json"><IconText icon="download" /></a>
 
 The attending physician can access all patient data:
 
@@ -538,7 +538,7 @@ The attending physician can access all patient data:
 
 **Expected**: <DecisionChip decision="grant" /> (attending physician has full access)
 
-### Test 3: Nurse Care Team Clinical Access <a href="/examples/healthcare-hipaa/input-3-nurse-clinical.json" download title="Download input-3-nurse-clinical.json"><IconText icon="download" /></a>
+### Test 3: Nurse Care Team Clinical Access <a href="healthcare-hipaa/input-3-nurse-clinical.json" download title="Download input-3-nurse-clinical.json"><IconText icon="download" /></a>
 
 A nurse on the care team can access clinical records:
 
@@ -567,7 +567,7 @@ A nurse on the care team can access clinical records:
 
 **Expected**: <DecisionChip decision="grant" /> (nurse has clinical clearance)
 
-### Test 4: Nurse Cannot Access Sensitive Records <a href="/examples/healthcare-hipaa/input-4-nurse-sensitive-denied.json" download title="Download input-4-nurse-sensitive-denied.json"><IconText icon="download" /></a>
+### Test 4: Nurse Cannot Access Sensitive Records <a href="healthcare-hipaa/input-4-nurse-sensitive-denied.json" download title="Download input-4-nurse-sensitive-denied.json"><IconText icon="download" /></a>
 
 A nurse cannot access sensitive records without consent:
 
@@ -598,7 +598,7 @@ A nurse cannot access sensitive records without consent:
 
 **Expected**: <DecisionChip decision="deny" /> (nurse clearance < sensitive, and no consent)
 
-### Test 5: Non-Care-Team Physician Limited Access <a href="/examples/healthcare-hipaa/input-5-non-careteam-denied.json" download title="Download input-5-non-careteam-denied.json"><IconText icon="download" /></a>
+### Test 5: Non-Care-Team Physician Limited Access <a href="healthcare-hipaa/input-5-non-careteam-denied.json" download title="Download input-5-non-careteam-denied.json"><IconText icon="download" /></a>
 
 A physician not on the care team can only access administrative data:
 
@@ -627,7 +627,7 @@ A physician not on the care team can only access administrative data:
 
 **Expected**: <DecisionChip decision="deny" /> (not on care team, record is clinical not administrative)
 
-### Test 6: Break-Glass Emergency Access <a href="/examples/healthcare-hipaa/input-6-break-glass.json" download title="Download input-6-break-glass.json"><IconText icon="download" /></a>
+### Test 6: Break-Glass Emergency Access <a href="healthcare-hipaa/input-6-break-glass.json" download title="Download input-6-break-glass.json"><IconText icon="download" /></a>
 
 Any licensed provider can use break-glass access:
 
@@ -659,7 +659,7 @@ Any licensed provider can use break-glass access:
 
 **Expected**: <DecisionChip decision="grant" /> (break-glass access for emergency)
 
-### Test 7: Researcher De-identified Access <a href="/examples/healthcare-hipaa/input-7-researcher-deidentified.json" download title="Download input-7-researcher-deidentified.json"><IconText icon="download" /></a>
+### Test 7: Researcher De-identified Access <a href="healthcare-hipaa/input-7-researcher-deidentified.json" download title="Download input-7-researcher-deidentified.json"><IconText icon="download" /></a>
 
 A researcher can access de-identified data:
 
@@ -687,7 +687,7 @@ A researcher can access de-identified data:
 
 **Expected**: <DecisionChip decision="grant" /> (researcher accessing de-identified data)
 
-### Test 8: Researcher Cannot Access Identified Data <a href="/examples/healthcare-hipaa/input-8-researcher-phi-denied.json" download title="Download input-8-researcher-phi-denied.json"><IconText icon="download" /></a>
+### Test 8: Researcher Cannot Access Identified Data <a href="healthcare-hipaa/input-8-researcher-phi-denied.json" download title="Download input-8-researcher-phi-denied.json"><IconText icon="download" /></a>
 
 A researcher cannot access identified patient data:
 
@@ -718,7 +718,7 @@ A researcher cannot access identified patient data:
 
 **Expected**: <DecisionChip decision="deny" /> (researcher cannot access PHI)
 
-### Test 9: Admin Can Access Demographics <a href="/examples/healthcare-hipaa/input-9-admin-demographics.json" download title="Download input-9-admin-demographics.json"><IconText icon="download" /></a>
+### Test 9: Admin Can Access Demographics <a href="healthcare-hipaa/input-9-admin-demographics.json" download title="Download input-9-admin-demographics.json"><IconText icon="download" /></a>
 
 An admin can access administrative records:
 

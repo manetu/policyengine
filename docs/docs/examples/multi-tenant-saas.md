@@ -53,7 +53,7 @@ flowchart TD
     H -->|Yes| I[GRANT]
 ```
 
-<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="/examples/multi-tenant-saas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
+<SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="multi-tenant-saas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
 apiVersion: iamlite.manetu.io/v1alpha4
@@ -423,7 +423,7 @@ spec:
 
 <SectionHeader icon="test" level={2}>Test Cases</SectionHeader>
 
-### Test 1: Member Can Read Own Tenant Resources <a href="/examples/multi-tenant-saas/input-1-member-read.json" download title="Download input-1-member-read.json"><IconText icon="download" /></a>
+### Test 1: Member Can Read Own Tenant Resources <a href="multi-tenant-saas/input-1-member-read.json" download title="Download input-1-member-read.json"><IconText icon="download" /></a>
 
 An Acme Corp member can read resources in their tenant:
 
@@ -448,7 +448,7 @@ An Acme Corp member can read resources in their tenant:
 
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 2: Member Can Create in Own Tenant <a href="/examples/multi-tenant-saas/input-2-member-create.json" download title="Download input-2-member-create.json"><IconText icon="download" /></a>
+### Test 2: Member Can Create in Own Tenant <a href="multi-tenant-saas/input-2-member-create.json" download title="Download input-2-member-create.json"><IconText icon="download" /></a>
 
 An Acme Corp member can create resources in their tenant:
 
@@ -473,7 +473,7 @@ An Acme Corp member can create resources in their tenant:
 
 **Expected**: <DecisionChip decision="grant" /> (members can create)
 
-### Test 3: Member Cannot Delete (Admin Required) <a href="/examples/multi-tenant-saas/input-3-member-delete-denied.json" download title="Download input-3-member-delete-denied.json"><IconText icon="download" /></a>
+### Test 3: Member Cannot Delete (Admin Required) <a href="multi-tenant-saas/input-3-member-delete-denied.json" download title="Download input-3-member-delete-denied.json"><IconText icon="download" /></a>
 
 An Acme Corp member cannot delete resources:
 
@@ -498,7 +498,7 @@ An Acme Corp member cannot delete resources:
 
 **Expected**: <DecisionChip decision="deny" /> (delete requires admin role)
 
-### Test 4: Admin Can Delete <a href="/examples/multi-tenant-saas/input-4-admin-delete.json" download title="Download input-4-admin-delete.json"><IconText icon="download" /></a>
+### Test 4: Admin Can Delete <a href="multi-tenant-saas/input-4-admin-delete.json" download title="Download input-4-admin-delete.json"><IconText icon="download" /></a>
 
 An Acme Corp admin can delete resources:
 
@@ -523,7 +523,7 @@ An Acme Corp admin can delete resources:
 
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 5: Cross-Tenant Access Denied <a href="/examples/multi-tenant-saas/input-5-cross-tenant-denied.json" download title="Download input-5-cross-tenant-denied.json"><IconText icon="download" /></a>
+### Test 5: Cross-Tenant Access Denied <a href="multi-tenant-saas/input-5-cross-tenant-denied.json" download title="Download input-5-cross-tenant-denied.json"><IconText icon="download" /></a>
 
 An Acme Corp member cannot access Globex Corp resources:
 
@@ -548,7 +548,7 @@ An Acme Corp member cannot access Globex Corp resources:
 
 **Expected**: <DecisionChip decision="deny" /> (tenant boundary violation)
 
-### Test 6: Platform Admin Cross-Tenant Access <a href="/examples/multi-tenant-saas/input-6-platform-admin.json" download title="Download input-6-platform-admin.json"><IconText icon="download" /></a>
+### Test 6: Platform Admin Cross-Tenant Access <a href="multi-tenant-saas/input-6-platform-admin.json" download title="Download input-6-platform-admin.json"><IconText icon="download" /></a>
 
 A platform admin can access any tenant's resources:
 
@@ -570,7 +570,7 @@ A platform admin can access any tenant's resources:
 
 **Expected**: <DecisionChip decision="grant" /> (platform admin bypasses tenant boundaries)
 
-### Test 7: Only Owner Can Access Billing <a href="/examples/multi-tenant-saas/input-7-member-billing-denied.json" download title="Download input-7-member-billing-denied.json"><IconText icon="download" /></a>
+### Test 7: Only Owner Can Access Billing <a href="multi-tenant-saas/input-7-member-billing-denied.json" download title="Download input-7-member-billing-denied.json"><IconText icon="download" /></a>
 
 A member cannot access billing:
 
@@ -595,7 +595,7 @@ A member cannot access billing:
 
 **Expected**: <DecisionChip decision="deny" /> (billing requires owner role)
 
-### Test 8: Owner Can Access Billing <a href="/examples/multi-tenant-saas/input-8-owner-billing.json" download title="Download input-8-owner-billing.json"><IconText icon="download" /></a>
+### Test 8: Owner Can Access Billing <a href="multi-tenant-saas/input-8-owner-billing.json" download title="Download input-8-owner-billing.json"><IconText icon="download" /></a>
 
 A tenant owner can access billing:
 
@@ -620,7 +620,7 @@ A tenant owner can access billing:
 
 **Expected**: <DecisionChip decision="grant" />
 
-### Test 9: Shared Resources Cross-Tenant Read <a href="/examples/multi-tenant-saas/input-9-shared-resources.json" download title="Download input-9-shared-resources.json"><IconText icon="download" /></a>
+### Test 9: Shared Resources Cross-Tenant Read <a href="multi-tenant-saas/input-9-shared-resources.json" download title="Download input-9-shared-resources.json"><IconText icon="download" /></a>
 
 Any authenticated user can read shared resources:
 
