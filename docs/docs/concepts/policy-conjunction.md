@@ -110,7 +110,8 @@ principal:
     - "mrn:iam:role:editor"
     - "mrn:iam:role:viewer"
   scopes:
-    - "mrn:iam:scope:write"
+    - "mrn:iam:scope:documents"
+    - "mrn:iam:scope:read-only"
 operation: "api:documents:update"
 resource:
   id: "mrn:data:document:doc456"
@@ -133,8 +134,9 @@ The PolicyEngine evaluates:
     - Document policy → <DecisionChip decision="grant" /> (user is owner)
     - **Phase result**: <DecisionChip decision="grant" />
 
-4. **Scope Phase** (1 policy, scope present)
-    - Write scope policy → <DecisionChip decision="grant" /> (write operation allowed)
+4. **Scope Phase** (2 scopes present, 2 policies)
+    - Document scope policy → <DecisionChip decision="grant" /> (operations on document resources allowed)
+    - Read-only scope policy → <DecisionChip decision="deny" /> (read-only)
     - **Phase result**: <DecisionChip decision="grant" />
 
 **Final Decision:** <DecisionChip decision="grant" /> (all phases agreed)
