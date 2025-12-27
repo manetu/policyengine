@@ -5,3 +5,6 @@ target/
 *.out
 .vscode
 .claude
+
+# Generated during artifact builds
+NOTICES
