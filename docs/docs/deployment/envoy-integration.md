@@ -182,12 +182,12 @@ MPE_LOG_LEVEL=.:debug mpe serve -b domain.yml -p envoy --port 9001
 
 ### Common Issues
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Connection refused | Server not running | Check server is started |
-| Timeout | Slow policy evaluation | Optimize policies, increase timeout |
-| Always denied | Missing mapper | Ensure mapper matches requests |
-| JWT errors | Invalid token format | Check JWT format in mapper |
+| Issue              | Cause                  | Solution                            |
+|--------------------|------------------------|-------------------------------------|
+| Connection refused | Server not running     | Check server is started             |
+| Timeout            | Slow policy evaluation | Optimize policies, increase timeout |
+| Always denied      | Missing mapper         | Ensure mapper matches requests      |
+| JWT errors         | Invalid token format   | Check JWT format in mapper          |
 
 ## Best Practices
 

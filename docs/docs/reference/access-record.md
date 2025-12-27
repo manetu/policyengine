@@ -10,10 +10,10 @@ Complete reference for the AccessRecord structure emitted by the Policy Decision
 
 The AccessRecord captures the complete context of a policy evaluation, enabling audit, debugging, analytics, and policy replay.
 
-| Output | Availability | Description |
-|--------|--------------|-------------|
+| Output         | Availability                        | Description                                    |
+|----------------|-------------------------------------|------------------------------------------------|
 | JSON to stdout | <FeatureChip variant="community" /> | Stream records for custom processing pipelines |
-| ElasticSearch | <FeatureChip variant="premium" /> | Durable storage with indexing and analytics |
+| ElasticSearch  | <FeatureChip variant="premium" />   | Durable storage with indexing and analytics    |
 
 ## Top-Level Structure
 
@@ -38,11 +38,11 @@ The AccessRecord captures the complete context of a policy evaluation, enabling 
 
 Contextual information about the decision.
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `timestamp` | string (ISO 8601) | When the decision was made |
-| `id` | string (UUID) | Unique identifier for this record |
-| `env` | object | Optional key-value pairs for deployment context |
+| Field       | Type              | Description                                     |
+|-------------|-------------------|-------------------------------------------------|
+| `timestamp` | string (ISO 8601) | When the decision was made                      |
+| `id`        | string (UUID)     | Unique identifier for this record               |
+| `env`       | object            | Optional key-value pairs for deployment context |
 
 **Example:**
 
@@ -62,10 +62,10 @@ Contextual information about the decision.
 
 The authenticated subject making the request.
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field     | Type   | Description                                               |
+|-----------|--------|-----------------------------------------------------------|
 | `subject` | string | The principal identifier (e.g., user ID, service account) |
-| `realm` | string | The authentication realm or domain |
+| `realm`   | string | The authentication realm or domain                        |
 
 **Example:**
 
@@ -98,10 +98,10 @@ The top-level authorization outcome.
 
 **Type:** enum
 
-| Value | Description |
-|-------|-------------|
+| Value   | Description          |
+|---------|----------------------|
 | `GRANT` | Access was permitted |
-| `DENY` | Access was denied |
+| `DENY`  | Access was denied    |
 
 ### references
 
@@ -131,18 +131,18 @@ When `system_override` is true, indicates why the bypass occurred.
 
 **Grant Reasons:**
 
-| Value | Description |
-|-------|-------------|
-| `PUBLIC` | Resource is marked as public |
-| `VISITOR` | Visitor access is permitted |
+| Value          | Description                       |
+|----------------|-----------------------------------|
+| `PUBLIC`       | Resource is marked as public      |
+| `VISITOR`      | Visitor access is permitted       |
 | `ANTI_LOCKOUT` | Anti-lockout protection triggered |
 
 **Deny Reasons:**
 
-| Value | Description |
-|-------|-------------|
-| `JWT_REQUIRED` | A valid JWT is required but not present |
-| `OPERATOR_REQUIRED` | Operator-level access is required |
+| Value               | Description                             |
+|---------------------|-----------------------------------------|
+| `JWT_REQUIRED`      | A valid JWT is required but not present |
+| `OPERATOR_REQUIRED` | Operator-level access is required       |
 
 ## BundleReference
 
@@ -161,39 +161,39 @@ Each policy bundle evaluated during the decision is recorded as a BundleReferenc
 
 ### Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Operation name or role MRN |
-| `policies` | array | List of PolicyReference objects |
-| `decision` | enum | Outcome of this bundle: `GRANT` or `DENY` |
-| `phase` | enum | Which conjunction phase (see below) |
-| `reason_code` | enum | Success or error type (see below) |
-| `reason` | string | Human-readable explanation, especially for errors |
+| Field         | Type   | Description                                       |
+|---------------|--------|---------------------------------------------------|
+| `id`          | string | Operation name or role MRN                        |
+| `policies`    | array  | List of PolicyReference objects                   |
+| `decision`    | enum   | Outcome of this bundle: `GRANT` or `DENY`         |
+| `phase`       | enum   | Which conjunction phase (see below)               |
+| `reason_code` | enum   | Success or error type (see below)                 |
+| `reason`      | string | Human-readable explanation, especially for errors |
 
 ### Phase
 
 Indicates which [conjunction phase](/concepts/policy-conjunction) the bundle belongs to.
 
-| Value | Description |
-|-------|-------------|
-| `OPERATION` | Phase 1: Operation-level policies |
-| `IDENTITY` | Phase 2: Role-based policies |
-| `RESOURCE` | Phase 3: Resource group policies |
-| `SCOPE` | Phase 4: Scope constraint policies |
+| Value       | Description                        |
+|-------------|------------------------------------|
+| `OPERATION` | Phase 1: Operation-level policies  |
+| `IDENTITY`  | Phase 2: Role-based policies       |
+| `RESOURCE`  | Phase 3: Resource group policies   |
+| `SCOPE`     | Phase 4: Scope constraint policies |
 
 ### ReasonCode
 
 Indicates the evaluation outcome type.
 
-| Value | Description |
-|-------|-------------|
-| `POLICY_OUTCOME` | Normal policy evaluation completed |
-| `COMPILATION_ERROR` | Policy failed to compile |
-| `NOTFOUND_ERROR` | Referenced policy could not be found |
-| `NETWORK_ERROR` | Network issue prevented policy resolution |
-| `EVALUATION_ERROR` | OPA evaluation error (not compilation) |
-| `INVALPARAM_ERROR` | Invalid parameter or identifier |
-| `UNKNOWN_ERROR` | Unspecified error |
+| Value               | Description                               |
+|---------------------|-------------------------------------------|
+| `POLICY_OUTCOME`    | Normal policy evaluation completed        |
+| `COMPILATION_ERROR` | Policy failed to compile                  |
+| `NOTFOUND_ERROR`    | Referenced policy could not be found      |
+| `NETWORK_ERROR`     | Network issue prevented policy resolution |
+| `EVALUATION_ERROR`  | OPA evaluation error (not compilation)    |
+| `INVALPARAM_ERROR`  | Invalid parameter or identifier           |
+| `UNKNOWN_ERROR`     | Unspecified error                         |
 
 When `reason_code` is not `POLICY_OUTCOME`, the `reason` field typically contains details about the error.
 
@@ -208,10 +208,10 @@ Individual policy identification within a bundle.
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `mrn` | string | The policy's Manetu Resource Notation identifier |
-| `fingerprint` | bytes | Cryptographic hash of the policy content |
+| Field         | Type   | Description                                      |
+|---------------|--------|--------------------------------------------------|
+| `mrn`         | string | The policy's Manetu Resource Notation identifier |
+| `fingerprint` | bytes  | Cryptographic hash of the policy content         |
 
 The combination of `mrn` and `fingerprint` uniquely identifies the exact policy version that was evaluated. This is critical for forensic analysis—even after policies are updated, you can determine exactly which version produced a particular decision.
 

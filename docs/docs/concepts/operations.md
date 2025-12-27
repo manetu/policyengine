@@ -24,13 +24,13 @@ Operations typically follow the format:
 
 ### Examples
 
-| Operation | Description |
-|-----------|-------------|
-| `iam:identity:create` | Create an identity in IAM |
+| Operation               | Description                |
+|-------------------------|----------------------------|
+| `iam:identity:create`   | Create an identity in IAM  |
 | `vault:attributes:read` | Read attributes from vault |
-| `api:users:list` | List users via API |
-| `realm:metadata:update` | Update realm metadata |
-| `graphql:query` | Execute GraphQL query |
+| `api:users:list`        | List users via API         |
+| `realm:metadata:update` | Update realm metadata      |
+| `graphql:query`         | Execute GraphQL query      |
 
 ## Defining Operations
 

@@ -14,13 +14,13 @@ This example models HIPAA-compliant access control for electronic health records
 
 HIPAA (Health Insurance Portability and Accountability Act) requires healthcare organizations to implement strict access controls:
 
-| HIPAA Requirement | Implementation |
-|-------------------|----------------|
-| **Minimum Necessary** | Only access data required for job function |
+| HIPAA Requirement     | Implementation                                   |
+|-----------------------|--------------------------------------------------|
+| **Minimum Necessary** | Only access data required for job function       |
 | **Role-Based Access** | Physicians, nurses, admins have different access |
-| **Patient Consent** | Patients can restrict access to their records |
-| **Break-Glass** | Emergency access with audit trail |
-| **Audit Trail** | All access decisions logged |
+| **Patient Consent**   | Patients can restrict access to their records    |
+| **Break-Glass**       | Emergency access with audit trail                |
+| **Audit Trail**       | All access decisions logged                      |
 
 <SectionHeader icon="settings" level={2}>Design</SectionHeader>
 
@@ -37,12 +37,12 @@ flowchart TD
 
 ### Record Sensitivity Levels
 
-| Level | Examples | Who Can Access |
-|-------|----------|----------------|
-| **Administrative** | Demographics, insurance | Admin, Nurse, Physician |
-| **Clinical** | Vitals, medications | Nurse, Physician |
-| **Sensitive** | Mental health, HIV, substance abuse | Physician (with consent) |
-| **Restricted** | Psychiatric notes, genetic data | Attending physician only |
+| Level              | Examples                            | Who Can Access           |
+|--------------------|-------------------------------------|--------------------------|
+| **Administrative** | Demographics, insurance             | Admin, Nurse, Physician  |
+| **Clinical**       | Vitals, medications                 | Nurse, Physician         |
+| **Sensitive**      | Mental health, HIV, substance abuse | Physician (with consent) |
+| **Restricted**     | Psychiatric notes, genetic data     | Attending physician only |
 
 <SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="healthcare-hipaa/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 

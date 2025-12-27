@@ -48,9 +48,9 @@ Identity Phase Result: GRANT (at least one role granted)
 
 When a principal has multiple roles, the policies are evaluated with OR semantics within the phase:
 
-| Role Evaluations | Phase Result |
-|-----------------|--------------|
-| All DENY | <DecisionChip decision="deny" /> |
+| Role Evaluations   | Phase Result                      |
+|--------------------|-----------------------------------|
+| All DENY           | <DecisionChip decision="deny" />  |
 | At least one GRANT | <DecisionChip decision="grant" /> |
 
 This means permissions are effectively additive—a principal gains the union of all their roles' permissions.
@@ -168,13 +168,13 @@ roles:
 
 Understanding the difference between roles and scopes is important:
 
-| Aspect | Roles (Identity Phase) | Scopes (Scope Phase) |
-|--------|----------------------|---------------------|
-| **Purpose** | Define what a principal can do | Constrain how access is exercised |
-| **Assignment** | Assigned to principals | Associated with access method |
-| **Effect** | Grant permissions | Limit permissions |
-| **Mandatory** | Yes (Phase 2) | No (Phase 4) |
-| **Default** | DENY if missing | GRANT if missing |
+| Aspect         | Roles (Identity Phase)         | Scopes (Scope Phase)              |
+|----------------|--------------------------------|-----------------------------------|
+| **Purpose**    | Define what a principal can do | Constrain how access is exercised |
+| **Assignment** | Assigned to principals         | Associated with access method     |
+| **Effect**     | Grant permissions              | Limit permissions                 |
+| **Mandatory**  | Yes (Phase 2)                  | No (Phase 4)                      |
+| **Default**    | DENY if missing                | GRANT if missing                  |
 
 ### Example: Role and Scope Interaction
 

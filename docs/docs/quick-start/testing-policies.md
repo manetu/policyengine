@@ -8,11 +8,11 @@ The `mpe test` command provides several ways to test your policies during develo
 
 ## Test Commands Overview
 
-| Command | Description |
-|---------|-------------|
+| Command             | Description                                             |
+|---------------------|---------------------------------------------------------|
 | `mpe test decision` | Test policy decisions with [PORC](/concepts/porc) input |
-| `mpe test mapper` | Test [mapper](/concepts/mappers) transformations |
-| `mpe test envoy` | Test full Envoy-to-decision pipeline |
+| `mpe test mapper`   | Test [mapper](/concepts/mappers) transformations        |
+| `mpe test envoy`    | Test full Envoy-to-decision pipeline                    |
 
 ## Understanding Test Output
 
@@ -35,12 +35,12 @@ The `mpe test decision` and `mpe test envoy` commands output an [**AccessRecord*
 
 Key fields you'll see:
 
-| Field | Description |
-|-------|-------------|
-| `decision` | The final outcome: `"GRANT"` or `"DENY"` |
-| `principal` | Who made the request (extracted from PORC) |
-| `operation` | What action was attempted |
-| `resource` | What resource was accessed |
+| Field        | Description                                                |
+|--------------|------------------------------------------------------------|
+| `decision`   | The final outcome: `"GRANT"` or `"DENY"`                   |
+| `principal`  | Who made the request (extracted from PORC)                 |
+| `operation`  | What action was attempted                                  |
+| `resource`   | What resource was accessed                                 |
 | `references` | Details about each policy evaluated (useful for debugging) |
 
 To quickly extract just the decision, pipe the output through `jq`:

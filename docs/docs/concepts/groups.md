@@ -210,13 +210,13 @@ groups:
 
 When should you use groups versus direct role assignment?
 
-| Scenario | Recommendation |
-|----------|---------------|
-| Standard team member | Use groups aligned with team/function |
-| Temporary elevated access | Direct role assignment (easier to audit/revoke) |
-| Service accounts | Groups for common patterns, direct for unique needs |
-| Cross-functional access | Multiple group memberships |
-| One-off exceptions | Direct role assignment with documentation |
+| Scenario                  | Recommendation                                      |
+|---------------------------|-----------------------------------------------------|
+| Standard team member      | Use groups aligned with team/function               |
+| Temporary elevated access | Direct role assignment (easier to audit/revoke)     |
+| Service accounts          | Groups for common patterns, direct for unique needs |
+| Cross-functional access   | Multiple group memberships                          |
+| One-off exceptions        | Direct role assignment with documentation           |
 
 ### Combining Groups and Direct Roles
 
@@ -237,13 +237,13 @@ This allows baseline access through groups with targeted additions via direct ro
 
 It's important to distinguish between identity groups and [Resource Groups](/reference/schema/resource-groups):
 
-| Aspect | Groups (Identity)               | Resource Groups                  |
-|--------|---------------------------------|----------------------------------|
-| **Contains** | Roles                           | Resource patterns                |
+| Aspect          | Groups (Identity)               | Resource Groups                  |
+|-----------------|---------------------------------|----------------------------------|
+| **Contains**    | Roles                           | Resource patterns                |
 | **Assigned to** | Principals                      | Resources                        |
-| **Phase** | Phase 2 (Identity)              | Phase 3 (Resource)               |
-| **Purpose** | What roles apply to an identity | What policies apply to resources |
-| **Claim** | `principal.mgroups`             | `resource.group`                 |
+| **Phase**       | Phase 2 (Identity)              | Phase 3 (Resource)               |
+| **Purpose**     | What roles apply to an identity | What policies apply to resources |
+| **Claim**       | `principal.mgroups`             | `resource.group`                 |
 
 ## Best Practices
 

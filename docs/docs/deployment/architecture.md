@@ -221,14 +221,14 @@ spec:
 
 ### Comparison Summary
 
-| Aspect | Embedded | Sidecar | Standalone |
-|--------|----------|---------|------------|
-| **Latency** | Lowest | Very Low | Low |
-| **Language Support** | Go only | Any | Any |
-| **Scaling** | With app | 1:1 with app | Independent |
-| **Operational Overhead** | Lowest | Medium | Higher |
-| **Premium Compatible** | No | Yes | Yes |
-| **Resource Efficiency** | Best | Good | Variable |
+| Aspect                   | Embedded  | Sidecar      | Standalone  |
+|--------------------------|-----------|--------------|-------------|
+| **Latency**              | Lowest    | Very Low     | Low         |
+| **Language Support**     | Go only   | Any          | Any         |
+| **Scaling**              | With app  | 1:1 with app | Independent |
+| **Operational Overhead** | Lowest    | Medium       | Higher      |
+| **Premium Compatible**   | No        | Yes          | Yes         |
+| **Resource Efficiency**  | Best      | Good         | Variable    |
 
 ## Horizontal Scaling
 

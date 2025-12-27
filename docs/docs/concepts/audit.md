@@ -40,15 +40,15 @@ Just as [PORC](/concepts/porc) normalizes authorization **inputs**, the AccessRe
 
 Every AccessRecord contains:
 
-| Field | Description |
-|-------|-------------|
-| **Metadata** | Timestamp, unique ID, and optional environment context |
-| **Principal** | The subject and realm from the PORC |
-| **Operation** | The operation being attempted |
-| **Resource** | The resource MRN being accessed |
-| **Decision** | The top-level outcome: `GRANT` or `DENY` |
-| **References** | Details about each policy bundle evaluated |
-| **PORC** | The complete PORC expression for replay/debugging |
+| Field          | Description                                            |
+|----------------|--------------------------------------------------------|
+| **Metadata**   | Timestamp, unique ID, and optional environment context |
+| **Principal**  | The subject and realm from the PORC                    |
+| **Operation**  | The operation being attempted                          |
+| **Resource**   | The resource MRN being accessed                        |
+| **Decision**   | The top-level outcome: `GRANT` or `DENY`               |
+| **References** | Details about each policy bundle evaluated             |
+| **PORC**       | The complete PORC expression for replay/debugging      |
 
 ### Policy Bundle References
 
@@ -65,10 +65,10 @@ The fingerprint is particularly valuable—it uniquely identifies the exact poli
 
 ## Output Destinations
 
-| Feature | Availability | Description |
-|---------|--------------|-------------|
-| JSON to stdout | <FeatureChip variant="community" /> | Stream AccessRecords as JSON for custom processing |
-| ElasticSearch Integration | <FeatureChip variant="premium" /> | Durable storage with indexing, dashboards, and alerting |
+| Feature                   | Availability                        | Description                                             |
+|---------------------------|-------------------------------------|---------------------------------------------------------|
+| JSON to stdout            | <FeatureChip variant="community" /> | Stream AccessRecords as JSON for custom processing      |
+| ElasticSearch Integration | <FeatureChip variant="premium" />   | Durable storage with indexing, dashboards, and alerting |
 
 ### JSON Output <FeatureChip variant="community" />
 

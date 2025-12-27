@@ -8,11 +8,11 @@ When a PEP submits a PORC expression for evaluation, the PolicyEngine needs to u
 
 ## Overview of Approaches
 
-| Approach | Availability | How It Works |
-|----------|--------------|--------------|
-| [MRN String with Selector Resolution](#approach-1-mrn-string-with-selector-resolution) | All editions | PEP sends MRN string; PolicyEngine resolves metadata via regex patterns in PolicyDomain config |
-| [MRN String with External Resolution](#approach-2-mrn-string-with-external-resolution) | <FeatureChip variant="premium" /> | PEP sends MRN string; PolicyEngine resolves metadata via your custom resolver integration |
-| [Fully-Qualified Descriptor](#approach-3-fully-qualified-descriptor) | All editions | PEP sends complete resource metadata; no resolution needed |
+| Approach                                                                               | Availability                      | How It Works                                                                                   |
+|----------------------------------------------------------------------------------------|-----------------------------------|------------------------------------------------------------------------------------------------|
+| [MRN String with Selector Resolution](#approach-1-mrn-string-with-selector-resolution) | All editions                      | PEP sends MRN string; PolicyEngine resolves metadata via regex patterns in PolicyDomain config |
+| [MRN String with External Resolution](#approach-2-mrn-string-with-external-resolution) | <FeatureChip variant="premium" /> | PEP sends MRN string; PolicyEngine resolves metadata via your custom resolver integration      |
+| [Fully-Qualified Descriptor](#approach-3-fully-qualified-descriptor)                   | All editions                      | PEP sends complete resource metadata; no resolution needed                                     |
 
 :::info Combining Approaches
 These approaches are not mutually exclusive. A single deployment can use all three:

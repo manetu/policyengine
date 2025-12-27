@@ -58,14 +58,14 @@ spec:
 
 ### Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `mrn` | string | Yes | Unique MRN identifier for the group |
-| `name` | string | Yes | Human-readable name |
-| `description` | string | No | Description of the group's purpose |
-| `default` | boolean | No | Use as default for unassigned resources |
-| `policy` | string | Yes | MRN of the policy to apply |
-| `annotations` | array | No | List of name/value objects for custom metadata |
+| Field         | Type    | Required | Description                                    |
+|---------------|---------|----------|------------------------------------------------|
+| `mrn`         | string  | Yes      | Unique MRN identifier for the group            |
+| `name`        | string  | Yes      | Human-readable name                            |
+| `description` | string  | No       | Description of the group's purpose             |
+| `default`     | boolean | No       | Use as default for unassigned resources        |
+| `policy`      | string  | Yes      | MRN of the policy to apply                     |
+| `annotations` | array   | No       | List of name/value objects for custom metadata |
 
 ## Default Resource Group
 
@@ -214,13 +214,13 @@ spec:
 
 It's important to distinguish between Resource Groups and identity [Groups](/concepts/groups):
 
-| Aspect | Resource Groups | Groups (Identity) |
-|--------|-----------------|-------------------|
-| **Contains** | Resource patterns | Roles |
-| **Assigned to** | Resources | Principals |
-| **Phase** | Phase 3 (Resource) | Phase 2 (Identity) |
-| **Purpose** | What policies apply to resources | What roles apply to an identity |
-| **PORC field** | `resource.group` | `principal.mgroups` |
+| Aspect          | Resource Groups                  | Groups (Identity)               |
+|-----------------|----------------------------------|---------------------------------|
+| **Contains**    | Resource patterns                | Roles                           |
+| **Assigned to** | Resources                        | Principals                      |
+| **Phase**       | Phase 3 (Resource)               | Phase 2 (Identity)              |
+| **Purpose**     | What policies apply to resources | What roles apply to an identity |
+| **PORC field**  | `resource.group`                 | `principal.mgroups`             |
 
 ## Best Practices
 
