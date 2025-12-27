@@ -22,12 +22,12 @@ Envoy ext_authz Request → Mapper → PORC → Policy Evaluation
 
 **Most integrations should NOT use mappers.** If you're building a PEP in your own application, you should construct PORC expressions directly in your native programming language:
 
-| Scenario | Recommendation |
-|----------|---------------|
-| Custom application with Go/Java/Python/etc. | Build PORC directly in your code |
-| API gateway you control | Build PORC in gateway middleware |
-| Envoy/Istio service mesh | Use mappers (Envoy protocol is fixed) |
-| Third-party system with fixed protocol | Use mappers if protocol can't be changed |
+| Scenario                                    | Recommendation                           |
+|---------------------------------------------|------------------------------------------|
+| Custom application with Go/Java/Python/etc. | Build PORC directly in your code         |
+| API gateway you control                     | Build PORC in gateway middleware         |
+| Envoy/Istio service mesh                    | Use mappers (Envoy protocol is fixed)    |
+| Third-party system with fixed protocol      | Use mappers if protocol can't be changed |
 
 Building PORC directly in your application code is:
 - **More efficient**: No additional transformation step

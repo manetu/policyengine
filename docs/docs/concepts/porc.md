@@ -46,14 +46,14 @@ PORC is the universal language for expressing authorization requests in the Poli
 
 The **Principal** represents who is making the request. This typically comes from JWT claims or other authentication tokens.
 
-| Field | Description |
-|-------|-------------|
-| `sub` | Subject identifier (user ID, service account) |
-| `mroles` | Array of [role](/concepts/roles) MRNs assigned to the principal |
-| `mgroups` | Array of [group](/concepts/groups) MRNs the principal belongs to |
-| `scopes` | Array of [scope](/concepts/scopes) MRNs from the access method |
-| `mclearance` | Security clearance level (LOW, MODERATE, HIGH, MAXIMUM) |
-| `mannotations` | Key-value metadata about the principal |
+| Field          | Description                                                      |
+|----------------|------------------------------------------------------------------|
+| `sub`          | Subject identifier (user ID, service account)                    |
+| `mroles`       | Array of [role](/concepts/roles) MRNs assigned to the principal  |
+| `mgroups`      | Array of [group](/concepts/groups) MRNs the principal belongs to |
+| `scopes`       | Array of [scope](/concepts/scopes) MRNs from the access method   |
+| `mclearance`   | Security clearance level (LOW, MODERATE, HIGH, MAXIMUM)          |
+| `mannotations` | Key-value metadata about the principal                           |
 
 :::note Audit Consideration
 The `sub` field should always be provided. While omitting it may not affect policy evaluation, `principal.sub` has first-class representation in the AccessRecord and its absence will impact audit data quality.
@@ -94,11 +94,11 @@ The **Operation** identifies what action is being performed. Operations follow a
 
 ### Examples
 
-| Operation | Description |
-|-----------|-------------|
-| `iam:identity:create` | Create an identity |
+| Operation               | Description           |
+|-------------------------|-----------------------|
+| `iam:identity:create`   | Create an identity    |
 | `vault:attributes:read` | Read vault attributes |
-| `api:users:list` | List users via API |
+| `api:users:list`        | List users via API    |
 | `admin:settings:update` | Update admin settings |
 
 See [Operations](/concepts/operations) for details on how operations route requests to policies.
@@ -132,10 +132,10 @@ allow {
 
 The **Resource** identifies the entity being accessed. Resources have metadata—group membership, classification, ownership, and annotations—that policies use to make decisions. The two PORC formats differ in *who provides* that metadata:
 
-| Format | Metadata Provider |
-|--------|-------------------|
-| MRN String | PolicyEngine resolves via selectors or external resolvers |
-| Fully-Qualified Descriptor | PEP provides directly in the request |
+| Format                     | Metadata Provider                                         |
+|----------------------------|-----------------------------------------------------------|
+| MRN String                 | PolicyEngine resolves via selectors or external resolvers |
+| Fully-Qualified Descriptor | PEP provides directly in the request                      |
 
 ### MRN String
 
@@ -241,13 +241,13 @@ The PORC expression drives the [Policy Conjunction](/concepts/policy-conjunction
 ![PORC Mapping](./assets/porc-mapping.svg)
 </div> 
 
-| PORC Component | Used By |
-|----------------|---------|
-| `operation` | Phase 1 - Routes to operation policy |
-| `principal.mroles` | Phase 2 - Selects identity policies via roles |
-| `principal.mgroups` | Phase 2 - Expands to additional roles |
-| `resource.group` | Phase 3 - Selects resource policy |
-| `principal.scopes` | Phase 4 - Selects scope policies |
+| PORC Component      | Used By                                       |
+|---------------------|-----------------------------------------------|
+| `operation`         | Phase 1 - Routes to operation policy          |
+| `principal.mroles`  | Phase 2 - Selects identity policies via roles |
+| `principal.mgroups` | Phase 2 - Expands to additional roles         |
+| `resource.group`    | Phase 3 - Selects resource policy             |
+| `principal.scopes`  | Phase 4 - Selects scope policies              |
 
 ## Complete PORC Example
 

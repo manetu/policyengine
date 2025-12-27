@@ -10,24 +10,24 @@ Environment variables and configuration options for the Manetu PolicyEngine.
 
 ### CLI Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable            | Description                        | Default           |
+|---------------------|------------------------------------|-------------------|
 | `MPE_CLI_OPA_FLAGS` | Additional OPA flags for lint/test | `--v0-compatible` |
 
 ### Logging Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MPE_LOG_LEVEL` | Logging level (`debug`, `info`, `warn`, `error`) | `info` |
-| `MPE_LOG_FORMATTER` | Log format (`json` or `text`) | `json` |
-| `MPE_LOG_REPORT_CALLER` | Include caller info in logs | (not set) |
+| Variable                | Description                                      | Default   |
+|-------------------------|--------------------------------------------------|-----------|
+| `MPE_LOG_LEVEL`         | Logging level (`debug`, `info`, `warn`, `error`) | `info`    |
+| `MPE_LOG_FORMATTER`     | Log format (`json` or `text`)                    | `json`    |
+| `MPE_LOG_REPORT_CALLER` | Include caller info in logs                      | (not set) |
 
 ### PolicyEngine Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MPE_CONFIG_PATH` | Path to config directory | `.` |
-| `MPE_CONFIG_FILENAME` | Config file name | `mpe-config.yaml` |
+| Variable              | Description              | Default           |
+|-----------------------|--------------------------|-------------------|
+| `MPE_CONFIG_PATH`     | Path to config directory | `.`               |
+| `MPE_CONFIG_FILENAME` | Config file name         | `mpe-config.yaml` |
 
 ## Configuration File
 
@@ -52,11 +52,11 @@ audit:
 
 ### Configuration Options
 
-| Option | Type | Description                                                                    |
-|--------|------|--------------------------------------------------------------------------------|
+| Option               | Type    | Description                                                                    |
+|----------------------|---------|--------------------------------------------------------------------------------|
 | `bundles.includeall` | boolean | Include all evaluated bundles in audit records                                 |
-| `opa.unsafebuiltins` | string | Comma-separated list of unsafe OPA built-ins to exclude from policy evaluation |
-| `audit.env` | map | Map of key names to environment variable names for AccessRecord metadata |
+| `opa.unsafebuiltins` | string  | Comma-separated list of unsafe OPA built-ins to exclude from policy evaluation |
+| `audit.env`          | map     | Map of key names to environment variable names for AccessRecord metadata       |
 
 ### Audit Environment Configuration
 

@@ -14,11 +14,11 @@ This example demonstrates how to use MPE for API subscription tier enforcement, 
 
 Modern APIs often have tiered access levels:
 
-| Tier | Features | Use Case |
-|------|----------|----------|
-| **Free** | Basic endpoints, low quotas | Testing, hobby projects |
-| **Pro** | More endpoints, higher quotas | Small businesses |
-| **Enterprise** | All endpoints, custom quotas | Large organizations |
+| Tier           | Features                      | Use Case                |
+|----------------|-------------------------------|-------------------------|
+| **Free**       | Basic endpoints, low quotas   | Testing, hobby projects |
+| **Pro**        | More endpoints, higher quotas | Small businesses        |
+| **Enterprise** | All endpoints, custom quotas  | Large organizations     |
 
 This PolicyDomain enforces:
 

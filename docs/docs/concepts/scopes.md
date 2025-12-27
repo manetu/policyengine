@@ -74,11 +74,11 @@ Effective Access: Constrained by OAuth scope policies
 
 Scopes are evaluated in **Phase 4** of [Policy Conjunction](/concepts/policy-conjunction). The scope phase runs in parallel with other phases but has unique behavior:
 
-| Condition | Scope Phase Result                                   |
-|-----------|------------------------------------------------------|
-| No scopes in PORC | <DecisionChip decision="grant" /> (phase is skipped) |
+| Condition                          | Scope Phase Result                                   |
+|------------------------------------|------------------------------------------------------|
+| No scopes in PORC                  | <DecisionChip decision="grant" /> (phase is skipped) |
 | Scopes present, at least one GRANT | <DecisionChip decision="grant" />                    |
-| Scopes present, all DENY | <DecisionChip decision="deny" />                     |
+| Scopes present, all DENY           | <DecisionChip decision="deny" />                     |
 
 ### Multiple Scopes
 
@@ -100,13 +100,13 @@ This OR relationship within the scope phase means that if any applicable scope p
 
 Understanding the difference between scopes and roles is crucial:
 
-| Aspect | Roles (Identity Phase) | Scopes (Scope Phase) |
-|--------|----------------------|---------------------|
-| **Purpose** | Define what a principal can do | Constrain how access is exercised |
-| **Assignment** | Assigned to principals | Associated with access method |
-| **Effect** | Grant permissions | Limit permissions |
-| **Mandatory** | Yes (Phase 2) | No (Phase 4) |
-| **Default** | DENY if missing | GRANT if missing |
+| Aspect         | Roles (Identity Phase)         | Scopes (Scope Phase)              |
+|----------------|--------------------------------|-----------------------------------|
+| **Purpose**    | Define what a principal can do | Constrain how access is exercised |
+| **Assignment** | Assigned to principals         | Associated with access method     |
+| **Effect**     | Grant permissions              | Limit permissions                 |
+| **Mandatory**  | Yes (Phase 2)                  | No (Phase 4)                      |
+| **Default**    | DENY if missing                | GRANT if missing                  |
 
 ### Example: Role vs. Scope Interaction
 
@@ -195,11 +195,11 @@ Name scopes based on their constraint, not their source:
 
 Clearly document which scopes are expected for different access methods:
 
-| Access Method | Required Scopes | Notes |
-|--------------|-----------------|-------|
-| PAT | At least one scope | User selects at creation |
-| OAuth | From token claims | Mapped from OAuth scopes |
-| Internal API | None | Full access |
+| Access Method  | Required Scopes    | Notes                    |
+|----------------|--------------------|--------------------------|
+| PAT            | At least one scope | User selects at creation |
+| OAuth          | From token claims  | Mapped from OAuth scopes |
+| Internal API   | None               | Full access              |
 
 ### 4. Monitor Scope Denials
 

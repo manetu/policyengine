@@ -137,13 +137,13 @@ allow {
 
 When building operations from HTTP requests:
 
-| HTTP Method | Verb |
-|-------------|------|
-| GET | read |
-| POST | create |
-| PUT | update |
-| PATCH | update |
-| DELETE | delete |
+| HTTP Method | Verb   |
+|-------------|--------|
+| GET         | read   |
+| POST        | create |
+| PUT         | update |
+| PATCH       | update |
+| DELETE      | delete |
 
 ```go
 func httpMethodToVerb(method string) string {

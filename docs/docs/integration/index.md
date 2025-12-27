@@ -41,22 +41,22 @@ A **PEP** is code within your application that enforces access control. Each PEP
 
 The PolicyEngine provides two integration options:
 
-| Method                                                                                                                                                      | Best For |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| Method                                                                                                                                                                  | Best For                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
 | <IconText icon="api">[HTTP API](/integration/http-api)</IconText> <FeatureChip variant="community" label="Community"/> <FeatureChip variant="premium" label="Premium"/> | Any language — Python, Java, TypeScript, Go, and more |
-| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="community" label="Community Only"/>                               | Go applications needing lowest latency |
+| <IconText icon="code">[Embedded Go Library](/integration/go-library)</IconText> <FeatureChip variant="community" label="Community Only"/>                               | Go applications needing lowest latency                |
 
 #### Considerations for Future Growth
 
 When choosing an integration method, consider your long-term needs:
 
 | Consideration              | HTTP API                                                                    | Embedded Go Library <FeatureChip variant="community" label="Community Only"/> |
-|----------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------|
-| Language support           | Any language                                                                | Go only                                                           |
-| Latency                    | Low (network call)                                                          | Lowest (in-process)                                               |
-| Deployment                 | Separate service or sidecar                                                 | Single artifact                                                   |
-| Scaling                    | Varies (See [Deployment Options](/integration/http-api#deployment-options)) | Scales with application                                           |
-| Premium Edition Compatible | Yes                                                                         | No                                                                |
+|----------------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Language support           | Any language                                                                | Go only                                                                       |
+| Latency                    | Low (network call)                                                          | Lowest (in-process)                                                           |
+| Deployment                 | Separate service or sidecar                                                 | Single artifact                                                               |
+| Scaling                    | Varies (See [Deployment Options](/integration/http-api#deployment-options)) | Scales with application                                                       |
+| Premium Edition Compatible | Yes                                                                         | No                                                                            |
 
 #### Quick Decision Guide
 

@@ -14,12 +14,12 @@ This example implements tenant isolation for a multi-tenant SaaS application. Us
 
 Multi-tenant applications must enforce strict boundaries between organizations:
 
-| Requirement | Implementation |
-|-------------|----------------|
-| **Tenant isolation** | Resources tagged with tenant ID, enforced at policy level |
-| **Role hierarchy** | Owner > Admin > Member > Viewer per tenant |
-| **Cross-tenant access** | Platform admins for support/operations |
-| **Tenant-scoped resources** | Each resource belongs to exactly one tenant |
+| Requirement                 | Implementation                                            |
+|-----------------------------|-----------------------------------------------------------|
+| **Tenant isolation**        | Resources tagged with tenant ID, enforced at policy level |
+| **Role hierarchy**          | Owner > Admin > Member > Viewer per tenant                |
+| **Cross-tenant access**     | Platform admins for support/operations                    |
+| **Tenant-scoped resources** | Each resource belongs to exactly one tenant               |
 
 <SectionHeader icon="settings" level={2}>Design</SectionHeader>
 

@@ -26,11 +26,11 @@ mrn:<type>:<namespace>:<class>:<instance>
 
 Example resource MRNs:
 
-| MRN | Description |
-|-----|-------------|
-| `mrn:vault:acme.com:secret:api-key` | A secret in the vault |
-| `mrn:data:acme.com:document:report-q4` | A document |
-| `mrn:app:myservice:user:12345` | A user in an application |
+| MRN                                    | Description              |
+|----------------------------------------|--------------------------|
+| `mrn:vault:acme.com:secret:api-key`    | A secret in the vault    |
+| `mrn:data:acme.com:document:report-q4` | A document               |
+| `mrn:app:myservice:user:12345`         | A user in an application |
 
 See the [MRN documentation](/concepts/mrn) for complete details on the MRN format and usage patterns.
 
@@ -66,13 +66,13 @@ allow {
 
 **Classification** is a security rating:
 
-| Level | Value | Description |
-|-------|-------|-------------|
-| `LOW` | 1 | Public data |
-| `MODERATE` | 2 | Internal data |
-| `HIGH` | 3 | Confidential data |
-| `MAXIMUM` | 4 | Top secret data |
-| `UNASSIGNED` | 5 | Not yet classified |
+| Level        | Value | Description        |
+|--------------|-------|--------------------|
+| `LOW`        | 1     | Public data        |
+| `MODERATE`   | 2     | Internal data      |
+| `HIGH`       | 3     | Confidential data  |
+| `MAXIMUM`    | 4     | Top secret data    |
+| `UNASSIGNED` | 5     | Not yet classified |
 
 Use classification with clearance:
 

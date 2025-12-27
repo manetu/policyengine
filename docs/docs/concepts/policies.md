@@ -10,12 +10,12 @@ sidebar_position: 10
 
 A policy receives a [PORC expression](/concepts/porc) as input and returns a decision. The output format depends on which phase the policy serves:
 
-| Phase | Output Type | Values |
-|-------|-------------|--------|
-| Operation (Phase 1) | Integer | Negative (DENY), `0` (GRANT), Positive (GRANT Override) |
-| Identity (Phase 2) | Boolean | `true` (GRANT), `false` (DENY) |
-| Resource (Phase 3) | Boolean | `true` (GRANT), `false` (DENY) |
-| Scope (Phase 4) | Boolean | `true` (GRANT), `false` (DENY) |
+| Phase               | Output Type | Values                                                  |
+|---------------------|-------------|---------------------------------------------------------|
+| Operation (Phase 1) | Integer     | Negative (DENY), `0` (GRANT), Positive (GRANT Override) |
+| Identity (Phase 2)  | Boolean     | `true` (GRANT), `false` (DENY)                          |
+| Resource (Phase 3)  | Boolean     | `true` (GRANT), `false` (DENY)                          |
+| Scope (Phase 4)     | Boolean     | `true` (GRANT), `false` (DENY)                          |
 
 ## Policy Structure
 
