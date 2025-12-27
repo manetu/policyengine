@@ -167,6 +167,12 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_num=$VERSION_NUM" >> $GITHUB_OUTPUT
 
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@latest
+
+      - name: Generate NOTICES file
+        run: ./scripts/generate-notices.sh
+
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
@@ -186,6 +192,10 @@ jobs:
 
           go build -ldflags "${LDFLAGS}" -o dist/${BINARY_NAME} ./cmd/mpe
 
+          # Include license files in distribution
+          cp NOTICES dist/
+          cp LICENSE dist/
+
       - name: Create archive
         run: |
           VERSION_NUM=${{ steps.version.outputs.version_num }}
@@ -193,10 +203,10 @@ jobs:
 
           if [ "${{ matrix.goos }}" == "windows" ]; then
             ARCHIVE_NAME="mpe_${VERSION_NUM}_${{ matrix.goos }}_${{ matrix.goarch }}.zip"
-            zip "${ARCHIVE_NAME}" mpe.exe
+            zip "${ARCHIVE_NAME}" mpe.exe NOTICES LICENSE
           else
             ARCHIVE_NAME="mpe_${VERSION_NUM}_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz"
-            tar -czvf "${ARCHIVE_NAME}" mpe
+            tar -czvf "${ARCHIVE_NAME}" mpe NOTICES LICENSE
           fi
 
           echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV

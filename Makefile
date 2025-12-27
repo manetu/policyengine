@@ -11,7 +11,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 VERSION_PKG := github.com/manetu/policyengine/cmd/mpe/version
 LDFLAGS := -ldflags "-X $(VERSION_PKG).Version=$(VERSION)"
 
-.PHONY: lint all clean test goimports staticcheck tests sec-scan protos docker docs-lint
+.PHONY: lint all clean test goimports staticcheck tests sec-scan protos docker docs-lint notices-generate license-check
 
 all: lint test test_fips race staticcheck goimports sec-scan build docs-lint
 
@@ -28,6 +28,9 @@ docker: ## Build and publish Docker container using ko (requires DOCKER_IMAGE en
 		echo "Error: DOCKER_IMAGE is required (e.g., DOCKER_IMAGE=ghcr.io/manetu/policyengine)"; \
 		exit 1; \
 	fi
+	@./scripts/generate-notices.sh
+	@mkdir -p cmd/mpe/kodata
+	@cp NOTICES LICENSE cmd/mpe/kodata/
 	@KO_DOCKER_REPO=$(DOCKER_IMAGE) ko build --platform=linux/amd64,linux/arm64 --bare --push github.com/manetu/policyengine/cmd/mpe
 
 lint: ## Lint the files
@@ -78,6 +81,7 @@ clean: ## Remove previous build
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@go clean -testcache
 	-@rm -rf target
+	-@rm NOTICES
 	@$(MAKE) -C docs clean
 
 sec-scan: ## Run gosec; see https://github.com/securego/gosec
@@ -90,3 +94,12 @@ docs-lint: ## Lint and build the documentation site
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+notices-generate: ## Generate NOTICES file with third-party license information (for artifact builds)
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@./scripts/generate-notices.sh
+
+license-check: ## Check that all dependencies use compatible licenses (MIT, BSD, Apache-2.0)
+	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
+	@go-licenses check ./...
+	@echo "All licenses are compatible."

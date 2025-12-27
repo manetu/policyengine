@@ -33,6 +33,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@latest
+
+      - name: Generate NOTICES and copy license files to kodata
+        run: |
+          ./scripts/generate-notices.sh
+          mkdir -p cmd/mpe/kodata
+          cp NOTICES cmd/mpe/kodata/
+          cp LICENSE cmd/mpe/kodata/
+
       - name: Build and publish Docker image
         env:
           KO_DOCKER_REPO: ghcr.io/manetu/policyengine
