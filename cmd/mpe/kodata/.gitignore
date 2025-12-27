@@ -1,0 +1,4 @@
+# License files are copied here during CI builds for Docker image inclusion.
+# See .github/workflows/release-docker.yml
+NOTICES
+LICENSE
