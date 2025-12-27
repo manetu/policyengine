@@ -74,14 +74,14 @@ This separation means you can:
 
 Annotations can be defined on multiple entity types:
 
-| Entity | Defined In                                                                                  | Description |
-|--------|---------------------------------------------------------------------------------------------|-------------|
-| Role | PolicyDomain `spec.roles[].annotations`                                                     | Role-specific metadata |
-| Group | PolicyDomain `spec.groups[].annotations`                                                    | Group-specific metadata |
-| Scope | PolicyDomain `spec.scopes[].annotations`                                                    | Scope-specific metadata |
-| Resource Group | PolicyDomain `spec.resource-groups[].annotations`                                           | Resource group metadata |
-| Resource | PolicyDomain `spec.resources[].annotations`, or external resource resolution <FeatureChip variant="premium" label="Premium Only" />| Resource-specific metadata |
-| Principal | JWT claims                                                                                  | Identity-level metadata |
+| Entity         | Defined In                                                                                  | Description                |
+|----------------|---------------------------------------------------------------------------------------------|----------------------------|
+| Role           | PolicyDomain `spec.roles[].annotations`                                                     | Role-specific metadata     |
+| Group          | PolicyDomain `spec.groups[].annotations`                                                    | Group-specific metadata    |
+| Scope          | PolicyDomain `spec.scopes[].annotations`                                                    | Scope-specific metadata    |
+| Resource Group | PolicyDomain `spec.resource-groups[].annotations`                                           | Resource group metadata    |
+| Resource       | PolicyDomain `spec.resources[].annotations`, or external resource resolution <FeatureChip variant="premium" label="Premium Only" />| Resource-specific metadata |
+| Principal      | JWT claims                                                                                  | Identity-level metadata    |
 
 ## Annotation Inheritance
 
@@ -233,13 +233,13 @@ Annotations are defined as a list of `{name, value}` objects. Keys must be strin
 :::tip[Values Are JSON-Encoded]
 The `value` field must contain a valid JSON value encoded as a string. This is a common source of confusion:
 
-| Type | Correct | Incorrect |
-|------|---------|-----------|
-| String | `"\"engineering\""` | `"engineering"` |
-| Number | `"12345"` | `12345` |
-| Boolean | `"true"` | `true` |
-| Array | `'["read", "write"]'` | `["read", "write"]` |
-| Object | `'{"region": "us-west", "priority": 1}'` | `{region: us-west}` |
+| Type    | Correct                                  | Incorrect           |
+|---------|------------------------------------------|---------------------|
+| String  | `"\"engineering\""`                      | `"engineering"`     |
+| Number  | `"12345"`                                | `12345`             |
+| Boolean | `"true"`                                 | `true`              |
+| Array   | `'["read", "write"]'`                    | `["read", "write"]` |
+| Object  | `'{"region": "us-west", "priority": 1}'` | `{region: us-west}` |
 
 **String values require nested quotes.** The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value. Without the inner quotes, a value like `"engineering"` would be interpreted as a JSON identifier (which is invalid) rather than a JSON string.
 

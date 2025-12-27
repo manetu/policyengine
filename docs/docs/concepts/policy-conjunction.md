@@ -34,12 +34,12 @@ The PolicyEngine processes all phases in **parallel** for maximum performance. H
 
 ### Phase Requirements
 
-| Phase | Mandatory | Default if Missing |
-|-------|-----------|-------------------|
-| Operation | Yes | <DecisionChip decision="deny" /> |
-| Identity | Yes | <DecisionChip decision="deny" /> |
-| Resource | Yes | <DecisionChip decision="deny" /> |
-| Scope | No | <DecisionChip decision="grant" /> |
+| Phase     | Mandatory  | Default if Missing                |
+|-----------|------------|-----------------------------------|
+| Operation | Yes        | <DecisionChip decision="deny" />  |
+| Identity  | Yes        | <DecisionChip decision="deny" />  |
+| Resource  | Yes        | <DecisionChip decision="deny" />  |
+| Scope     | No         | <DecisionChip decision="grant" /> |
 
 :::warning Important
 If a PORC expression is missing references to any mandatory phase (operation, identity, or resource), that phase votes DENY implicitly. The scope phase is the exception: if no scopes are present in the PORC, it defaults to GRANT. However, once at least one scope is present in the PORC, the scope phase behaves like the others and requires at least one policy to vote GRANT.
@@ -87,13 +87,13 @@ The policy is treated as if it evaluated to **DENY**. This fail-closed behavior 
 
 While failures are treated as DENY for decision purposes, the **audit record captures the distinction**:
 
-| Vote Type | Decision Impact | Audit Reason Code |
-|-----------|-----------------|-------------------|
-| GRANT | Contributes GRANT | Policy evaluated to GRANT |
-| DENY | Contributes DENY | Policy evaluated to DENY |
-| Not Found | Treated as DENY | Policy not found |
-| Error | Treated as DENY | Evaluation error (with details) |
-| Timeout | Treated as DENY | Evaluation timeout |
+| Vote Type  | Decision Impact   | Audit Reason Code               |
+|------------|-------------------|---------------------------------|
+| GRANT      | Contributes GRANT | Policy evaluated to GRANT       |
+| DENY       | Contributes DENY  | Policy evaluated to DENY        |
+| Not Found  | Treated as DENY   | Policy not found                |
+| Error      | Treated as DENY   | Evaluation error (with details) |
+| Timeout    | Treated as DENY   | Evaluation timeout              |
 
 This separation allows auditors to distinguish between:
 - A policy that explicitly denied access
@@ -121,34 +121,34 @@ resource:
 The PolicyEngine evaluates:
 
 1. **Operation Phase** (1 policy)
-    - Policy votes GRANT — authenticated request, proceed normally
-    - Phase result: **GRANT**
+    - Policy votes <DecisionChip decision="grant" /> — authenticated request, proceed normally
+    - **Phase result**: <DecisionChip decision="grant" />
 
 2. **Identity Phase** (2 policies, one per role)
-    - Editor role policy → GRANT (can update documents)
-    - Viewer role policy → DENY (read-only)
-    - Phase result: **GRANT** (at least one GRANT)
+    - Editor role policy → <DecisionChip decision="grant" /> (can update documents)
+    - Viewer role policy → <DecisionChip decision="deny" /> (read-only)
+    - **Phase result**: <DecisionChip decision="grant" /> (at least one GRANT)
 
 3. **Resource Phase** (1 policy)
-    - Document policy → GRANT (user is owner)
-    - Phase result: **GRANT**
+    - Document policy → <DecisionChip decision="grant" /> (user is owner)
+    - **Phase result**: <DecisionChip decision="grant" />
 
 4. **Scope Phase** (1 policy, scope present)
-    - Write scope policy → GRANT (write operation allowed)
-    - Phase result: **GRANT**
+    - Write scope policy → <DecisionChip decision="grant" /> (write operation allowed)
+    - **Phase result**: <DecisionChip decision="grant" />
 
-**Final Decision: GRANT** (all phases agreed)
+**Final Decision:** <DecisionChip decision="grant" /> (all phases agreed)
 
 ## Example: Partial Failure
 
 Now consider if the resource policy fails to load:
 
-1. **Operation Phase** → GRANT
-2. **Identity Phase** → GRANT
-3. **Resource Phase** → **DENY** (policy not found, treated as DENY)
-4. **Scope Phase** → GRANT
+1. Operation Phase → <DecisionChip decision="grant" />
+2. Identity Phase → <DecisionChip decision="grant" />
+3. Resource Phase → <DecisionChip decision="deny" /> (policy not found, treated as DENY)
+4. Scope Phase → <DecisionChip decision="grant" />
 
-**Final Decision: DENY** (resource phase did not GRANT)
+**Final Decision:**  <DecisionChip decision="deny" /> (resource phase did not GRANT)
 
 The audit record shows that the resource phase's outcome was DENY, not because of policy logic, but because the policy could not be found—enabling operators to identify and fix the issue.
 

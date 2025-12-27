@@ -135,9 +135,9 @@ pe, err := core.NewLocalPolicyEngine(
 
 ### Available Options
 
-| Option | Description |
-|--------|-------------|
-| `WithAccessLog(factory)` | Configure access logging |
+| Option                         | Description                    |
+|--------------------------------|--------------------------------|
+| `WithAccessLog(factory)`       | Configure access logging       |
 | `WithCompilerOptions(opts...)` | Configure OPA compiler options |
 
 ## Probe Mode

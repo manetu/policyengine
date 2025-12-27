@@ -25,12 +25,12 @@ MRNs provide:
 mrn:<type>:<namespace>:<class>:<instance>
 ```
 
-| Component | Description | Example |
-|-----------|-------------|---------|
-| `mrn:` | Fixed prefix | Always `mrn:` |
-| `type` | Entity type or system | `iam`, `vault`, `data`, `app` |
-| `class` | Entity classification | `role`, `policy`, `secret`, `user` |
-| `instance` | Unique instance identifier | `admin`, `api-key`, `12345` |
+| Component  | Description                | Example                            |
+|------------|----------------------------|------------------------------------|
+| `mrn:`     | Fixed prefix               | Always `mrn:`                      |
+| `type`     | Entity type or system      | `iam`, `vault`, `data`, `app`      |
+| `class`    | Entity classification      | `role`, `policy`, `secret`, `user` |
+| `instance` | Unique instance identifier | `admin`, `api-key`, `12345`        |
 
 :::tip MRN Scheme
 The PolicyEngine does not enforce any specific scheme, including the 'mrn:' prefix. The scheme above is only a suggestion, and any scheme will work as long as you minimally maintain id-uniqueness.  However, you are encouraged to adopt a naming convention that provides context to the observer, such as the type of resource, and suggest that you use the methodology outlined here.

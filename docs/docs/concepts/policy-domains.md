@@ -51,9 +51,9 @@ kind: PolicyDomain  # or PolicyDomainReference
 
 **Supported kinds**:
 
-| Kind | Description |
-|------|-------------|
-| `PolicyDomain` | Deployment format with inline Rego code |
+| Kind                    | Description                                                  |
+|-------------------------|--------------------------------------------------------------|
+| `PolicyDomain`          | Deployment format with inline Rego code                      |
 | `PolicyDomainReference` | Development format that can reference external `.rego` files |
 
 See [PolicyDomain vs PolicyDomainReference](#policydomain-vs-policydomainreference) for detailed guidance on when to use each format.
@@ -182,12 +182,12 @@ The PolicyEngine supports two document formats that serve different purposes in 
 
 ### Key Differences
 
-| Aspect | PolicyDomain | PolicyDomainReference |
-|--------|--------------|----------------------|
-| **Rego code** | Inline `rego` field only | Either `rego` (inline) or `rego_filename` (external file) |
-| **Primary use** | Deployment, runtime evaluation | Development, source control |
-| **Kubernetes Operator** | Supported (Premium) | Must convert with `mpe build` first |
-| **Community tooling** | Fully supported | Fully supported |
+| Aspect                  | PolicyDomain                   | PolicyDomainReference                                     |
+|-------------------------|--------------------------------|-----------------------------------------------------------|
+| **Rego code**           | Inline `rego` field only       | Either `rego` (inline) or `rego_filename` (external file) |
+| **Primary use**         | Deployment, runtime evaluation | Development, source control                               |
+| **Kubernetes Operator** | Supported (Premium)            | Must convert with `mpe build` first                       |
+| **Community tooling**   | Fully supported                | Fully supported                                           |
 
 ### PolicyDomainReference Format
 
@@ -311,9 +311,9 @@ Because PolicyDomains are just files, they integrate with any GitOps-oriented de
 ![GitOps](./assets/gitops.svg)
 </div>
 
-| Pattern | Description |
-|---------|-------------|
-| **Push-based** | Git → CI pipeline → `kubectl apply` to Kubernetes |
+| Pattern        | Description                                                |
+|----------------|------------------------------------------------------------|
+| **Push-based** | Git → CI pipeline → `kubectl apply` to Kubernetes          |
 | **Pull-based** | GitOps operators (Flux, ArgoCD) continuously sync from Git |
 
 ### Delivery by Edition

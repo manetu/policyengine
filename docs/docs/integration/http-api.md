@@ -16,11 +16,11 @@ mpe serve -b my-domain.yml --port 9000
 
 This works for both **local development** and **production deployments**:
 
-| Use Case | Description |
-|----------|-------------|
-| **Development** | Test HTTP-based PEP integration locally before deploying |
+| Use Case                   | Description                                                 |
+|----------------------------|-------------------------------------------------------------|
+| **Development**            | Test HTTP-based PEP integration locally before deploying    |
 | **Production (Community)** | Run as a production PDP when Premium features aren't needed |
-| **Premium migration** | Develop against the same API that Premium exposes |
+| **Premium migration**      | Develop against the same API that Premium exposes           |
 
 The server exposes an HTTP endpoint at `POST /decision`. A SwaggerUI interface is available at http://localhost:9000/swagger-ui/ for interactive testing.
 
@@ -37,9 +37,9 @@ Content-Type: application/json
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `probe` | boolean | `false` | When `true`, disables audit logging for this request. Use for UI capability checks. |
+| Parameter | Type    | Default | Description                                                                         |
+|-----------|---------|---------|-------------------------------------------------------------------------------------|
+| `probe`   | boolean | `false` | When `true`, disables audit logging for this request. Use for UI capability checks. |
 
 ### Request Body
 
@@ -445,10 +445,10 @@ You can develop locally with [`mpe serve`](/reference/cli/serve), then deploy to
 
 The Premium Edition can be deployed in multiple configurations:
 
-| Deployment | Latency | Scaling | Best For |
-|------------|---------|---------|----------|
+| Deployment             | Latency              | Scaling                                 | Best For                                   |
+|------------------------|----------------------|-----------------------------------------|--------------------------------------------|
 | **Kubernetes sidecar** | Localhost round-trip | 1:1 with application (Operator-managed) | K8s environments wanting automated scaling |
-| **Standalone service** | Network round-trip | Independent | Non-K8s environments, shared PDP |
+| **Standalone service** | Network round-trip   | Independent                             | Non-K8s environments, shared PDP           |
 
 Regardless of the deployment model, Premium features such as centralized audit logs, decision replay, external resource resolution, and policy coordination are available.
 

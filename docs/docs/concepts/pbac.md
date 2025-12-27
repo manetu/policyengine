@@ -74,13 +74,13 @@ In the Manetu PolicyEngine, policies are defined using PolicyDomain YAML files a
 
 ## PBAC vs Other Models
 
-| Model | Description | Limitations |
-|-------|-------------|-------------|
-| **DAC** | Discretionary - owner controls access | No central control |
-| **MAC** | Mandatory - system enforces levels | Rigid, hard to change |
-| **RBAC** | Role-Based - roles grant permissions | Role explosion, no context |
+| Model    | Description                                   | Limitations                  |
+|----------|-----------------------------------------------|------------------------------|
+| **DAC**  | Discretionary - owner controls access         | No central control           |
+| **MAC**  | Mandatory - system enforces levels            | Rigid, hard to change        |
+| **RBAC** | Role-Based - roles grant permissions          | Role explosion, no context   |
 | **ABAC** | Attribute-Based - attributes determine access | Complex attribute management |
-| **PBAC** | Policy-Based - policies make decisions | Requires policy expertise |
+| **PBAC** | Policy-Based - policies make decisions        | Requires policy expertise    |
 
 :::tip
 PBAC combines the best aspects of RBAC and ABAC while adding the flexibility of programmable policies.

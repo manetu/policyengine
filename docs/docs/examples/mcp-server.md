@@ -14,12 +14,12 @@ This example demonstrates how to implement fine-grained access control for [Mode
 
 MCP servers expose several types of operations:
 
-| Category | Operations | Description |
-|----------|------------|-------------|
-| **Discovery** | `mcp:tool:list`, `mcp:prompt:list`, `mcp:resource:list` | List available capabilities |
-| **Invocation** | `mcp:tool:call`, `mcp:prompt:get`, `mcp:resource:read` | Execute tools or read resources |
-| **Subscription** | `mcp:resource:subscribe`, `mcp:resource:unsubscribe` | Real-time updates |
-| **Lifecycle** | `mcp:server:ping`, `mcp:server:initialize` | Connection management |
+| Category         | Operations                                              | Description                     |
+|------------------|---------------------------------------------------------|---------------------------------|
+| **Discovery**    | `mcp:tool:list`, `mcp:prompt:list`, `mcp:resource:list` | List available capabilities     |
+| **Invocation**   | `mcp:tool:call`, `mcp:prompt:get`, `mcp:resource:read`  | Execute tools or read resources |
+| **Subscription** | `mcp:resource:subscribe`, `mcp:resource:unsubscribe`    | Real-time updates               |
+| **Lifecycle**    | `mcp:server:ping`, `mcp:server:initialize`              | Connection management           |
 
 This PolicyDomain implements:
 

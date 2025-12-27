@@ -33,33 +33,33 @@ This runs `npm run build` and outputs to the `build/` directory.
 
 ### Local Development
 
-| Target | Description |
-|--------|-------------|
-| `make install` | Install npm dependencies |
-| `make build` | Build the Docusaurus site |
-| `make start` | Start local development server |
-| `make clean` | Remove build artifacts and node_modules |
+| Target         | Description                             |
+|----------------|-----------------------------------------|
+| `make install` | Install npm dependencies                |
+| `make build`   | Build the Docusaurus site               |
+| `make start`   | Start local development server          |
+| `make clean`   | Remove build artifacts and node_modules |
 
 ### Validation
 
-| Target | Description |
-|--------|-------------|
-| `make lint` | Run all validation (typecheck, spellcheck, build) |
-| `make spellcheck` | Run spell checking only |
-| `make typecheck` | Run TypeScript type checking only |
+| Target            | Description                                       |
+|-------------------|---------------------------------------------------|
+| `make lint`       | Run all validation (typecheck, spellcheck, build) |
+| `make spellcheck` | Run spell checking only                           |
+| `make typecheck`  | Run TypeScript type checking only                 |
 
 ### Docker Deployment
 
-| Target | Description |
-|--------|-------------|
-| `make docker-build` | Build the Docker image |
-| `make docker-run` | Build and run the container |
-| `make docker-stop` | Stop and remove the container |
-| `make docker-clean` | Remove the container and image |
-| `make docker-logs` | View container logs |
-| `make docker-shell` | Open a shell in the running container |
-| `make docker-restart` | Stop and restart the container |
-| `make docker-status` | Show container status |
+| Target                | Description                           |
+|-----------------------|---------------------------------------|
+| `make docker-build`   | Build the Docker image                |
+| `make docker-run`     | Build and run the container           |
+| `make docker-stop`    | Stop and remove the container         |
+| `make docker-clean`   | Remove the container and image        |
+| `make docker-logs`    | View container logs                   |
+| `make docker-shell`   | Open a shell in the running container |
+| `make docker-restart` | Stop and restart the container        |
+| `make docker-status`  | Show container status                 |
 
 ## Docker Deployment
 
@@ -88,12 +88,12 @@ make docker-build IMAGE_NAME=my-docs IMAGE_TAG=v1.0.0
 make docker-run CONTAINER_NAME=my-docs-container
 ```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `IMAGE_NAME` | `policyengine-docs` | Docker image name |
-| `IMAGE_TAG` | `latest` | Docker image tag |
-| `CONTAINER_NAME` | `policyengine-docs` | Container name |
-| `PORT` | `8080` | Host port to expose |
+| Variable         | Default             | Description         |
+|------------------|---------------------|---------------------|
+| `IMAGE_NAME`     | `policyengine-docs` | Docker image name   |
+| `IMAGE_TAG`      | `latest`            | Docker image tag    |
+| `CONTAINER_NAME` | `policyengine-docs` | Container name      |
+| `PORT`           | `8080`              | Host port to expose |
 
 ## Validation
 
@@ -113,11 +113,11 @@ make build        # Build (also validates links and anchors)
 
 ### Validation Checks
 
-| Check | Description |
-|-------|-------------|
-| TypeScript | Validates TypeScript configuration and types |
-| Spell Check | Checks spelling in all markdown files using [cspell](https://cspell.org/) |
-| Link Validation | Docusaurus build validates all internal links and anchors |
+| Check           | Description                                                               |
+|-----------------|---------------------------------------------------------------------------|
+| TypeScript      | Validates TypeScript configuration and types                              |
+| Spell Check     | Checks spelling in all markdown files using [cspell](https://cspell.org/) |
+| Link Validation | Docusaurus build validates all internal links and anchors                 |
 
 ### Spell Checking
 
