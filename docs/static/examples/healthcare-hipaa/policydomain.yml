@@ -106,29 +106,15 @@ spec:
             context.emergency_reason != ""
         }
 
-        # Determine required operation type
+        # Determine required operation type (using set iteration)
         is_read_operation(operation) if {
-            endswith(operation, ":read")
-        }
-
-        is_read_operation(operation) if {
-            endswith(operation, ":view")
-        }
-
-        is_read_operation(operation) if {
-            endswith(operation, ":list")
+            some suffix in {":read", ":view", ":list"}
+            endswith(operation, suffix)
         }
 
         is_write_operation(operation) if {
-            endswith(operation, ":update")
-        }
-
-        is_write_operation(operation) if {
-            endswith(operation, ":create")
-        }
-
-        is_write_operation(operation) if {
-            endswith(operation, ":amend")
+            some suffix in {":update", ":create", ":amend"}
+            endswith(operation, suffix)
         }
 
   # ============================================================

@@ -225,12 +225,8 @@ spec:
         # Allow read access to shared resources for any authenticated user
         allow if {
             input.resource.annotations.shared == true
-            endswith(input.operation, ":read")
-        }
-
-        allow if {
-            input.resource.annotations.shared == true
-            endswith(input.operation, ":list")
+            some suffix in {":read", ":list"}
+            endswith(input.operation, suffix)
         }
 
         # Only the owning tenant can modify shared resources
