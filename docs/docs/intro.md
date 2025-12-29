@@ -27,35 +27,37 @@ The Manetu PolicyEngine is available in two editions:
 
 ### Feature Comparison
 
-| Feature                                                                                   | <FeatureChip variant="community" label="Community" /> | <FeatureChip variant="premium" label="Premium" /> |
-|-------------------------------------------------------------------------------------------|:-------------------------------------------------:|:-------------------------------------------------:|
-| <TableSection><IconText icon="settings">**Core Policy Engine**</IconText></TableSection>  |                                                   |                                                   |
-| OPA/Rego policy evaluation                                                                |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| PolicyDomain model (policies, roles, groups, scopes)                                      |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Multi-phase policy evaluation                                                             |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Local resource resolution via selectors                                                   |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Istio/Envoy Integration                                                                   |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="terminal">**Developer Tooling**</IconText></TableSection>   |                                                   |                                                   |
-| CLI for build, lint, and test                                                             |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Local development server (`mpe serve`)                                                    |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="extension">**Integration**</IconText></TableSection>        |                                                   |                                                   |
-| Embeddable Go library                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="no" />               |
-| HTTP decision service                                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="architecture">**Architecture & Platform**</IconText></TableSection> |                                                   |                                                   |
-| Stateless, horizontally scalable PDPs                                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Flexible deployment: embedded, sidecar, or standalone                                     |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Multi-architecture support (amd64, arm64)                                                 |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| Update policies without application restart (static reload)                               |             <FeatureCheck variant="yes" />              |             <FeatureCheck variant="yes" />              |
-| <TableSection><IconText icon="business">**Enterprise Features**</IconText></TableSection> |                                                   |                                                   |
-| Dynamic policy rollout with cache coherency                                               |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Kubernetes Operator with auto-scaling sidecars                                            |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Centralized policy administration with GitOps                                             |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| ElasticSearch integration for audit storage, indexing, and reporting                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Queryable Audit History                                                                   |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Analytics Dashboards                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Streaming Live Audit                                                                      |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| Decision Replay with Visual Policy Debugger                                               |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
-| External resource resolution integration (Databases, APIs, etc)                           |             <FeatureCheck variant="no" />               |             <FeatureCheck variant="yes" />              |
+| Feature                                                                                           | <FeatureChip variant="community" label="Community" /> | <FeatureChip variant="premium" label="Premium" />  |
+|---------------------------------------------------------------------------------------------------|:-----------------------------------------------------:|:--------------------------------------------------:|
+| <TableSection><IconText icon="settings">**Core Policy Engine**</IconText></TableSection>          |                                                       |                                                    |
+| OPA/Rego policy evaluation                                                                        |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| PolicyDomain model (policies, roles, groups, scopes)                                              |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Multi-phase policy evaluation                                                                     |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Local resource resolution via selectors                                                           |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Decision Replay                                                                                   |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Istio/Envoy Integration                                                                           |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| <TableSection><IconText icon="terminal">**Developer Tooling**</IconText></TableSection>           |                                                       |                                                    |
+| CLI for build, lint, and test                                                                     |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Local development server (`mpe serve`)                                                            |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| <TableSection><IconText icon="extension">**Integration**</IconText></TableSection>                |                                                       |                                                    |
+| Embeddable Go library                                                                             |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="no" />            |
+| HTTP decision service                                                                             |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| <TableSection><IconText icon="architecture">**Architecture & Platform**</IconText></TableSection> |                                                       |                                                    |
+| Stateless, horizontally scalable PDPs                                                             |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Flexible deployment: embedded, sidecar, or standalone                                             |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Multi-architecture support (amd64, arm64)                                                         |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| Update policies without application restart (static reload)                                       |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| GitOps compatible policy updates                                                                  |            <FeatureCheck variant="yes" />             |           <FeatureCheck variant="yes" />           |
+| <TableSection><IconText icon="business">**Enterprise Features**</IconText></TableSection>         |                                                       |                                                    |
+| Update policies without PDP restart                                                               |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Kubernetes Operator with auto-scaling sidecars                                                    |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Centralized policy administration                                                                 |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| ElasticSearch integration for audit storage, indexing, and reporting                              |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Queryable Audit History                                                                           |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Analytics Dashboards                                                                              |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Streaming Live Audit                                                                              |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| Visual Policy Replay+Debugger                                                                     |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
+| External resource resolution integration (CMDBs, APIs, etc)                                       |             <FeatureCheck variant="no" />             |           <FeatureCheck variant="yes" />           |
 
 :::info
 The Premium Edition requires integration via the HTTP interface to enable enterprise features such as centralized audit and policy coordination. The embeddable Go library is available only in the Community Edition.
