@@ -542,11 +542,8 @@ To support execute permission (for running scripts):
 
 ```rego
 required_permission(operation) := "execute" if {
-    endswith(operation, ":execute")
-}
-
-required_permission(operation) := "execute" if {
-    endswith(operation, ":run")
+    some suffix in {":execute", ":run"}
+    endswith(operation, suffix)
 }
 ```
 
