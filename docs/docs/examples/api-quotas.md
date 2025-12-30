@@ -287,6 +287,7 @@ spec:
           value: "\"free\""
         - name: "enabled_features"
           value: "[]"
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 1000, "storage_mb": 100}'
 
@@ -299,6 +300,7 @@ spec:
           value: "\"pro\""
         - name: "enabled_features"
           value: '["export_csv", "realtime_analytics"]'
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 100000, "storage_mb": 10000}'
 
@@ -311,6 +313,7 @@ spec:
           value: "\"enterprise\""
         - name: "enabled_features"
           value: '["export_csv", "export_pdf", "realtime_analytics", "bulk_import", "bulk_export"]'
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 10000000, "storage_mb": 1000000}'
 
@@ -704,7 +707,7 @@ required_tier_for_operation(operation) := "enterprise" if {
 default required_tier_for_operation(_) := "free"
 ```
 
-### <IconText icon="tune">2. Feature Flags</IconText>
+### <IconText icon="tune">2. Feature Flags with Union Merge</IconText>
 
 Specific operations require specific features to be enabled:
 
@@ -713,7 +716,16 @@ required_feature("api:export:pdf") := "export_pdf"
 required_feature("api:export:csv") := "export_csv"
 ```
 
-The policy checks if the feature is in the principal's enabled_features list.
+The policy checks if the feature is in the principal's `enabled_features` list. Using `merge: "union"` on feature annotations ensures that users with multiple roles or group memberships accumulate features rather than having one set replace another:
+
+```yaml
+annotations:
+  - name: "enabled_features"
+    value: '["export_csv", "realtime_analytics"]'
+    merge: "union"
+```
+
+See [Annotation Merge Strategies](/concepts/annotations#merge-strategies) for more details on available merge options.
 
 ### <IconText icon="api">3. Quota Checking</IconText>
 

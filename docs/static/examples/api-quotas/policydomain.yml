@@ -231,6 +231,7 @@ spec:
           value: "\"free\""
         - name: "enabled_features"
           value: "[]"
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 1000, "storage_mb": 100}'
 
@@ -243,6 +244,7 @@ spec:
           value: "\"pro\""
         - name: "enabled_features"
           value: '["export_csv", "realtime_analytics"]'
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 100000, "storage_mb": 10000}'
 
@@ -255,6 +257,7 @@ spec:
           value: "\"enterprise\""
         - name: "enabled_features"
           value: '["export_csv", "export_pdf", "realtime_analytics", "bulk_import", "bulk_export"]'
+          merge: "union"
         - name: "quotas"
           value: '{"api_calls": 10000000, "storage_mb": 1000000}'
 

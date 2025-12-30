@@ -1,0 +1,56 @@
+apiVersion: iamlite.manetu.io/v1alpha4
+kind: PolicyDomain
+metadata:
+  name: annotation-hierarchy-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:allow-all"
+      rego: |
+        package authz
+        default allow = 1
+
+  roles:
+    - mrn: "mrn:iam:role:test-role"
+      policy: "mrn:iam:policy:allow-all"
+      annotations:
+        - name: priority_test
+          value: '"from_role"'
+        - name: role_only
+          value: '"role_value"'
+        - name: role_and_group
+          value: '"role_value"'
+
+  groups:
+    - mrn: "mrn:iam:group:test-group"
+      roles:
+        - "mrn:iam:role:test-role"
+      annotations:
+        - name: priority_test
+          value: '"from_group"'
+        - name: group_only
+          value: '"group_value"'
+        - name: role_and_group
+          value: '"group_value"'
+        - name: group_and_scope
+          value: '"group_value"'
+
+  scopes:
+    - mrn: "mrn:iam:scope:test-scope"
+      policy: "mrn:iam:policy:allow-all"
+      annotations:
+        - name: priority_test
+          value: '"from_scope"'
+        - name: scope_only
+          value: '"scope_value"'
+        - name: group_and_scope
+          value: '"scope_value"'
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:default"
+      policy: "mrn:iam:policy:allow-all"
+      default: true
+
+  operations:
+    - selectors:
+        - ".*"
+      policy: "mrn:iam:policy:allow-all"

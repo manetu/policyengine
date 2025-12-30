@@ -197,20 +197,26 @@ func (pe *PolicyEngine) fetchAnnotations(ctx context.Context, principalMap map[s
 
 func (pe *PolicyEngine) resolveResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError) {
 	logger.Debugf(agent, "resolveResource", "mrn: %s", mrn)
+
+	// Get resource with RichAnnotations
 	res, err := pe.backend.GetResource(ctx, mrn)
 	if err != nil {
 		logger.Debugf(agent, "resolveResource", "error getting resource: %+v", err)
 		return nil, err
 	}
-	rg, err := pe.backend.GetResourceGroup(ctx, res.Group)
-	if err != nil {
-		logger.Debugf(agent, "resolveResource", "error getting resource group: %+v", err)
-		return nil, err
+
+	// Get resource group for annotation merging (if available)
+	// If resource group lookup fails, continue with just the resource's annotations
+	rg, rgErr := pe.backend.GetResourceGroup(ctx, res.Group)
+	if rgErr != nil {
+		logger.Debugf(agent, "resolveResource", "resource group not found, using resource annotations only: %+v", rgErr)
+		// Resource already has RichAnnotations, return as-is
+		return res, nil
 	}
 
-	resCopy := deepcopy.Copy(res).(*model.Resource)
-	resCopy.Annotations = mergeAnnotations(rg.Annotations, resCopy.Annotations)
-	return resCopy, nil
+	// MergeStrategy annotations: resource-group (lower priority) with resource (higher priority)
+	res.Annotations = mergeAnnotations(rg.Annotations, res.Annotations)
+	return res, nil
 }
 
 // Authorize is the main function that calls opa
@@ -268,7 +274,7 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 			ID:             resMrn,
 			Owner:          owner,
 			Group:          group,
-			Annotations:    annots,
+			Annotations:    model.FromAnnotations(annots),
 			Classification: classification,
 		}
 	}
