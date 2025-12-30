@@ -86,9 +86,12 @@ func exportDefinitions(defs []PolicyDefinition) map[string]policydomain.Policy {
 }
 
 func exportReference(def PolicyReference) policydomain.PolicyReference {
-	annotations := make(map[string]string)
+	annotations := make(map[string]policydomain.Annotation)
 	for _, ann := range def.Annotations {
-		annotations[ann.Name] = ann.Value
+		annotations[ann.Name] = policydomain.Annotation{
+			Value: ann.Value,
+			// v1alpha3 doesn't support merge strategies - use default
+		}
 	}
 	return policydomain.PolicyReference{
 		IDSpec: policydomain.IDSpec{
@@ -110,9 +113,12 @@ func exportReferences(defs []PolicyReference) map[string]policydomain.PolicyRefe
 }
 
 func exportGroup(def Group) policydomain.Group {
-	annotations := make(map[string]string)
+	annotations := make(map[string]policydomain.Annotation)
 	for _, ann := range def.Annotations {
-		annotations[ann.Name] = ann.Value
+		annotations[ann.Name] = policydomain.Annotation{
+			Value: ann.Value,
+			// v1alpha3 doesn't support merge strategies - use default
+		}
 	}
 	return policydomain.Group{
 		IDSpec: policydomain.IDSpec{

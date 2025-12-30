@@ -28,6 +28,8 @@
 package model
 
 import (
+	"encoding/json"
+
 	"github.com/manetu/policyengine/pkg/core/opa"
 )
 
@@ -47,6 +49,87 @@ import (
 //	    input.resource.annotations.department == input.principal.mannotations.department
 //	}
 type Annotations map[string]interface{}
+
+// MergeStrategy strategy constants for annotation merging
+const (
+	MergeReplace = "replace" // Higher priority value completely replaces lower
+	MergeAppend  = "append"  // Arrays: [higher..., lower...], Objects: shallow merge (higher wins)
+	MergePrepend = "prepend" // Arrays: [lower..., higher...], Objects: shallow merge (lower wins)
+	MergeDeep    = "deep"    // Arrays: [higher..., lower...], Objects: recursive deep merge
+	MergeUnion   = "union"   // Arrays: deduplicated set, Objects: same as deep
+
+	// DefaultMergeStrategy is used when no strategy is specified
+	DefaultMergeStrategy = MergeDeep
+)
+
+// AnnotationEntry holds a parsed annotation value with its merge strategy.
+//
+// AnnotationEntry is used during the annotation merging process to track
+// both the value and how it should be merged with values from other sources
+// in the inheritance hierarchy.
+type AnnotationEntry struct {
+	// Value is the parsed JSON value of the annotation
+	Value interface{}
+	// MergeStrategy is the strategy for merging: "replace", "append", "prepend", "deep", "union"
+	MergeStrategy string
+}
+
+// RichAnnotations is a map of annotation entries with merge strategies.
+//
+// RichAnnotations is used internally during annotation resolution to track
+// merge strategies. After merging is complete, the result is converted to
+// plain Annotations for use in policy evaluation.
+type RichAnnotations map[string]AnnotationEntry
+
+// ToAnnotations converts RichAnnotations to plain Annotations by extracting just the values.
+func (r RichAnnotations) ToAnnotations() Annotations {
+	if r == nil {
+		return nil
+	}
+	result := make(Annotations, len(r))
+	for k, entry := range r {
+		result[k] = entry.Value
+	}
+	return result
+}
+
+// FromAnnotations converts plain Annotations to RichAnnotations with default (empty) merge strategies.
+// This is useful when receiving resources from PORC input where annotations are already plain values.
+func FromAnnotations(a Annotations) RichAnnotations {
+	if a == nil {
+		return nil
+	}
+	result := make(RichAnnotations, len(a))
+	for k, v := range a {
+		result[k] = AnnotationEntry{Value: v}
+	}
+	return result
+}
+
+// MarshalJSON serializes RichAnnotations as a plain map of values (without merge strategies).
+// This ensures OPA receives annotations in the expected format.
+func (r *RichAnnotations) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.ToAnnotations())
+}
+
+// UnmarshalJSON deserializes a plain map of values into RichAnnotations.
+// MergeStrategy strategies default to empty (which means use default).
+func (r *RichAnnotations) UnmarshalJSON(data []byte) error {
+	var plain Annotations
+	if err := json.Unmarshal(data, &plain); err != nil {
+		return err
+	}
+	if plain == nil {
+		*r = nil
+		return nil
+	}
+	result := make(RichAnnotations, len(plain))
+	for k, v := range plain {
+		result[k] = AnnotationEntry{Value: v}
+	}
+	*r = result
+	return nil
+}
 
 // Policy represents a compiled Rego policy ready for evaluation.
 //
@@ -70,7 +153,7 @@ type Policy struct {
 // to associate a compiled policy with the entity. It provides:
 //   - The entity's MRN for identification
 //   - A reference to the compiled policy for evaluation
-//   - Annotations providing metadata for policy decisions
+//   - Annotations providing metadata for policy decisions with merge strategies
 //
 // During authorization, the policy engine retrieves PolicyReferences to
 // access both the policy to evaluate and any annotations that should be
@@ -78,7 +161,7 @@ type Policy struct {
 type PolicyReference struct {
 	Mrn         string
 	Policy      *Policy
-	Annotations Annotations
+	Annotations RichAnnotations
 }
 
 // Group represents a named collection of roles for batch permission assignment.
@@ -90,11 +173,11 @@ type PolicyReference struct {
 // Fields:
 //   - Mrn: The Manetu Resource Name uniquely identifying this group
 //   - Roles: MRNs of all roles included in this group
-//   - Annotations: Metadata available during policy evaluation
+//   - Annotations: Metadata available during policy evaluation with merge strategies
 type Group struct {
 	Mrn         string
 	Roles       []string
-	Annotations Annotations
+	Annotations RichAnnotations
 }
 
 // Resource represents a target of operations in authorization decisions.
@@ -107,17 +190,18 @@ type Group struct {
 //   - ID: The Manetu Resource Name identifying this specific resource
 //   - Owner: Subject identifier of the identity that owns this resource
 //   - Group: MRN of the resource group this resource belongs to
-//   - Annotations: Custom metadata for policy decisions
+//   - Annotations: Custom metadata for policy decisions (with merge strategies)
 //   - Classification: Security level (e.g., "LOW", "MODERATE", "HIGH", "MAXIMUM")
 //
 // The JSON tags support PORC encoding/decoding when resources are passed
-// through authorization requests.
+// through authorization requests. RichAnnotations marshal to plain values
+// for OPA compatibility while preserving merge strategies internally.
 type Resource struct {
-	ID             string      `json:"id,omitempty"`
-	Owner          string      `json:"owner,omitempty"`
-	Group          string      `json:"group,omitempty"`
-	Annotations    Annotations `json:"annotations,omitempty"`
-	Classification string      `json:"classification,omitempty"`
+	ID             string          `json:"id,omitempty"`
+	Owner          string          `json:"owner,omitempty"`
+	Group          string          `json:"group,omitempty"`
+	Annotations    RichAnnotations `json:"annotations,omitempty"`
+	Classification string          `json:"classification,omitempty"`
 }
 
 // Mapper transforms non-PORC inputs into PORC expressions.

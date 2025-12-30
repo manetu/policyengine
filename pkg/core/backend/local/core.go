@@ -34,6 +34,7 @@ package local
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/manetu/policyengine/internal/logging"
@@ -107,8 +108,30 @@ func newTestBackend(compiler *opa.Compiler, reg *registry.Registry) *Backend {
 	}
 }
 
+func toRichAnnotations(input map[string]policydomain.Annotation) (model.RichAnnotations, *common.PolicyError) {
+	if input == nil {
+		return nil, nil
+	}
+	output := make(model.RichAnnotations, len(input))
+	for k, av := range input {
+		var x interface{}
+		err := json.Unmarshal([]byte(av.Value), &x)
+		if err != nil {
+			return nil, &common.PolicyError{
+				ReasonCode: events.AccessRecord_BundleReference_INVALPARAM_ERROR,
+				Reason:     fmt.Sprintf("bad annotation '%s' (err-%s)", k, err.Error()),
+			}
+		}
+		output[k] = model.AnnotationEntry{
+			Value:         x,
+			MergeStrategy: av.MergeStrategy,
+		}
+	}
+	return output, nil
+}
+
 func (b *Backend) policyRefExport(ref *policydomain.PolicyReference) (*model.PolicyReference, *common.PolicyError) {
-	annotations, err := model.ToJSON(ref.Annotations)
+	annotations, err := toRichAnnotations(ref.Annotations)
 	if err != nil {
 		return nil, common.NewError(events.AccessRecord_BundleReference_UNKNOWN_ERROR, err.Error())
 	}
@@ -150,9 +173,10 @@ func (b *Backend) getPolicy(mrn string) (*model.Policy, *common.PolicyError) {
 	return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "policy not found")
 }
 
-// GetResource retrieves a resource by MRN.
+// GetResource retrieves a resource by MRN with RichAnnotations for merge support.
 // First checks for matches in PolicyDomain::Resources definition (v1alpha4+),
 // then falls back to using the ResourceGroup designated with default=true.
+// RichAnnotations automatically flatten to plain values when serialized to JSON for OPA.
 func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError) {
 	logger.Tracef(actor, "Get", "GetResource: %v", mrn)
 
@@ -162,7 +186,7 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 			for _, selector := range resource.Selectors {
 				if selector.MatchString(mrn) {
 					// Found a matching resource definition
-					annotations, err := model.ToJSON(resource.Annotations)
+					richAnnotations, err := toRichAnnotations(resource.Annotations)
 					if err != nil {
 						return nil, common.NewError(events.AccessRecord_BundleReference_UNKNOWN_ERROR, err.Error())
 					}
@@ -170,7 +194,7 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 					return &model.Resource{
 						ID:          mrn,
 						Group:       resource.Group,
-						Annotations: annotations,
+						Annotations: richAnnotations,
 					}, nil
 				}
 			}
@@ -290,7 +314,7 @@ func (b *Backend) GetGroup(ctx context.Context, mrn string) (*model.Group, *comm
 		return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, "group not found")
 	}
 
-	annotations, err := model.ToJSON(group.Annotations)
+	annotations, err := toRichAnnotations(group.Annotations)
 	if err != nil {
 		return nil, common.NewError(events.AccessRecord_BundleReference_UNKNOWN_ERROR, err.Error())
 	}

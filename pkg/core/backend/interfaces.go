@@ -107,6 +107,9 @@ type Service interface {
 	//
 	// Resources are the targets of operations. If no explicit resource
 	// definition matches, the default resource group is used.
+	// Returns the resource with RichAnnotations to support annotation merging.
+	// When serialized to JSON for OPA, RichAnnotations automatically flatten
+	// to plain values.
 	GetResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError)
 
 	// GetResourceGroup retrieves a resource group by its MRN.

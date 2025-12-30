@@ -7,6 +7,7 @@ package mock
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -138,8 +139,50 @@ func (b *Backend) generatePolicyReference(ctx context.Context, mrn, policyMrn st
 	return &model.PolicyReference{
 		Mrn:         mrn,
 		Policy:      policy,
-		Annotations: model.UnsafeToJSON(annotations),
+		Annotations: unsafeToRichAnnotations(annotations),
 	}, nil
+}
+
+func toJSON(input map[string]string) (model.Annotations, *common.PolicyError) {
+	output := model.Annotations{}
+	for k, v := range input {
+		var x interface{}
+		err := json.Unmarshal([]byte(v), &x)
+		if err != nil {
+			return nil, &common.PolicyError{ReasonCode: events.AccessRecord_BundleReference_INVALPARAM_ERROR, Reason: fmt.Sprintf("bad annotation (err-%s)", err.Error())}
+		}
+		output[k] = x
+	}
+
+	return output, nil
+}
+
+// toRichAnnotations converts a map[string]string (JSON-encoded values) to RichAnnotations.
+// This is a helper for mock backend - all annotations get default merge strategy.
+// Returns an error if any annotation value fails JSON parsing.
+func toRichAnnotations(input map[string]string) (model.RichAnnotations, *common.PolicyError) {
+	plain, err := toJSON(input)
+	if err != nil {
+		return nil, err
+	}
+	if plain == nil {
+		return nil, nil
+	}
+	result := make(model.RichAnnotations, len(plain))
+	for k, v := range plain {
+		result[k] = model.AnnotationEntry{Value: v}
+	}
+	return result, nil
+}
+
+// unsafeToRichAnnotations converts a map[string]string to RichAnnotations, panics on error.
+// Only use for test/mock scenarios.
+func unsafeToRichAnnotations(input map[string]string) model.RichAnnotations {
+	result, err := toRichAnnotations(input)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }
 
 // GetRole retrieves a role by its MRN from the mock backend configuration.
@@ -203,7 +246,7 @@ func (b *Backend) GetGroup(ctx context.Context, mrn string) (*model.Group, *comm
 		return &model.Group{
 			Mrn:         mrn,
 			Roles:       toStringArray(roles.([]interface{})),
-			Annotations: model.UnsafeToJSON(map[string]string{"common": "\"but in quoted group annotation\"", "common_to_role_group": "\"group\"", "groupkey": "1"}),
+			Annotations: unsafeToRichAnnotations(map[string]string{"common": "\"but in quoted group annotation\"", "common_to_role_group": "\"group\"", "groupkey": "1"}),
 		}, nil
 	}
 
@@ -246,6 +289,7 @@ func (b *Backend) GetScope(ctx context.Context, mrn string) (*model.PolicyRefere
 }
 
 // GetResource retrieves a resource by its MRN from the mock backend configuration.
+// Returns resource with RichAnnotations for merge support.
 func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError) {
 	if strings.Contains(mrn, "networkerror") {
 		return nil, &common.PolicyError{ReasonCode: events.AccessRecord_BundleReference_NETWORK_ERROR, Reason: "network error"}
@@ -256,10 +300,10 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 		ID:          mrn,
 		Group:       "mrn:iam:resource-group:default",
 		Owner:       "",
-		Annotations: model.UnsafeToJSON(map[string]string{"foo": "\"quoted foo\"", "bar": "1", "foobar": "{\"x\": \"double quoted x\"}"}),
+		Annotations: unsafeToRichAnnotations(map[string]string{"foo": "\"quoted foo\"", "bar": "1", "foobar": "{\"x\": \"double quoted x\"}"}),
 	}
 	if mrn == "mrn:vault:bar:unquoted" {
-		defaultResource.Annotations = model.UnsafeToJSON(map[string]string{"foo": "unquoted foo", "bar": "1"})
+		defaultResource.Annotations = unsafeToRichAnnotations(map[string]string{"foo": "unquoted foo", "bar": "1"})
 	}
 
 	rConfig := config.VConfig.Get(fmt.Sprintf("%s.resources", mockDomainCfg))
@@ -287,18 +331,21 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 				}
 			}
 
-			jsonAnnots, err := model.ToJSON(annots)
+			richAnnots, err := toRichAnnotations(annots)
 			if err != nil {
 				logger.Errorf(mockAgent, "getResource", "error converting annotations to json: %s", err)
 				return nil, err
 			}
 
+			owner, _ := rmeta[cfgOwner].(string)
+			classification, _ := rmeta[cfgClassification].(string)
+
 			myresource := &model.Resource{
 				ID:             rmrn,
-				Owner:          rmeta[cfgOwner].(string),
+				Owner:          owner,
 				Group:          rmeta[cfgGroup].(string),
-				Annotations:    jsonAnnots,
-				Classification: rmeta[cfgClassification].(string),
+				Annotations:    richAnnots,
+				Classification: classification,
 			}
 			logger.Debugf(mockAgent, "getResource", "myresource: %s", myresource)
 			return myresource, nil

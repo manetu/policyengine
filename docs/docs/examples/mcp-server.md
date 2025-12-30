@@ -349,8 +349,10 @@ spec:
       annotations:
         - name: "mcp_servers"
           value: '["mrn:mcp:server:github", "mrn:mcp:server:filesystem", "mrn:mcp:server:git"]'
+          merge: "union"
         - name: "mcp_tools"
           value: '["mrn:mcp:github:tool:*", "mrn:mcp:filesystem:tool:read_file", "mrn:mcp:filesystem:tool:list_directory", "mrn:mcp:git:tool:*"]'
+          merge: "union"
 
     # Data analysts get database access
     - mrn: "mrn:iam:group:data-analysts"
@@ -361,8 +363,10 @@ spec:
       annotations:
         - name: "mcp_servers"
           value: '["mrn:mcp:server:database", "mrn:mcp:server:analytics"]'
+          merge: "union"
         - name: "mcp_tools"
           value: '["mrn:mcp:database:tool:query", "mrn:mcp:analytics:tool:*"]'
+          merge: "union"
 
     # Platform team gets full admin access
     - mrn: "mrn:iam:group:platform"
@@ -373,8 +377,10 @@ spec:
       annotations:
         - name: "mcp_servers"
           value: '["mrn:mcp:server:*"]'
+          merge: "union"
         - name: "mcp_tools"
           value: '["mrn:mcp:*:tool:*"]'
+          merge: "union"
 
     # Auditors get read-only access
     - mrn: "mrn:iam:group:auditors"
@@ -385,8 +391,10 @@ spec:
       annotations:
         - name: "mcp_servers"
           value: '["mrn:mcp:server:github", "mrn:mcp:server:database"]'
+          merge: "union"
         - name: "mcp_tools"
           value: '[]'
+          merge: "union"
 
   # ============================================================
   # Resource Groups - Categorize MCP entities
@@ -660,17 +668,23 @@ mrn:mcp:<server>:<type>:<name>
 
 This enables pattern-based routing and access checks.
 
-### <IconText icon="inventory">2. Annotation-Based Entitlements</IconText>
+### <IconText icon="inventory">2. Annotation-Based Entitlements with Union Merge</IconText>
 
-Rather than creating a role for every tool combination, we use annotations to specify which servers and tools a group can access:
+Rather than creating a role for every tool combination, we use annotations to specify which servers and tools a group can access. The `merge: "union"` strategy ensures that users in multiple groups accumulate access rather than having one group's settings replace another:
 
 ```yaml
 annotations:
   - name: "mcp_servers"
     value: '["mrn:mcp:server:github"]'
+    merge: "union"
   - name: "mcp_tools"
     value: '["mrn:mcp:github:tool:*"]'
+    merge: "union"
 ```
+
+With union merging, a user who belongs to both `developers` and `data-analysts` groups would have access to servers and tools from both groups combined.
+
+See [Annotation Merge Strategies](/concepts/annotations#merge-strategies) for more details on available merge options.
 
 ### <IconText icon="tune">3. Wildcard Permissions</IconText>
 

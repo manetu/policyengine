@@ -486,7 +486,7 @@ func TestGetRole(t *testing.T) {
 		assert.NotNil(t, role.Annotations, "Annotations should be initialized")
 		// Annotations should be populated from the domain
 		assert.Equal(t, 3, len(role.Annotations), "Admin role should have 3 annotations")
-		assert.Equal(t, float64(42), role.Annotations["foo"], "Foo annotation should be '42'")
+		assert.Equal(t, float64(42), role.Annotations["foo"].Value, "Foo annotation should be '42'")
 		//assert.Equal(t, 3, len(role.Annotations["bar"].([]float64)), "Bar annotation should be '[1, 2, 3]' and thus has 3 elements")
 		//assert.Equal(t, 42, role.Annotations["baz"]["bat"], "baz.bat annotation should be '42'")
 	})
@@ -542,7 +542,7 @@ func TestGetScope(t *testing.T) {
 		assert.NotNil(t, scope.Annotations, "Annotations should be initialized")
 		// Annotations should be populated from the domain
 		assert.Equal(t, 1, len(scope.Annotations), "API scope should have 1 annotation")
-		assert.Equal(t, "scopes", scope.Annotations["testing"], "Testing annotation should be 'scopes'")
+		assert.Equal(t, "scopes", scope.Annotations["testing"].Value, "Testing annotation should be 'scopes'")
 	})
 
 	t.Run("GetScope - not found", func(t *testing.T) {
@@ -571,7 +571,7 @@ func TestGetScope(t *testing.T) {
 		assert.Equal(t, "mrn:iam:scope:api", apiScope.Mrn, "API scope MRN should match")
 		assert.NotNil(t, apiScope.Annotations, "API scope annotations should be initialized")
 		assert.Equal(t, 1, len(apiScope.Annotations), "API scope should have 1 annotation")
-		assert.Equal(t, "scopes", apiScope.Annotations["testing"], "Testing annotation should be 'scopes'")
+		assert.Equal(t, "scopes", apiScope.Annotations["testing"].Value, "Testing annotation should be 'scopes'")
 
 		// Test getting read-api scope
 		readAPIScope, policyErr := be.GetScope(context.Background(), "mrn:iam:scope:read-api")
@@ -580,7 +580,7 @@ func TestGetScope(t *testing.T) {
 		assert.Equal(t, "mrn:iam:scope:read-api", readAPIScope.Mrn, "Read-API scope MRN should match")
 		assert.NotNil(t, readAPIScope.Annotations, "Read-API scope annotations should be initialized")
 		assert.Equal(t, 1, len(readAPIScope.Annotations), "Read-API scope should have 1 annotation")
-		assert.Equal(t, "annotations", readAPIScope.Annotations["testing"], "Testing annotation should be 'annotations'")
+		assert.Equal(t, "annotations", readAPIScope.Annotations["testing"].Value, "Testing annotation should be 'annotations'")
 	})
 }
 
@@ -602,8 +602,8 @@ func TestGetGroup(t *testing.T) {
 		assert.NotNil(t, group.Annotations, "Annotations should be initialized")
 		// Annotations should be populated from the domain
 		assert.Equal(t, 2, len(group.Annotations), "Admin group should have 2 annotations")
-		assert.Equal(t, "admin", group.Annotations["group_level"], "Group level annotation should be 'admin'")
-		assert.Equal(t, "system", group.Annotations["group_type"], "Group type annotation should be 'system'")
+		assert.Equal(t, "admin", group.Annotations["group_level"].Value, "Group level annotation should be 'admin'")
+		assert.Equal(t, "system", group.Annotations["group_type"].Value, "Group type annotation should be 'system'")
 	})
 
 	t.Run("GetGroup - not found", func(t *testing.T) {
@@ -635,8 +635,8 @@ func TestGetGroup(t *testing.T) {
 
 		// Verify annotations are present
 		assert.Equal(t, 2, len(adminGroup.Annotations), "Admin group should have 2 annotations")
-		assert.Equal(t, "admin", adminGroup.Annotations["group_level"], "Admin group should have group_level annotation")
-		assert.Equal(t, "system", adminGroup.Annotations["group_type"], "Admin group should have group_type annotation")
+		assert.Equal(t, "admin", adminGroup.Annotations["group_level"].Value, "Admin group should have group_level annotation")
+		assert.Equal(t, "system", adminGroup.Annotations["group_type"].Value, "Admin group should have group_type annotation")
 	})
 }
 
@@ -656,7 +656,7 @@ func TestGetResourceGroup(t *testing.T) {
 		assert.NotNil(t, rg.Annotations, "Annotations should be initialized")
 		// Annotations should be populated from the domain
 		assert.Equal(t, 3, len(rg.Annotations), "Allow-all resource group should have 3 annotations")
-		assert.Equal(t, float64(42), rg.Annotations["foo"], "Foo annotation should be 42")
+		assert.Equal(t, float64(42), rg.Annotations["foo"].Value, "Foo annotation should be 42")
 		//assert.Equal(t, "[1, 2, 3]", rg.Annotations["bar"], "Bar annotation should be [1, 2, 3]")
 		//assert.Equal(t, "{\"bat\": 42}", rg.Annotations["baz"], "Baz annotation should be {\"bat\": 42}")
 	})
@@ -689,7 +689,7 @@ func TestGetResource(t *testing.T) {
 		require.NotNil(t, res, "Resource should not be nil")
 		assert.Equal(t, "mrn:data:sensitive:doc123", res.ID, "Resource ID should match input MRN")
 		assert.Equal(t, "mrn:iam:resource-group:sensitive", res.Group, "Resource should be in sensitive group")
-		assert.Equal(t, "HIGH", res.Annotations["classification"], "Classification annotation should be HIGH")
+		assert.Equal(t, "HIGH", res.Annotations["classification"].Value, "Classification annotation should be HIGH")
 	})
 
 	t.Run("GetResource - match restricted data resource", func(t *testing.T) {
@@ -704,8 +704,8 @@ func TestGetResource(t *testing.T) {
 		require.NotNil(t, res, "Resource should not be nil")
 		assert.Equal(t, "mrn:data:restricted:secret456", res.ID, "Resource ID should match input MRN")
 		assert.Equal(t, "mrn:iam:resource-group:restricted", res.Group, "Resource should be in restricted group")
-		assert.Equal(t, "MAXIMUM", res.Annotations["classification"], "Classification annotation should be MAXIMUM")
-		assert.Equal(t, true, res.Annotations["audit_required"], "audit_required annotation should be true")
+		assert.Equal(t, "MAXIMUM", res.Annotations["classification"].Value, "Classification annotation should be MAXIMUM")
+		assert.Equal(t, true, res.Annotations["audit_required"].Value, "audit_required annotation should be true")
 	})
 
 	t.Run("GetResource - match secret resource via second selector", func(t *testing.T) {
