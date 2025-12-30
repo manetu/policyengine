@@ -180,6 +180,188 @@ resource:
 }
 ```
 
+## Merge Strategies
+
+:::info[v1alpha4 Feature]
+Merge strategies are available in PolicyDomain schema version `v1alpha4` and later.
+:::
+
+When annotation keys conflict across inheritance levels, merge strategies determine how values are combined. The default strategy is `deep`, which recursively merges arrays and objects while letting higher-priority scalar values win. You can specify different strategies to control this behavior precisely.
+
+Merge strategies are particularly useful for:
+- **Accumulating permissions**: Combining tags, capabilities, or allowed regions from multiple sources
+- **Building configurations**: Merging objects where each level adds or overrides specific fields
+- **Set operations**: Creating deduplicated lists from multiple sources
+
+### Available Strategies
+
+| Strategy  | Arrays                           | Objects                              | Scalars      |
+|-----------|----------------------------------|--------------------------------------|--------------|
+| `replace` | Higher replaces lower            | Higher replaces lower                | Higher wins  |
+| `append`  | `[higher..., lower...]`          | Shallow merge, higher wins           | Higher wins  |
+| `prepend` | `[lower..., higher...]`          | Shallow merge, lower wins            | Lower wins   |
+| `deep`    | `[higher..., lower...]`          | Recursive merge, higher wins         | Higher wins  |
+| `union`   | Deduplicated set, higher first   | Same as deep                         | Higher wins  |
+
+The **default strategy** is `deep` when no strategy is specified.
+
+### Specifying a Merge Strategy
+
+Add the `merge` field to an annotation to control how it combines with values from lower-priority sources:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:developer"
+    annotations:
+      - name: "allowed_regions"
+        value: '["us-west"]'
+        merge: "union"           # Deduplicate when combined with other sources
+
+groups:
+  - mrn: "mrn:iam:group:global-team"
+    annotations:
+      - name: "allowed_regions"
+        value: '["us-east", "eu-west"]'
+        merge: "union"           # Combined result: ["us-east", "eu-west", "us-west"]
+```
+
+### Strategy Precedence
+
+When merging annotations, the strategy is determined by priority:
+1. **Higher-priority source's strategy** (if specified)
+2. **Lower-priority source's strategy** (if higher has none)
+3. **Default strategy** (`deep`)
+
+### Merge Strategy Examples
+
+#### Accumulating Tags with Union
+
+Use `union` to collect unique values from all sources:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:developer"
+    annotations:
+      - name: "tags"
+        value: '["dev", "internal"]'
+        merge: "union"
+
+groups:
+  - mrn: "mrn:iam:group:platform-team"
+    annotations:
+      - name: "tags"
+        value: '["platform", "internal"]'
+        merge: "union"
+```
+
+**Result**: `["platform", "internal", "dev"]` (deduplicated, higher priority first)
+
+#### Building Configuration Objects with Deep Merge
+
+Use `deep` to recursively merge nested objects:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:developer"
+    annotations:
+      - name: "config"
+        value: '{"timeouts": {"read": 30, "write": 60}, "retries": 3}'
+        merge: "deep"
+
+groups:
+  - mrn: "mrn:iam:group:premium-users"
+    annotations:
+      - name: "config"
+        value: '{"timeouts": {"write": 120}, "priority": "high"}'
+        merge: "deep"
+```
+
+**Result**:
+```json
+{
+  "timeouts": {"read": 30, "write": 120},
+  "retries": 3,
+  "priority": "high"
+}
+```
+
+#### Preserving Order with Append/Prepend
+
+Use `append` to add lower-priority elements after higher-priority ones:
+
+```yaml
+resource-groups:
+  - mrn: "mrn:iam:resource-group:base"
+    annotations:
+      - name: "processing_steps"
+        value: '["validate", "log"]'
+        merge: "append"
+
+resources:
+  - selector: ["mrn:data:sensitive:.*"]
+    group: "mrn:iam:resource-group:base"
+    annotations:
+      - name: "processing_steps"
+        value: '["encrypt", "audit"]'
+        merge: "append"
+```
+
+**Result**: `["encrypt", "audit", "validate", "log"]` (higher priority first)
+
+Use `prepend` to add lower-priority elements before higher-priority ones:
+
+```yaml
+# Same as above but with prepend
+annotations:
+  - name: "processing_steps"
+    value: '["encrypt", "audit"]'
+    merge: "prepend"
+```
+
+**Result**: `["validate", "log", "encrypt", "audit"]` (lower priority first)
+
+#### Replacing Values Explicitly
+
+Use `replace` when you want to completely override a lower-priority value:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:standard-user"
+    annotations:
+      - name: "permissions"
+        value: '["read", "list"]'
+
+groups:
+  - mrn: "mrn:iam:group:admin"
+    annotations:
+      - name: "permissions"
+        value: '["read", "write", "delete", "admin"]'
+        merge: "replace"          # Completely replaces role permissions
+```
+
+**Result**: `["read", "write", "delete", "admin"]` (role permissions ignored)
+
+### Type Mismatch Behavior
+
+When conflicting values have incompatible types (e.g., array vs. string), the higher-priority value always wins regardless of the merge strategy:
+
+```yaml
+roles:
+  - mrn: "mrn:iam:role:basic"
+    annotations:
+      - name: "access"
+        value: '["read"]'         # Array
+
+groups:
+  - mrn: "mrn:iam:group:special"
+    annotations:
+      - name: "access"
+        value: '"full"'           # String (incompatible type)
+        merge: "union"            # Strategy is ignored for type mismatch
+```
+
+**Result**: `"full"` (higher priority wins due to type mismatch)
+
 ### Inheritance Use Cases
 
 #### Establishing Defaults with Overrides
@@ -228,7 +410,15 @@ resource:
 
 ## Annotation Structure
 
-Annotations are defined as a list of `{name, value}` objects. Keys must be strings. Values must be **JSON-encoded strings**.
+Annotations are defined as a list of objects with the following fields:
+
+| Field   | Required | Description                                                                 |
+|---------|----------|-----------------------------------------------------------------------------|
+| `name`  | Yes      | The annotation key (string)                                                 |
+| `value` | Yes      | The annotation value (JSON-encoded string)                                  |
+| `merge` | No       | Merge strategy: `replace`, `append`, `prepend`, `deep`, or `union` (v1alpha4) |
+
+Keys must be strings. Values must be **JSON-encoded strings**.
 
 :::tip[Values Are JSON-Encoded]
 The `value` field must contain a valid JSON value encoded as a string. This is a common source of confusion:
@@ -258,18 +448,32 @@ annotations:
 
 Values can be any valid JSON type:
 
+```yaml
+annotations:
+  - name: "department"
+    value: "\"engineering\""              # String (note the nested quotes)
+  - name: "cost_center"
+    value: "12345"                        # Number
+  - name: "tags"
+    value: '["production", "critical"]'   # Array
+  - name: "metadata"
+    value: '{"created_by": "admin", "version": 2}'  # Object
+  - name: "enabled"
+    value: "true"                         # Boolean
+```
+
+After parsing, these annotations are available in policies as native JSON values:
+
 ```json
 {
-  "annotations": {
-    "department": "engineering",
-    "cost_center": 12345,
-    "tags": ["production", "critical"],
-    "metadata": {
-      "created_by": "admin",
-      "version": 2
-    },
-    "enabled": true
-  }
+  "department": "engineering",
+  "cost_center": 12345,
+  "tags": ["production", "critical"],
+  "metadata": {
+    "created_by": "admin",
+    "version": 2
+  },
+  "enabled": true
 }
 ```
 
@@ -459,6 +663,8 @@ allow {
 6. **Design for inheritance**: Place default values at lower precedence levels (roles, resource groups) and overrides at higher levels
 7. **Be explicit about precedence**: When the same key appears at multiple levels, document the intended override behavior
 8. **Avoid deep nesting**: While nested objects are supported, flatter structures are easier to reason about in policies
+9. **Choose merge strategies intentionally**: Use `union` for accumulating unique values, `deep` for configuration objects, and `replace` when you need complete override behavior
+10. **Be consistent with strategies**: If an annotation key uses a specific merge strategy, use the same strategy at all inheritance levels to avoid confusion
 
 ## Related Concepts
 

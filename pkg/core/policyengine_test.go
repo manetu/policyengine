@@ -1713,3 +1713,171 @@ func TestNewLocalPolicyEngine_MapInput(t *testing.T) {
 	assert.Nil(t, err, "Authorization with map input should not return error")
 	assert.True(t, allowed, "Admin role should be granted access")
 }
+
+// TestAnnotationHierarchy tests that annotations are merged according to the correct
+// priority hierarchy: principal > scope > group > role
+func TestAnnotationHierarchy(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "annotation-hierarchy.yml")
+
+	mockLog := &mockAccessLog{}
+	mockFactory := &mockAccessLogFactory{stream: mockLog}
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile}, options.WithAccessLog(mockFactory))
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	t.Run("role-only annotations", func(t *testing.T) {
+		mockLog.records = nil // Reset records
+
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":    "alice@example.com",
+				"mrealm": "test",
+				"aud":    "manetu.io",
+				"mroles": []interface{}{"mrn:iam:role:test-role"},
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		_, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err)
+
+		records := mockLog.GetRecords()
+		assert.Equal(t, 1, len(records), "Should have one access record")
+
+		porcJ, err := types.UnmarshalPORC(records[0].Porc)
+		assert.Nil(t, err)
+
+		principal := porcJ["principal"].(map[string]interface{})
+		annots := principal["mannotations"].(map[string]interface{})
+
+		// Role-only annotation should be present
+		assert.Equal(t, "role_value", annots["role_only"], "role_only should come from role")
+		// priority_test should come from role (lowest priority, but only source)
+		assert.Equal(t, "from_role", annots["priority_test"], "priority_test should come from role when no higher priority source")
+	})
+
+	t.Run("group overrides role", func(t *testing.T) {
+		mockLog.records = nil // Reset records
+
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":     "alice@example.com",
+				"mrealm":  "test",
+				"aud":     "manetu.io",
+				"mgroups": []interface{}{"mrn:iam:group:test-group"},
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		_, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err)
+
+		records := mockLog.GetRecords()
+		assert.Equal(t, 1, len(records), "Should have one access record")
+
+		porcJ, err := types.UnmarshalPORC(records[0].Porc)
+		assert.Nil(t, err)
+
+		principal := porcJ["principal"].(map[string]interface{})
+		annots := principal["mannotations"].(map[string]interface{})
+
+		// Group-only annotation should be present
+		assert.Equal(t, "group_value", annots["group_only"], "group_only should come from group")
+		// Role-only annotation should be present (inherited via group's role)
+		assert.Equal(t, "role_value", annots["role_only"], "role_only should come from role via group")
+		// priority_test should come from group (higher priority than role)
+		assert.Equal(t, "from_group", annots["priority_test"], "priority_test should come from group, overriding role")
+		// role_and_group should come from group (higher priority)
+		assert.Equal(t, "group_value", annots["role_and_group"], "role_and_group should come from group, overriding role")
+	})
+
+	t.Run("scope overrides group and role", func(t *testing.T) {
+		mockLog.records = nil // Reset records
+
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":     "alice@example.com",
+				"mrealm":  "test",
+				"aud":     "manetu.io",
+				"mgroups": []interface{}{"mrn:iam:group:test-group"},
+				"scopes":  []interface{}{"mrn:iam:scope:test-scope"},
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		_, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err)
+
+		records := mockLog.GetRecords()
+		assert.Equal(t, 1, len(records), "Should have one access record")
+
+		porcJ, err := types.UnmarshalPORC(records[0].Porc)
+		assert.Nil(t, err)
+
+		principal := porcJ["principal"].(map[string]interface{})
+		annots := principal["mannotations"].(map[string]interface{})
+
+		// Scope-only annotation should be present
+		assert.Equal(t, "scope_value", annots["scope_only"], "scope_only should come from scope")
+		// Group-only annotation should be present
+		assert.Equal(t, "group_value", annots["group_only"], "group_only should come from group")
+		// Role-only annotation should be present
+		assert.Equal(t, "role_value", annots["role_only"], "role_only should come from role")
+		// priority_test should come from scope (highest priority among role/group/scope)
+		assert.Equal(t, "from_scope", annots["priority_test"], "priority_test should come from scope, overriding group and role")
+		// group_and_scope should come from scope (higher priority than group)
+		assert.Equal(t, "scope_value", annots["group_and_scope"], "group_and_scope should come from scope, overriding group")
+	})
+
+	t.Run("principal annotations override everything", func(t *testing.T) {
+		mockLog.records = nil // Reset records
+
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":     "alice@example.com",
+				"mrealm":  "test",
+				"aud":     "manetu.io",
+				"mgroups": []interface{}{"mrn:iam:group:test-group"},
+				"scopes":  []interface{}{"mrn:iam:scope:test-scope"},
+				"mannotations": map[string]interface{}{
+					"priority_test":  "from_principal",
+					"principal_only": "principal_value",
+				},
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		_, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err)
+
+		records := mockLog.GetRecords()
+		assert.Equal(t, 1, len(records), "Should have one access record")
+
+		porcJ, err := types.UnmarshalPORC(records[0].Porc)
+		assert.Nil(t, err)
+
+		principal := porcJ["principal"].(map[string]interface{})
+		annots := principal["mannotations"].(map[string]interface{})
+
+		// Principal-only annotation should be present
+		assert.Equal(t, "principal_value", annots["principal_only"], "principal_only should come from principal")
+		// priority_test should come from principal (highest priority)
+		assert.Equal(t, "from_principal", annots["priority_test"], "priority_test should come from principal, overriding all others")
+		// Other annotations should still be inherited
+		assert.Equal(t, "scope_value", annots["scope_only"], "scope_only should come from scope")
+		assert.Equal(t, "group_value", annots["group_only"], "group_only should come from group")
+		assert.Equal(t, "role_value", annots["role_only"], "role_only should come from role")
+	})
+}

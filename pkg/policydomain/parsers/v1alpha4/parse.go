@@ -25,10 +25,16 @@ type PolicyDefinition struct {
 	Dependencies []string `yaml:"dependencies"`
 }
 
-// Annotation represents a key-value annotation
+// Annotation represents a key-value annotation with optional merge strategy
 type Annotation struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
+	Merge string `yaml:"merge,omitempty"` // "replace", "append", "prepend", "deep", "union"
+}
+
+// AnnotationDefaults contains default settings for annotation merging
+type AnnotationDefaults struct {
+	Merge string `yaml:"merge,omitempty"` // Default merge strategy
 }
 
 // PolicyReference represents a reference to a policy in v1alpha4 format
@@ -95,9 +101,12 @@ func exportDefinitions(defs []PolicyDefinition) map[string]policydomain.Policy {
 }
 
 func exportReference(def PolicyReference) policydomain.PolicyReference {
-	annotations := make(map[string]string)
+	annotations := make(map[string]policydomain.Annotation)
 	for _, ann := range def.Annotations {
-		annotations[ann.Name] = ann.Value
+		annotations[ann.Name] = policydomain.Annotation{
+			Value:         ann.Value,
+			MergeStrategy: ann.Merge,
+		}
 	}
 	return policydomain.PolicyReference{
 		IDSpec: policydomain.IDSpec{
@@ -119,9 +128,12 @@ func exportReferences(defs []PolicyReference) map[string]policydomain.PolicyRefe
 }
 
 func exportGroup(def Group) policydomain.Group {
-	annotations := make(map[string]string)
+	annotations := make(map[string]policydomain.Annotation)
 	for _, ann := range def.Annotations {
-		annotations[ann.Name] = ann.Value
+		annotations[ann.Name] = policydomain.Annotation{
+			Value:         ann.Value,
+			MergeStrategy: ann.Merge,
+		}
 	}
 	return policydomain.Group{
 		IDSpec: policydomain.IDSpec{
@@ -236,9 +248,12 @@ func exportResource(def Resource) (*policydomain.Resource, error) {
 		selectors = append(selectors, r)
 	}
 
-	annotations := make(map[string]string)
+	annotations := make(map[string]policydomain.Annotation)
 	for _, ann := range def.Annotations {
-		annotations[ann.Name] = ann.Value
+		annotations[ann.Name] = policydomain.Annotation{
+			Value:         ann.Value,
+			MergeStrategy: ann.Merge,
+		}
 	}
 
 	return &policydomain.Resource{
@@ -270,15 +285,16 @@ type IntermediateModel struct {
 		Name string `yaml:"name"`
 	}
 	Spec struct {
-		PolicyLibraries []PolicyDefinition `yaml:"policy-libraries"`
-		Policies        []PolicyDefinition `yaml:"policies"`
-		Roles           []PolicyReference  `yaml:"roles"`
-		Groups          []Group            `yaml:"groups"`
-		ResourceGroups  []PolicyReference  `yaml:"resource-groups"`
-		Scopes          []PolicyReference  `yaml:"scopes"`
-		Operations      []Operation        `yaml:"operations"`
-		Mappers         []Mapper           `yaml:"mappers"`
-		Resources       []Resource         `yaml:"resources"`
+		AnnotationDefaults AnnotationDefaults `yaml:"annotation-defaults"`
+		PolicyLibraries    []PolicyDefinition `yaml:"policy-libraries"`
+		Policies           []PolicyDefinition `yaml:"policies"`
+		Roles              []PolicyReference  `yaml:"roles"`
+		Groups             []Group            `yaml:"groups"`
+		ResourceGroups     []PolicyReference  `yaml:"resource-groups"`
+		Scopes             []PolicyReference  `yaml:"scopes"`
+		Operations         []Operation        `yaml:"operations"`
+		Mappers            []Mapper           `yaml:"mappers"`
+		Resources          []Resource         `yaml:"resources"`
 	}
 }
 
@@ -318,7 +334,10 @@ func Load(path string) (*policydomain.IntermediateModel, error) {
 	}
 
 	return &policydomain.IntermediateModel{
-		Name:            intermediate.Metadata.Name,
+		Name: intermediate.Metadata.Name,
+		AnnotationDefaults: policydomain.AnnotationDefaults{
+			MergeStrategy: intermediate.Spec.AnnotationDefaults.Merge,
+		},
 		PolicyLibraries: exportDefinitions(intermediate.Spec.PolicyLibraries),
 		Policies:        exportDefinitions(intermediate.Spec.Policies),
 		Roles:           exportReferences(intermediate.Spec.Roles),

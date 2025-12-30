@@ -38,6 +38,21 @@ type IDSpec struct {
 	Fingerprint []byte
 }
 
+// Annotation holds an annotation's JSON-encoded value and optional merge strategy.
+type Annotation struct {
+	// Value is the JSON-encoded annotation value.
+	Value string
+	// MergeStrategy is the merge strategy: "replace", "append", "prepend", "deep", "union".
+	// Empty string defaults to "deep".
+	MergeStrategy string
+}
+
+// AnnotationDefaults contains default settings for annotation merging.
+type AnnotationDefaults struct {
+	// MergeStrategy is the default merge strategy for annotations.
+	MergeStrategy string
+}
+
 // Policy represents a Rego policy definition parsed from YAML.
 //
 // The Ast field is nil after parsing and populated by
@@ -52,16 +67,16 @@ type Policy struct {
 // PolicyReference connects roles, scopes, or resource groups to their policies.
 type PolicyReference struct {
 	IDSpec      IDSpec
-	Policy      string            // MRN of the referenced policy
-	Default     bool              // True if this is a default resource group
-	Annotations map[string]string // Metadata available during policy evaluation
+	Policy      string                // MRN of the referenced policy
+	Default     bool                  // True if this is a default resource group
+	Annotations map[string]Annotation // Metadata available during policy evaluation
 }
 
 // Group represents a named collection of roles.
 type Group struct {
 	IDSpec      IDSpec
-	Roles       []string          // MRNs of roles in this group
-	Annotations map[string]string // Metadata available during policy evaluation
+	Roles       []string              // MRNs of roles in this group
+	Annotations map[string]Annotation // Metadata available during policy evaluation
 }
 
 // Operation routes authorization requests to policies based on operation MRN patterns.
@@ -85,9 +100,9 @@ type Mapper struct {
 // Resource matches resource MRNs to resource groups for policy evaluation.
 type Resource struct {
 	IDSpec      IDSpec
-	Selectors   []*regexp.Regexp  // Patterns matching resource MRNs
-	Group       string            // MRN of the resource group
-	Annotations map[string]string // Metadata available during policy evaluation
+	Selectors   []*regexp.Regexp      // Patterns matching resource MRNs
+	Group       string                // MRN of the resource group
+	Annotations map[string]Annotation // Metadata available during policy evaluation
 }
 
 // IntermediateModel is the complete representation of a parsed policy domain.
@@ -96,14 +111,15 @@ type Resource struct {
 // validated by the [registry] package. After validation, policies and
 // mappers are compiled to populate the Ast fields.
 type IntermediateModel struct {
-	Name            string                     // Policy domain name
-	PolicyLibraries map[string]Policy          // Reusable Rego libraries
-	Policies        map[string]Policy          // Authorization policies
-	Roles           map[string]PolicyReference // Role-to-policy bindings
-	Groups          map[string]Group           // Named role collections
-	ResourceGroups  map[string]PolicyReference // Resource-to-policy bindings
-	Scopes          map[string]PolicyReference // Scope-to-policy bindings
-	Operations      []Operation                // Operation routing rules
-	Mappers         []Mapper                   // Principal mappers
-	Resources       []Resource                 // Resource matching rules
+	Name               string                     // Policy domain name
+	AnnotationDefaults AnnotationDefaults         // Default annotation merge settings
+	PolicyLibraries    map[string]Policy          // Reusable Rego libraries
+	Policies           map[string]Policy          // Authorization policies
+	Roles              map[string]PolicyReference // Role-to-policy bindings
+	Groups             map[string]Group           // Named role collections
+	ResourceGroups     map[string]PolicyReference // Resource-to-policy bindings
+	Scopes             map[string]PolicyReference // Scope-to-policy bindings
+	Operations         []Operation                // Operation routing rules
+	Mappers            []Mapper                   // Principal mappers
+	Resources          []Resource                 // Resource matching rules
 }
