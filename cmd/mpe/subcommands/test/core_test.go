@@ -19,6 +19,7 @@ import (
 	"github.com/open-policy-agent/opa/v1/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
 )
 
 // Test helper function
@@ -170,4 +171,196 @@ porc = output {
 
 	// Verify the test domain file was loaded successfully
 	require.NotEmpty(t, domainFile, "Domain file should be loaded")
+}
+
+// testDataPath returns the path to test data files in cmd/mpe/test
+func testDataPath(filename string) string {
+	return filepath.Join("..", "..", "test", filename)
+}
+
+// buildTestCommand creates a CLI command structure for testing with the specified action
+func buildTestCommand(action cli.ActionFunc) *cli.Command {
+	return &cli.Command{
+		Name: "mpe",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "trace",
+				Value: false,
+			},
+		},
+		Commands: []*cli.Command{
+			{
+				Name: "test",
+				Commands: []*cli.Command{
+					{
+						Name: "decision",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "input", Aliases: []string{"i"}},
+							&cli.StringSliceFlag{Name: "bundle", Aliases: []string{"b"}},
+							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
+						},
+						Action: action,
+					},
+					{
+						Name: "mapper",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "input", Aliases: []string{"i"}},
+							&cli.StringSliceFlag{Name: "bundle", Aliases: []string{"b"}},
+							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
+							&cli.StringFlag{Name: "opa-flags"},
+							&cli.BoolFlag{Name: "no-opa-flags"},
+						},
+						Action: action,
+					},
+					{
+						Name: "envoy",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "input", Aliases: []string{"i"}},
+							&cli.StringSliceFlag{Name: "bundle", Aliases: []string{"b"}},
+							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
+							&cli.StringFlag{Name: "opa-flags"},
+							&cli.BoolFlag{Name: "no-opa-flags"},
+						},
+						Action: action,
+					},
+				},
+			},
+		},
+	}
+}
+
+// TestExecuteMapper_WithConsolidatedBundle tests the mapper command with consolidated.yml and envoy.json
+func TestExecuteMapper_WithConsolidatedBundle(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{"mpe", "test", "mapper", "-i", inputFile, "-b", bundleFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteMapper should succeed with consolidated bundle and envoy input")
+}
+
+// TestExecuteMapper_MissingBundle tests mapper command with missing bundle
+func TestExecuteMapper_MissingBundle(t *testing.T) {
+	inputFile := testDataPath("envoy.json")
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{"mpe", "test", "mapper", "-i", inputFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteMapper should fail without bundle")
+	assert.Contains(t, err.Error(), "bundle", "Error should mention missing bundle")
+}
+
+// TestExecuteDecision_WithConsolidatedBundle tests the decision command with consolidated.yml and example-porc-input.json
+func TestExecuteDecision_WithConsolidatedBundle(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("example-porc-input.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "example-porc-input.json should exist")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "test", "decision", "-i", inputFile, "-b", bundleFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteDecision should succeed with consolidated bundle and PORC input")
+}
+
+// TestExecuteDecision_MissingBundle tests decision command with missing bundle
+func TestExecuteDecision_MissingBundle(t *testing.T) {
+	inputFile := testDataPath("example-porc-input.json")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "test", "decision", "-i", inputFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteDecision should fail without bundle")
+	assert.Contains(t, err.Error(), "bundle", "Error should mention missing bundle")
+}
+
+// TestExecuteDecision_WithScopesInput tests decision command with scopes input
+func TestExecuteDecision_WithScopesInput(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("example-porc-input-scopes.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "example-porc-input-scopes.json should exist")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "test", "decision", "-i", inputFile, "-b", bundleFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteDecision should succeed with PORC input containing scopes")
+}
+
+// TestExecuteEnvoy_WithConsolidatedBundle tests the envoy command (full pipeline) with consolidated.yml and envoy.json
+func TestExecuteEnvoy_WithConsolidatedBundle(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "test", "envoy", "-i", inputFile, "-b", bundleFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteEnvoy should succeed with consolidated bundle and envoy input")
+}
+
+// TestExecuteEnvoy_MissingBundle tests envoy command with missing bundle
+func TestExecuteEnvoy_MissingBundle(t *testing.T) {
+	inputFile := testDataPath("envoy.json")
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "test", "envoy", "-i", inputFile}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteEnvoy should fail without bundle")
+	assert.Contains(t, err.Error(), "bundle", "Error should mention missing bundle")
+}
+
+// TestExecuteMapper_InvalidBundle tests mapper command with non-existent bundle file
+func TestExecuteMapper_InvalidBundle(t *testing.T) {
+	inputFile := testDataPath("envoy.json")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{"mpe", "test", "mapper", "-i", inputFile, "-b", "nonexistent-bundle.yml"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteMapper should fail with non-existent bundle file")
+}
+
+// TestExecuteDecision_InvalidBundle tests decision command with non-existent bundle file
+func TestExecuteDecision_InvalidBundle(t *testing.T) {
+	inputFile := testDataPath("example-porc-input.json")
+	require.FileExists(t, inputFile, "example-porc-input.json should exist")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "test", "decision", "-i", inputFile, "-b", "nonexistent-bundle.yml"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteDecision should fail with non-existent bundle file")
+}
+
+// TestExecuteEnvoy_InvalidBundle tests envoy command with non-existent bundle file
+func TestExecuteEnvoy_InvalidBundle(t *testing.T) {
+	inputFile := testDataPath("envoy.json")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "test", "envoy", "-i", inputFile, "-b", "nonexistent-bundle.yml"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteEnvoy should fail with non-existent bundle file")
 }

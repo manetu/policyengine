@@ -33,6 +33,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
       - name: Download dependencies
         run: go mod download
 
@@ -121,6 +126,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
+      - name: Install OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
 
       - name: Download dependencies
         run: go mod download
