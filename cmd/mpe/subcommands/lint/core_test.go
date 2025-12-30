@@ -222,17 +222,16 @@ func TestFormatYAMLError(t *testing.T) {
 	}
 }
 
-// FIXME: This test passes locally but fails in GH CI for reasons that are not clear. Fix and re-enable
-//// TestLintFile_FailOpaCheck tests a file that passes compilation but fails opa check
-//func TestLintFile_FailOpaCheck(t *testing.T) {
-//	validFile := createTempFileFromTestData(t, "fail-opa-check.yml")
-//
-//	// Test YAML validation - should pass
-//	result := lintFile(validFile)
-//	assert.True(t, result.Valid, "YAML should be valid")
-//	assert.Nil(t, result.Error, "YAML should have no error")
-//
-//	// Test Rego validation - should fail at opa check stage
-//	errorCount := lintRegoUsingExistingValidation([]string{validFile}, "--v0-compatible")
-//	assert.Greater(t, errorCount, 0, "Should have OPA check errors (undefined function)")
-//}
+// TestLintFile_FailOpaCheck tests a file that passes compilation but fails opa check
+func TestLintFile_FailOpaCheck(t *testing.T) {
+	validFile := createTempFileFromTestData(t, "fail-opa-check.yml")
+
+	// Test YAML validation - should pass
+	result := lintFile(validFile)
+	assert.True(t, result.Valid, "YAML should be valid")
+	assert.Nil(t, result.Error, "YAML should have no error")
+
+	// Test Rego validation - should fail at opa check stage
+	errorCount := lintRegoUsingExistingValidation([]string{validFile}, "--v0-compatible")
+	assert.Greater(t, errorCount, 0, "Should have OPA check errors (undefined function)")
+}
