@@ -169,3 +169,118 @@ func TestStdoutAccessLog_MultipleWrites(t *testing.T) {
 	lines := bytes.Count(buf.Bytes(), []byte("\n"))
 	assert.Equal(t, 3, lines)
 }
+
+// Tests for NullFactory and NullStream
+
+func TestNullFactory(t *testing.T) {
+	factory := NewNullFactory()
+	assert.NotNil(t, factory)
+	assert.IsType(t, &NullFactory{}, factory)
+}
+
+func TestNullFactory_NewStream(t *testing.T) {
+	factory := NewNullFactory()
+	stream, err := factory.NewStream()
+
+	require.NoError(t, err)
+	assert.NotNil(t, stream)
+	assert.IsType(t, &NullStream{}, stream)
+}
+
+func TestNullStream_Send(t *testing.T) {
+	factory := NewNullFactory()
+	stream, _ := factory.NewStream()
+
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "test-user"},
+		Operation: "read",
+		Resource:  "test-resource",
+		Decision:  events.AccessRecord_GRANT,
+	}
+
+	err := stream.Send(record)
+	assert.NoError(t, err)
+}
+
+func TestNullStream_Send_MultipleTimes(t *testing.T) {
+	factory := NewNullFactory()
+	stream, _ := factory.NewStream()
+
+	for i := 0; i < 100; i++ {
+		record := &events.AccessRecord{
+			Principal: &events.AccessRecord_Principal{Subject: "user"},
+			Operation: "read",
+			Resource:  "resource",
+		}
+		err := stream.Send(record)
+		assert.NoError(t, err)
+	}
+}
+
+func TestNullStream_Close(t *testing.T) {
+	factory := NewNullFactory()
+	stream, _ := factory.NewStream()
+
+	// Close should not panic
+	assert.NotPanics(t, func() {
+		stream.Close()
+	})
+
+	// Should be able to call Close multiple times without issue
+	stream.Close()
+	stream.Close()
+}
+
+func TestNullStream_Send_NilRecord(t *testing.T) {
+	factory := NewNullFactory()
+	stream, _ := factory.NewStream()
+
+	// Should handle nil record gracefully
+	err := stream.Send(nil)
+	assert.NoError(t, err)
+}
+
+// Tests for IoWriterFactory.NewStream
+
+func TestIoWriterFactory_NewStream(t *testing.T) {
+	buf := &bytes.Buffer{}
+	factory := NewIoWriterFactory(buf)
+
+	stream, err := factory.NewStream()
+	require.NoError(t, err)
+	assert.NotNil(t, stream)
+	assert.IsType(t, &IoWriterStream{}, stream)
+}
+
+func TestNewIoWriterFactory(t *testing.T) {
+	buf := &bytes.Buffer{}
+	factory := NewIoWriterFactory(buf)
+
+	assert.NotNil(t, factory)
+	assert.IsType(t, &IoWriterFactory{}, factory)
+}
+
+func TestIoWriterStream_ViaFactory(t *testing.T) {
+	buf := &bytes.Buffer{}
+	factory := NewIoWriterFactory(buf)
+
+	stream, err := factory.NewStream()
+	require.NoError(t, err)
+
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "test-user"},
+		Operation: "write",
+		Resource:  "test-resource",
+		Decision:  events.AccessRecord_DENY,
+	}
+
+	err = stream.Send(record)
+	require.NoError(t, err)
+
+	// Verify output
+	output := buf.String()
+	assert.Contains(t, output, "test-user")
+	assert.Contains(t, output, "write")
+	assert.Contains(t, output, "test-resource")
+	assert.Contains(t, output, "DENY")
+}
