@@ -237,6 +237,58 @@ jobs:
           name: mpe-${{ matrix.goos }}-${{ matrix.goarch }}
           path: target/mpe-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
 
+  example-validation:
+    name: Validate Example PolicyDomains
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build mpe
+        run: go build -o ./bin/mpe ./cmd/mpe
+
+      - name: Validate example PolicyDomains
+        run: |
+          echo "## Example Validation Results" >> $GITHUB_STEP_SUMMARY
+          failed=0
+          for dir in docs/static/examples/*/; do
+            name=$(basename "$dir")
+            if [ -f "${dir}policydomain.yml" ]; then
+              echo "Validating: $name"
+              if ./bin/mpe lint -f "${dir}policydomain.yml" 2>&1; then
+                echo "- ✅ $name" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "- ❌ $name" >> $GITHUB_STEP_SUMMARY
+                failed=1
+              fi
+            fi
+          done
+          if [ $failed -eq 1 ]; then
+            echo ""
+            echo "Some examples failed validation!"
+            exit 1
+          fi
+          echo ""
+          echo "All examples validated successfully!"
+
   docs-lint:
     name: Documentation Lint
     runs-on: ubuntu-latest
