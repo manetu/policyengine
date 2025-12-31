@@ -4,7 +4,7 @@ target/
 .test
 *.out
 .vscode
-.claude
+.claude/settings.local.json
 
 # Generated during artifact builds
 NOTICES
