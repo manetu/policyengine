@@ -84,7 +84,7 @@ func parseLevel(levelStr string) (zapcore.Level, error) {
 		return zapcore.WarnLevel, nil
 	case "info":
 		return zapcore.InfoLevel, nil
-	case "debug":
+	case "debug", "trace":
 		return zapcore.DebugLevel, nil
 	default:
 		return zapcore.InfoLevel, nil // Return InfoLevel as default, no error
