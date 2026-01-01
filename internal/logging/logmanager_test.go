@@ -73,6 +73,19 @@ func TestUpdateConfigFromStringWithWhitespace(t *testing.T) {
 	assert.Equal(t, l2.IsLevelEnabled(zapcore.WarnLevel), false)
 }
 
+func TestTraceLevelMapsToDebug(t *testing.T) {
+	// Reset manager for clean test
+	resetForTesting()
+
+	// Set trace level - should map to debug since zap doesn't support trace
+	err := UpdateLogLevels(".:trace")
+	assert.NoError(t, err)
+
+	l := GetLogger("testmodule")
+	assert.Equal(t, true, l.IsLevelEnabled(zapcore.DebugLevel))
+	assert.Equal(t, true, l.IsTraceEnabled())
+}
+
 // TestRaceCondition makes sure that logger support multi-threaded caller;
 // that is, we don't have a race condition in the logger.
 func TestRaceCondition(t *testing.T) {
