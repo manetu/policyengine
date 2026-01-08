@@ -6,6 +6,7 @@ package core
 
 import (
 	"context"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/common"
 	"github.com/manetu/policyengine/pkg/core/model"
@@ -22,10 +23,16 @@ type phase3 struct {
 // phase3 is executed only if prior resource resolution is successful. ie, either group is provided in PORC or resource
 // MRN is used to fully resolve the resource in "input"
 func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]interface{}) bool {
+	phaseStart := time.Now()
+	defer func() {
+		p3.duration = uint64(time.Since(phaseStart).Nanoseconds())
+	}()
+
 	var (
-		result bool
-		perr   *common.PolicyError
-		policy *model.Policy
+		result       bool
+		perr         *common.PolicyError
+		policy       *model.Policy
+		evalDuration uint64
 	)
 
 	// ResourceGroup policy check
@@ -37,7 +44,9 @@ func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 		logger.Debugf(agent, "authorize", "[phase3] error getting group for resource %s (err: %+v)", res.ID, perr)
 	} else {
 		policy = rg.Policy
+		evalStart := time.Now()
 		result, perr = rg.Policy.EvaluateBool(ctx, input)
+		evalDuration = uint64(time.Since(evalStart).Nanoseconds())
 		if perr != nil {
 			logger.Debugf(agent, "authorize", "[phase3] phase3 failed(err-%s)", perr)
 		}
@@ -47,7 +56,7 @@ func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 	if result {
 		desc = events.AccessRecord_GRANT
 	}
-	p3.append(buildBundleReference(perr, policy, events.AccessRecord_BundleReference_RESOURCE, res.Group, desc))
+	p3.append(buildBundleReference(perr, policy, events.AccessRecord_BundleReference_RESOURCE, res.Group, desc, evalDuration))
 
 	return result
 }

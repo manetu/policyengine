@@ -221,6 +221,7 @@ func (pe *PolicyEngine) resolveResource(ctx context.Context, mrn string) (*model
 
 // Authorize is the main function that calls opa
 func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOptions *options.AuthzOptions) bool {
+	overallStart := time.Now()
 	logger.Debug(agent, "authorize", "Enter")
 	defer logger.Debug(agent, "authorize", "Exit")
 
@@ -306,8 +307,15 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 		reason       string
 	}{}
 
+	// Initialize duration tracking
+	ar.Duration = &events.AccessRecord_Duration{
+		Phases: make(map[uint32]uint64),
+	}
+
 	// -------------------------- NOTE: all returns audited -----------------
 	defer func() {
+		// Capture overall duration just before sending audit (excluding audit send time)
+		ar.Duration.Overall = uint64(time.Since(overallStart).Nanoseconds())
 		pe.auditDecision(authOptions, ar, resMrn, auditDecision.reason, input, false, auditDecision.phase1Result)
 	}()
 
@@ -317,7 +325,7 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 
 		perr := &common.PolicyError{ReasonCode: events.AccessRecord_BundleReference_INVALPARAM_ERROR, Reason: err.Error()}
 
-		ar.References = append(ar.References, buildBundleReference(perr, nil, events.AccessRecord_BundleReference_RESOURCE, resMrn, events.AccessRecord_DENY))
+		ar.References = append(ar.References, buildBundleReference(perr, nil, events.AccessRecord_BundleReference_RESOURCE, resMrn, events.AccessRecord_DENY, 0))
 		ar.Decision = events.AccessRecord_DENY
 
 		auditDecision.reason = "failed to marshal PORC"
@@ -378,6 +386,12 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 
 	phasesWg.Wait()
 
+	// Collect per-phase durations
+	ar.Duration.Phases[uint32(events.AccessRecord_BundleReference_SYSTEM)] = p1.duration
+	ar.Duration.Phases[uint32(events.AccessRecord_BundleReference_IDENTITY)] = p2.duration
+	ar.Duration.Phases[uint32(events.AccessRecord_BundleReference_RESOURCE)] = p3.duration
+	ar.Duration.Phases[uint32(events.AccessRecord_BundleReference_SCOPE)] = p4.duration
+
 	logger.Debug(agent, "authorize", "phases completed...begin evaulation")
 
 	// include execution records for audit and display purposes
@@ -417,7 +431,7 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 
 		auditDecision.reason = "error getting resource"
 
-		ar.References = append(ar.References, buildBundleReference(resErr, nil, events.AccessRecord_BundleReference_RESOURCE, resMrn, events.AccessRecord_DENY))
+		ar.References = append(ar.References, buildBundleReference(resErr, nil, events.AccessRecord_BundleReference_RESOURCE, resMrn, events.AccessRecord_DENY, 0))
 
 		return false
 	}

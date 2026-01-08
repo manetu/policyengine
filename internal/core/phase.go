@@ -14,7 +14,8 @@ import (
  * is the anded result from the individual phases
  */
 type phase struct {
-	bundles []*events.AccessRecord_BundleReference
+	bundles  []*events.AccessRecord_BundleReference
+	duration uint64 // total phase duration in nanoseconds
 }
 
 func (p *phase) append(r *events.AccessRecord_BundleReference) {

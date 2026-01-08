@@ -306,6 +306,7 @@ type AccessRecord struct {
 	//	*AccessRecord_GrantReason
 	//	*AccessRecord_DenyReason
 	OverrideReason isAccessRecord_OverrideReason `protobuf_oneof:"override_reason"`
+	Duration       *AccessRecord_Duration        `protobuf:"bytes,11,opt,name=duration,proto3" json:"duration,omitempty"` // execution latency, in nanoseconds
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -419,6 +420,13 @@ func (x *AccessRecord) GetDenyReason() AccessRecord_BypassDenyReason {
 		}
 	}
 	return AccessRecord_NOT_DENIED
+}
+
+func (x *AccessRecord) GetDuration() *AccessRecord_Duration {
+	if x != nil {
+		return x.Duration
+	}
+	return nil
 }
 
 type isAccessRecord_OverrideReason interface {
@@ -608,7 +616,8 @@ type AccessRecord_BundleReference struct {
 	Decision      AccessRecord_Decision                   `protobuf:"varint,3,opt,name=decision,proto3,enum=manetu.policyengine.events.v1.AccessRecord_Decision" json:"decision,omitempty"`        // The outcome of this specific policy-bundle
 	Phase         AccessRecord_BundleReference_Phase      `protobuf:"varint,4,opt,name=phase,proto3,enum=manetu.policyengine.events.v1.AccessRecord_BundleReference_Phase" json:"phase,omitempty"` // The conjunction phase
 	ReasonCode    AccessRecord_BundleReference_ReasonCode `protobuf:"varint,5,opt,name=reason_code,json=reasonCode,proto3,enum=manetu.policyengine.events.v1.AccessRecord_BundleReference_ReasonCode" json:"reason_code,omitempty"`
-	Reason        string                                  `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"` // optional reason description, typically used for exception scenarios such as COMPILATION_ERROR
+	Reason        string                                  `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`      // optional reason description, typically used for exception scenarios such as COMPILATION_ERROR
+	Duration      uint64                                  `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"` // execution latency, in nanoseconds
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -685,11 +694,70 @@ func (x *AccessRecord_BundleReference) GetReason() string {
 	return ""
 }
 
+func (x *AccessRecord_BundleReference) GetDuration() uint64 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
+}
+
+type AccessRecord_Duration struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Overall       uint64                 `protobuf:"varint,1,opt,name=overall,proto3" json:"overall,omitempty"`
+	Phases        map[uint32]uint64      `protobuf:"bytes,2,rep,name=phases,proto3" json:"phases,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccessRecord_Duration) Reset() {
+	*x = AccessRecord_Duration{}
+	mi := &file_manetu_policyengine_events_v1_message_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessRecord_Duration) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessRecord_Duration) ProtoMessage() {}
+
+func (x *AccessRecord_Duration) ProtoReflect() protoreflect.Message {
+	mi := &file_manetu_policyengine_events_v1_message_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessRecord_Duration.ProtoReflect.Descriptor instead.
+func (*AccessRecord_Duration) Descriptor() ([]byte, []int) {
+	return file_manetu_policyengine_events_v1_message_proto_rawDescGZIP(), []int{0, 4}
+}
+
+func (x *AccessRecord_Duration) GetOverall() uint64 {
+	if x != nil {
+		return x.Overall
+	}
+	return 0
+}
+
+func (x *AccessRecord_Duration) GetPhases() map[uint32]uint64 {
+	if x != nil {
+		return x.Phases
+	}
+	return nil
+}
+
 var File_manetu_policyengine_events_v1_message_proto protoreflect.FileDescriptor
 
 const file_manetu_policyengine_events_v1_message_proto_rawDesc = "" +
 	"\n" +
-	"+manetu/policyengine/events/v1/message.proto\x12\x1dmanetu.policyengine.events.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfd\x0e\n" +
+	"+manetu/policyengine/events/v1/message.proto\x12\x1dmanetu.policyengine.events.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa7\x11\n" +
 	"\fAccessRecord\x12P\n" +
 	"\bmetadata\x18\x01 \x01(\v24.manetu.policyengine.events.v1.AccessRecord.MetadataR\bmetadata\x12S\n" +
 	"\tprincipal\x18\x02 \x01(\v25.manetu.policyengine.events.v1.AccessRecord.PrincipalR\tprincipal\x12\x1c\n" +
@@ -704,7 +772,8 @@ const file_manetu_policyengine_events_v1_message_proto_rawDesc = "" +
 	"\fgrant_reason\x18\t \x01(\x0e2=.manetu.policyengine.events.v1.AccessRecord.BypassGrantReasonH\x00R\vgrantReason\x12_\n" +
 	"\vdeny_reason\x18\n" +
 	" \x01(\x0e2<.manetu.policyengine.events.v1.AccessRecord.BypassDenyReasonH\x00R\n" +
-	"denyReason\x1a\xdd\x01\n" +
+	"denyReason\x12P\n" +
+	"\bduration\x18\v \x01(\v24.manetu.policyengine.events.v1.AccessRecord.DurationR\bduration\x1a\xdd\x01\n" +
 	"\bMetadata\x128\n" +
 	"\ttimestamp\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12O\n" +
 	"\x03env\x18\x02 \x03(\v2=.manetu.policyengine.events.v1.AccessRecord.Metadata.EnvEntryR\x03env\x12\x0e\n" +
@@ -717,7 +786,7 @@ const file_manetu_policyengine_events_v1_message_proto_rawDesc = "" +
 	"\x05realm\x18\x02 \x01(\tR\x05realm\x1aE\n" +
 	"\x0fPolicyReference\x12\x10\n" +
 	"\x03mrn\x18\x01 \x01(\tR\x03mrn\x12 \n" +
-	"\vfingerprint\x18\x02 \x01(\fR\vfingerprint\x1a\x93\x05\n" +
+	"\vfingerprint\x18\x02 \x01(\fR\vfingerprint\x1a\xaf\x05\n" +
 	"\x0fBundleReference\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12W\n" +
 	"\bpolicies\x18\x02 \x03(\v2;.manetu.policyengine.events.v1.AccessRecord.PolicyReferenceR\bpolicies\x12P\n" +
@@ -725,7 +794,8 @@ const file_manetu_policyengine_events_v1_message_proto_rawDesc = "" +
 	"\x05phase\x18\x04 \x01(\x0e2A.manetu.policyengine.events.v1.AccessRecord.BundleReference.PhaseR\x05phase\x12g\n" +
 	"\vreason_code\x18\x05 \x01(\x0e2F.manetu.policyengine.events.v1.AccessRecord.BundleReference.ReasonCodeR\n" +
 	"reasonCode\x12\x16\n" +
-	"\x06reason\x18\x06 \x01(\tR\x06reason\"K\n" +
+	"\x06reason\x18\x06 \x01(\tR\x06reason\x12\x1a\n" +
+	"\bduration\x18\a \x01(\x04R\bduration\"K\n" +
 	"\x05Phase\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\n" +
 	"\n" +
@@ -741,7 +811,13 @@ const file_manetu_policyengine_events_v1_message_proto_rawDesc = "" +
 	"\rNETWORK_ERROR\x10\x03\x12\x14\n" +
 	"\x10EVALUATION_ERROR\x10\x04\x12\x14\n" +
 	"\x10INVALPARAM_ERROR\x10\x05\x12\x11\n" +
-	"\rUNKNOWN_ERROR\x10d\"0\n" +
+	"\rUNKNOWN_ERROR\x10d\x1a\xb9\x01\n" +
+	"\bDuration\x12\x18\n" +
+	"\aoverall\x18\x01 \x01(\x04R\aoverall\x12X\n" +
+	"\x06phases\x18\x02 \x03(\v2@.manetu.policyengine.events.v1.AccessRecord.Duration.PhasesEntryR\x06phases\x1a9\n" +
+	"\vPhasesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\rR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x04R\x05value:\x028\x01\"0\n" +
 	"\bDecision\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05GRANT\x10\x01\x12\b\n" +
@@ -773,7 +849,7 @@ func file_manetu_policyengine_events_v1_message_proto_rawDescGZIP() []byte {
 }
 
 var file_manetu_policyengine_events_v1_message_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_manetu_policyengine_events_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_manetu_policyengine_events_v1_message_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_manetu_policyengine_events_v1_message_proto_goTypes = []any{
 	(AccessRecord_Decision)(0),                   // 0: manetu.policyengine.events.v1.AccessRecord.Decision
 	(AccessRecord_BypassGrantReason)(0),          // 1: manetu.policyengine.events.v1.AccessRecord.BypassGrantReason
@@ -785,8 +861,10 @@ var file_manetu_policyengine_events_v1_message_proto_goTypes = []any{
 	(*AccessRecord_Principal)(nil),               // 7: manetu.policyengine.events.v1.AccessRecord.Principal
 	(*AccessRecord_PolicyReference)(nil),         // 8: manetu.policyengine.events.v1.AccessRecord.PolicyReference
 	(*AccessRecord_BundleReference)(nil),         // 9: manetu.policyengine.events.v1.AccessRecord.BundleReference
-	nil,                                          // 10: manetu.policyengine.events.v1.AccessRecord.Metadata.EnvEntry
-	(*timestamppb.Timestamp)(nil),                // 11: google.protobuf.Timestamp
+	(*AccessRecord_Duration)(nil),                // 10: manetu.policyengine.events.v1.AccessRecord.Duration
+	nil,                                          // 11: manetu.policyengine.events.v1.AccessRecord.Metadata.EnvEntry
+	nil,                                          // 12: manetu.policyengine.events.v1.AccessRecord.Duration.PhasesEntry
+	(*timestamppb.Timestamp)(nil),                // 13: google.protobuf.Timestamp
 }
 var file_manetu_policyengine_events_v1_message_proto_depIdxs = []int32{
 	6,  // 0: manetu.policyengine.events.v1.AccessRecord.metadata:type_name -> manetu.policyengine.events.v1.AccessRecord.Metadata
@@ -795,17 +873,19 @@ var file_manetu_policyengine_events_v1_message_proto_depIdxs = []int32{
 	9,  // 3: manetu.policyengine.events.v1.AccessRecord.references:type_name -> manetu.policyengine.events.v1.AccessRecord.BundleReference
 	1,  // 4: manetu.policyengine.events.v1.AccessRecord.grant_reason:type_name -> manetu.policyengine.events.v1.AccessRecord.BypassGrantReason
 	2,  // 5: manetu.policyengine.events.v1.AccessRecord.deny_reason:type_name -> manetu.policyengine.events.v1.AccessRecord.BypassDenyReason
-	11, // 6: manetu.policyengine.events.v1.AccessRecord.Metadata.timestamp:type_name -> google.protobuf.Timestamp
-	10, // 7: manetu.policyengine.events.v1.AccessRecord.Metadata.env:type_name -> manetu.policyengine.events.v1.AccessRecord.Metadata.EnvEntry
-	8,  // 8: manetu.policyengine.events.v1.AccessRecord.BundleReference.policies:type_name -> manetu.policyengine.events.v1.AccessRecord.PolicyReference
-	0,  // 9: manetu.policyengine.events.v1.AccessRecord.BundleReference.decision:type_name -> manetu.policyengine.events.v1.AccessRecord.Decision
-	3,  // 10: manetu.policyengine.events.v1.AccessRecord.BundleReference.phase:type_name -> manetu.policyengine.events.v1.AccessRecord.BundleReference.Phase
-	4,  // 11: manetu.policyengine.events.v1.AccessRecord.BundleReference.reason_code:type_name -> manetu.policyengine.events.v1.AccessRecord.BundleReference.ReasonCode
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	10, // 6: manetu.policyengine.events.v1.AccessRecord.duration:type_name -> manetu.policyengine.events.v1.AccessRecord.Duration
+	13, // 7: manetu.policyengine.events.v1.AccessRecord.Metadata.timestamp:type_name -> google.protobuf.Timestamp
+	11, // 8: manetu.policyengine.events.v1.AccessRecord.Metadata.env:type_name -> manetu.policyengine.events.v1.AccessRecord.Metadata.EnvEntry
+	8,  // 9: manetu.policyengine.events.v1.AccessRecord.BundleReference.policies:type_name -> manetu.policyengine.events.v1.AccessRecord.PolicyReference
+	0,  // 10: manetu.policyengine.events.v1.AccessRecord.BundleReference.decision:type_name -> manetu.policyengine.events.v1.AccessRecord.Decision
+	3,  // 11: manetu.policyengine.events.v1.AccessRecord.BundleReference.phase:type_name -> manetu.policyengine.events.v1.AccessRecord.BundleReference.Phase
+	4,  // 12: manetu.policyengine.events.v1.AccessRecord.BundleReference.reason_code:type_name -> manetu.policyengine.events.v1.AccessRecord.BundleReference.ReasonCode
+	12, // 13: manetu.policyengine.events.v1.AccessRecord.Duration.phases:type_name -> manetu.policyengine.events.v1.AccessRecord.Duration.PhasesEntry
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_manetu_policyengine_events_v1_message_proto_init() }
@@ -823,7 +903,7 @@ func file_manetu_policyengine_events_v1_message_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_manetu_policyengine_events_v1_message_proto_rawDesc), len(file_manetu_policyengine_events_v1_message_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

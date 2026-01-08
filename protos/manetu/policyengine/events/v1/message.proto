@@ -57,6 +57,7 @@ message AccessRecord {
     Phase                    phase       = 4;  // The conjunction phase
     ReasonCode               reason_code = 5;
     string                   reason      = 6;  // optional reason description, typically used for exception scenarios such as COMPILATION_ERROR
+    uint64                   duration    = 7;  // execution latency, in nanoseconds
   }
 
   enum BypassGrantReason {
@@ -72,6 +73,11 @@ message AccessRecord {
     OPERATOR_REQUIRED = 2;
   }
 
+  message Duration { // execution latencies, in nanoseconds
+    uint64    overall                 = 1;
+    map<uint32, uint64> phases        = 2;
+  }
+
   Metadata  metadata                  = 1;
   Principal principal                 = 2;
   string    operation                 = 3;   // from PORC, e.g. "http-post", "graphql-mutate", etc
@@ -84,4 +90,5 @@ message AccessRecord {
     BypassGrantReason grant_reason    = 9;
     BypassDenyReason  deny_reason     = 10;
   }
+  Duration  duration                  = 11;  // execution latency, in nanoseconds
 }

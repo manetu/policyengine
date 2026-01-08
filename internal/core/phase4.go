@@ -7,6 +7,7 @@ package core
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/common"
 	"github.com/manetu/policyengine/pkg/core/model"
@@ -26,6 +27,11 @@ type phase4 struct {
 }
 
 func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[string]interface{}, input map[string]interface{}) bool {
+	phaseStart := time.Now()
+	defer func() {
+		p4.duration = uint64(time.Since(phaseStart).Nanoseconds())
+	}()
+
 	logger.Trace(agent, "authorize", "proceeding to phase4")
 	scs := []string{}
 	if ss, ok := principalMap[Scopes].([]interface{}); ok {
@@ -54,6 +60,7 @@ func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 	policies := make([]*model.Policy, numScopes)
 	decs := make([]bool, numScopes)
 	errs := make([]*common.PolicyError, numScopes)
+	durations := make([]uint64, numScopes)
 
 	// ------------ begin processing policies concurrently ---------------
 	wg := sync.WaitGroup{}
@@ -72,7 +79,9 @@ func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			}
 
 			policies[i] = scope.Policy
+			evalStart := time.Now()
 			decs[i], errs[i] = scope.Policy.EvaluateBool(ctx, input)
+			durations[i] = uint64(time.Since(evalStart).Nanoseconds())
 		}(ind, s)
 	}
 
@@ -96,7 +105,7 @@ func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			desc = events.AccessRecord_GRANT
 		}
 
-		p4.append(buildBundleReference(errs[i], policies[i], events.AccessRecord_BundleReference_SCOPE, scs[i], desc))
+		p4.append(buildBundleReference(errs[i], policies[i], events.AccessRecord_BundleReference_SCOPE, scs[i], desc, durations[i]))
 	}
 
 	return result
