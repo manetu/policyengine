@@ -9,6 +9,7 @@ import (
 	"maps"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/common"
 	"github.com/manetu/policyengine/pkg/core/model"
@@ -26,6 +27,11 @@ type phase2 struct {
 }
 
 func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[string]interface{}, input map[string]interface{}) bool {
+	phaseStart := time.Now()
+	defer func() {
+		p2.duration = uint64(time.Since(phaseStart).Nanoseconds())
+	}()
+
 	logger.Trace(agent, "authorize", "proceeding to phase2")
 
 	var policies []*model.Policy
@@ -52,7 +58,7 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			group, perr := pe.backend.GetGroup(ctx, groupMrn)
 			if perr != nil {
 				logger.Tracef(agent, "authorize", "[phase2] get rolebundle failed for group %s", groupMrn)
-				p2.append(buildBundleReference(perr, nil, events.AccessRecord_BundleReference_IDENTITY, groupMrn, events.AccessRecord_DENY))
+				p2.append(buildBundleReference(perr, nil, events.AccessRecord_BundleReference_IDENTITY, groupMrn, events.AccessRecord_DENY, 0))
 			} else {
 				for _, r := range group.Roles {
 					roleMap[r] = struct{}{}
@@ -68,6 +74,7 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 	policies = make([]*model.Policy, len(rs))
 	decs := make([]bool, len(rs))
 	errs := make([]*common.PolicyError, len(rs))
+	durations := make([]uint64, len(rs))
 
 	// ------------ begin processing policies concurrently ---------------
 	numRoles := len(rs)
@@ -88,7 +95,9 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			}
 
 			policies[i] = role.Policy
+			evalStart := time.Now()
 			decs[i], errs[i] = role.Policy.EvaluateBool(ctx, input)
+			durations[i] = uint64(time.Since(evalStart).Nanoseconds())
 		}(ind, roleMrn)
 	}
 
@@ -113,7 +122,7 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			desc = events.AccessRecord_GRANT
 		}
 
-		p2.append(buildBundleReference(errs[i], policies[i], events.AccessRecord_BundleReference_IDENTITY, rs[i], desc))
+		p2.append(buildBundleReference(errs[i], policies[i], events.AccessRecord_BundleReference_IDENTITY, rs[i], desc, durations[i]))
 	}
 
 	return result

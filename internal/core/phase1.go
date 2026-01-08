@@ -6,6 +6,7 @@ package core
 
 import (
 	"context"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/common"
 	"github.com/manetu/policyengine/pkg/core/model"
@@ -46,10 +47,16 @@ func getPolicyForOperation(ctx context.Context, pe *PolicyEngine, mrn string) (*
 //
 // Value 0 is an leaves the result to be computed from the evaluation of other phases.
 func (p1 *phase1) exec(ctx context.Context, pe *PolicyEngine, input map[string]interface{}, op string) events.AccessRecord_Decision {
+	phaseStart := time.Now()
+	defer func() {
+		p1.duration = uint64(time.Since(phaseStart).Nanoseconds())
+	}()
+
 	var (
-		result events.AccessRecord_Decision
-		perr   *common.PolicyError
-		policy *model.Policy
+		result       events.AccessRecord_Decision
+		perr         *common.PolicyError
+		policy       *model.Policy
+		evalDuration uint64
 	)
 
 	result = events.AccessRecord_UNSPECIFIED
@@ -64,7 +71,10 @@ func (p1 *phase1) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 	} else {
 		logger.Debugf(agent, "authorize", "[phase1] got policy: %+v", policy)
 
+		evalStart := time.Now()
 		p1.result, perr = policy.EvaluateInt(ctx, input)
+		evalDuration = uint64(time.Since(evalStart).Nanoseconds())
+
 		if perr != nil {
 			result = events.AccessRecord_DENY
 			logger.Debugf(agent, "authorize", "[phase1] failed(err-%s)", perr)
@@ -84,7 +94,7 @@ func (p1 *phase1) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 		}
 	}
 
-	p1.append(buildBundleReference(perr, policy, events.AccessRecord_BundleReference_SYSTEM, op, bundleResult))
+	p1.append(buildBundleReference(perr, policy, events.AccessRecord_BundleReference_SYSTEM, op, bundleResult, evalDuration))
 
 	return result
 }

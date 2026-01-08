@@ -23,7 +23,7 @@ func getUnsafeBuiltins() map[string]struct{} {
 	return m
 }
 
-func buildBundleReference(policyError *common.PolicyError, policy *model.Policy, phase events.AccessRecord_BundleReference_Phase, id string, result events.AccessRecord_Decision) *events.AccessRecord_BundleReference {
+func buildBundleReference(policyError *common.PolicyError, policy *model.Policy, phase events.AccessRecord_BundleReference_Phase, id string, result events.AccessRecord_Decision, duration uint64) *events.AccessRecord_BundleReference {
 	var policies []*events.AccessRecord_PolicyReference
 
 	event := &events.AccessRecord_PolicyReference{}
@@ -37,6 +37,7 @@ func buildBundleReference(policyError *common.PolicyError, policy *model.Policy,
 		Id:       id,
 		Policies: policies,
 		Phase:    phase,
+		Duration: duration,
 	}
 
 	// error trumps everything
