@@ -315,7 +315,7 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 	// -------------------------- NOTE: all returns audited -----------------
 	defer func() {
 		// Capture overall duration just before sending audit (excluding audit send time)
-		ar.Duration.Overall = uint64(time.Since(overallStart).Nanoseconds())
+		ar.Duration.Overall = safeNanos(time.Since(overallStart))
 		pe.auditDecision(authOptions, ar, resMrn, auditDecision.reason, input, false, auditDecision.phase1Result)
 	}()
 

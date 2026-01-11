@@ -25,7 +25,7 @@ type phase3 struct {
 func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]interface{}) bool {
 	phaseStart := time.Now()
 	defer func() {
-		p3.duration = uint64(time.Since(phaseStart).Nanoseconds())
+		p3.duration = safeNanos(time.Since(phaseStart))
 	}()
 
 	var (
@@ -46,7 +46,7 @@ func (p3 *phase3) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 		policy = rg.Policy
 		evalStart := time.Now()
 		result, perr = rg.Policy.EvaluateBool(ctx, input)
-		evalDuration = uint64(time.Since(evalStart).Nanoseconds())
+		evalDuration = safeNanos(time.Since(evalStart))
 		if perr != nil {
 			logger.Debugf(agent, "authorize", "[phase3] phase3 failed(err-%s)", perr)
 		}

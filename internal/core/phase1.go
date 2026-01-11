@@ -49,7 +49,7 @@ func getPolicyForOperation(ctx context.Context, pe *PolicyEngine, mrn string) (*
 func (p1 *phase1) exec(ctx context.Context, pe *PolicyEngine, input map[string]interface{}, op string) events.AccessRecord_Decision {
 	phaseStart := time.Now()
 	defer func() {
-		p1.duration = uint64(time.Since(phaseStart).Nanoseconds())
+		p1.duration = safeNanos(time.Since(phaseStart))
 	}()
 
 	var (
@@ -73,7 +73,7 @@ func (p1 *phase1) exec(ctx context.Context, pe *PolicyEngine, input map[string]i
 
 		evalStart := time.Now()
 		p1.result, perr = policy.EvaluateInt(ctx, input)
-		evalDuration = uint64(time.Since(evalStart).Nanoseconds())
+		evalDuration = safeNanos(time.Since(evalStart))
 
 		if perr != nil {
 			result = events.AccessRecord_DENY
