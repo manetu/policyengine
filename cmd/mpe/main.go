@@ -60,6 +60,28 @@ func main() {
 						Action: test.ExecuteDecision,
 					},
 					{
+						Name:  "decisions",
+						Usage: "Run a suite of policy decision tests from a YAML file",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:     "input",
+								Aliases:  []string{"i"},
+								Usage:    "Load test suite from 'FILE'",
+								Required: true,
+							},
+							&cli.StringSliceFlag{
+								Name:    "bundle",
+								Aliases: []string{"b"},
+								Usage:   "Load PolicyDomain bundle from `FILE`. Can be specified multiple times.",
+							},
+							&cli.StringSliceFlag{
+								Name:  "test",
+								Usage: "Run only tests matching this glob pattern. Can be specified multiple times.",
+							},
+						},
+						Action: test.ExecuteDecisions,
+					},
+					{
 						Name:  "mapper",
 						Usage: "Executes a mapper's Rego code to transform Envoy input into a PORC",
 						Flags: []cli.Flag{

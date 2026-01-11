@@ -1,0 +1,132 @@
+# Example decision test suite for mpe test decisions
+# Run with: mpe test decisions -b consolidated.yml -i example-decision-tests.yaml
+
+tests:
+  # Test authenticated admin user can access resources
+  - name: admin-can-access
+    description: Admin role grants full access
+    porc:
+      principal:
+        sub: admin@example.com
+        mroles:
+          - mrn:iam:role:admin
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:allow-all
+    result:
+      allow: true
+
+  # Test authenticated admin can write
+  - name: admin-can-write
+    description: Admin role can perform write operations
+    porc:
+      principal:
+        sub: admin@example.com
+        mroles:
+          - mrn:iam:role:admin
+      operation: api:documents:write
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:allow-all
+    result:
+      allow: true
+
+  # Test unauthenticated user is denied (operation phase rejects)
+  - name: unauthenticated-denied
+    description: Unauthenticated users are denied at operation phase
+    porc:
+      principal: {}
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:allow-all
+    result:
+      allow: false
+
+  # Test no-access role denies everything
+  - name: no-access-role-denied
+    description: No-access role denies all operations
+    porc:
+      principal:
+        sub: restricted@example.com
+        mroles:
+          - mrn:iam:role:no-access
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:allow-all
+    result:
+      allow: false
+
+  # Test clearance-based access - user with HIGH clearance can read HIGH resource
+  - name: clearance-high-can-read-high
+    description: User with HIGH clearance can read HIGH classified resource
+    porc:
+      principal:
+        sub: cleared@example.com
+        mroles:
+          - mrn:iam:role:admin
+        mclearance: HIGH
+      operation: data:secrets:get
+      resource:
+        id: mrn:data:secret:123
+        group: mrn:iam:resource-group:share-by-clearance
+        owner: otheruser
+        classification: HIGH
+    result:
+      allow: true
+
+  # Test clearance-based access - user with LOW clearance cannot read HIGH resource
+  - name: clearance-low-cannot-read-high
+    description: User with LOW clearance cannot read HIGH classified resource
+    porc:
+      principal:
+        sub: lowclearance@example.com
+        mroles:
+          - mrn:iam:role:admin
+        mclearance: LOW
+      operation: data:secrets:get
+      resource:
+        id: mrn:data:secret:123
+        group: mrn:iam:resource-group:share-by-clearance
+        owner: otheruser
+        classification: HIGH
+    result:
+      allow: false
+
+  # Test owner can always access their resource
+  - name: owner-can-access
+    description: Resource owner can access regardless of clearance
+    porc:
+      principal:
+        sub: resourceowner
+        mroles:
+          - mrn:iam:role:admin
+        mclearance: LOW
+      operation: data:secrets:write
+      resource:
+        id: mrn:data:secret:123
+        group: mrn:iam:resource-group:share-by-clearance
+        owner: resourceowner
+        classification: MAXIMUM
+    result:
+      allow: true
+
+  # Test share-by-clearance only allows read operations for non-owners
+  - name: non-owner-cannot-write
+    description: Non-owner cannot write to shared resource even with clearance
+    porc:
+      principal:
+        sub: otheruser
+        mroles:
+          - mrn:iam:role:admin
+        mclearance: HIGH
+      operation: data:secrets:write
+      resource:
+        id: mrn:data:secret:123
+        group: mrn:iam:resource-group:share-by-clearance
+        owner: resourceowner
+        classification: LOW
+    result:
+      allow: false
