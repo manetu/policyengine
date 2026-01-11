@@ -6,12 +6,19 @@ package core
 
 import (
 	"strings"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/common"
 	"github.com/manetu/policyengine/pkg/core/config"
 	"github.com/manetu/policyengine/pkg/core/model"
 	events "github.com/manetu/policyengine/pkg/protos/manetu/policyengine/events/v1"
 )
+
+// safeNanos converts a time.Duration to uint64 nanoseconds safely,
+// ensuring no integer overflow from negative values.
+func safeNanos(d time.Duration) uint64 {
+	return uint64(max(0, d.Nanoseconds())) // #nosec G115 -- guarded by max(0, ...)
+}
 
 func getUnsafeBuiltins() map[string]struct{} {
 	builtins := strings.Split(config.VConfig.GetString(config.UnsafeBuiltIns), ",")

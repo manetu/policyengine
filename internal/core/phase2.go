@@ -29,7 +29,7 @@ type phase2 struct {
 func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[string]interface{}, input map[string]interface{}) bool {
 	phaseStart := time.Now()
 	defer func() {
-		p2.duration = uint64(time.Since(phaseStart).Nanoseconds())
+		p2.duration = safeNanos(time.Since(phaseStart))
 	}()
 
 	logger.Trace(agent, "authorize", "proceeding to phase2")
@@ -97,7 +97,7 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			policies[i] = role.Policy
 			evalStart := time.Now()
 			decs[i], errs[i] = role.Policy.EvaluateBool(ctx, input)
-			durations[i] = uint64(time.Since(evalStart).Nanoseconds())
+			durations[i] = safeNanos(time.Since(evalStart))
 		}(ind, roleMrn)
 	}
 

@@ -29,7 +29,7 @@ type phase4 struct {
 func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[string]interface{}, input map[string]interface{}) bool {
 	phaseStart := time.Now()
 	defer func() {
-		p4.duration = uint64(time.Since(phaseStart).Nanoseconds())
+		p4.duration = safeNanos(time.Since(phaseStart))
 	}()
 
 	logger.Trace(agent, "authorize", "proceeding to phase4")
@@ -81,7 +81,7 @@ func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 			policies[i] = scope.Policy
 			evalStart := time.Now()
 			decs[i], errs[i] = scope.Policy.EvaluateBool(ctx, input)
-			durations[i] = uint64(time.Since(evalStart).Nanoseconds())
+			durations[i] = safeNanos(time.Since(evalStart))
 		}(ind, s)
 	}
 
