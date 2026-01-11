@@ -10,6 +10,7 @@ Test policy decisions and mappers with various inputs.
 
 ```bash
 mpe test decision --bundle <file> --input <file>
+mpe test decisions --bundle <file> --input <file>
 mpe test mapper --bundle <file> --input <file>
 mpe test envoy --bundle <file> --input <file>
 ```
@@ -18,7 +19,8 @@ mpe test envoy --bundle <file> --input <file>
 
 | Subcommand | Description |
 |------------|-------------|
-| `decision` | Test policy decisions with PORC input |
+| `decision` | Test a single policy decision with PORC input |
+| `decisions` | Run a suite of policy decision tests from a YAML file |
 | `mapper` | Test mapper transformations |
 | `envoy` | Test full Envoy-to-decision pipeline |
 
@@ -94,6 +96,137 @@ mpe test decision -b my-domain.yml -i input.json | jq .references
 # Check for any bypass reasons
 mpe test decision -b my-domain.yml -i input.json | jq '{grant_reason, deny_reason, system_override}'
 ```
+
+## test decisions
+
+Run a suite of policy decision tests from a YAML file. This command is designed for automated testing and CI/CD pipelines, allowing you to define multiple test cases with expected outcomes in a single file.
+
+### Options
+
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `--bundle` | `-b` | PolicyDomain bundle file(s) |
+| `--input` | `-i` | Test suite YAML file (required) |
+| `--test` | | Run only tests matching this glob pattern (can be repeated) |
+
+### Example
+
+```bash
+# Run all tests in a suite
+mpe test decisions -b my-domain.yml -i tests.yaml
+
+# Run a specific test for debugging
+mpe test decisions -b my-domain.yml -i tests.yaml --test my-failing-test
+
+# Run tests matching a pattern
+mpe test decisions -b my-domain.yml -i tests.yaml --test "admin-*"
+
+# Run multiple patterns
+mpe test decisions -b my-domain.yml -i tests.yaml --test "admin-*" --test "viewer-*"
+```
+
+### Input Format
+
+The test suite is a YAML file containing a list of test cases. Each test case specifies:
+- `name`: A unique identifier for the test
+- `description`: What the test verifies
+- `porc`: The PORC expression to evaluate
+- `result.allow`: The expected outcome (`true` for GRANT, `false` for DENY)
+
+```yaml
+tests:
+  - name: admin-can-read
+    description: Admin role can perform read operations
+    porc:
+      principal:
+        sub: admin@example.com
+        mroles:
+          - mrn:iam:role:admin
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:default
+    result:
+      allow: true
+
+  - name: viewer-cannot-delete
+    description: Viewer role cannot delete resources
+    porc:
+      principal:
+        sub: viewer@example.com
+        mroles:
+          - mrn:iam:role:viewer
+      operation: api:documents:delete
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:default
+    result:
+      allow: false
+
+  - name: unauthenticated-denied
+    description: Unauthenticated users cannot access protected resources
+    porc:
+      principal: {}
+      operation: api:protected:read
+      resource:
+        id: mrn:app:resource:1
+        group: mrn:iam:resource-group:default
+    result:
+      allow: false
+```
+
+### Output
+
+The command outputs the result of each test, followed by a summary:
+
+```
+admin-can-read: PASS
+viewer-cannot-delete: PASS
+unauthenticated-denied: PASS
+
+3/3 tests passed
+```
+
+On failure, the output shows what was expected vs. what was received:
+
+```
+admin-can-read: PASS
+viewer-cannot-delete: FAIL (expected allow=false, got allow=true)
+
+1/2 tests passed
+```
+
+### Exit Codes
+
+| Code | Description |
+|------|-------------|
+| 0 | All tests passed |
+| 1 | One or more tests failed, or an error occurred |
+
+:::tip CI/CD Integration
+The `test decisions` command is designed for CI/CD pipelines. The exit code directly reflects test outcomes, making integration straightforward:
+
+```bash
+# In your CI pipeline
+mpe test decisions -b domain.yml -i tests.yaml
+# Exit code 0 = all tests passed
+# Exit code 1 = at least one test failed
+```
+:::
+
+### Debugging Failed Tests
+
+When investigating why a test is failing, use the `--trace` flag to see the full AccessRecord and OPA trace output:
+
+```bash
+mpe --trace test decisions -b domain.yml -i tests.yaml --test failing-test-name
+```
+
+This outputs:
+- **OPA trace**: Shows rule evaluation order, variable bindings, and decision path
+- **AccessRecord**: Shows which policies were evaluated, their decisions, and phase information
+
+The trace output goes to stderr, so it won't interfere with test result parsing.
 
 ## test mapper
 
