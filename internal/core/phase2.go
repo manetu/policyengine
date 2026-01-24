@@ -37,24 +37,17 @@ func (p2 *phase2) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 	var policies []*model.Policy
 
 	roleMap := make(map[string]interface{})
-	if rs, ok := principalMap[Mroles].([]interface{}); ok {
-		for _, x := range rs {
-			var r string
-			r, _ = x.(string)
-			roleMap[r] = struct{}{}
-		}
+	for _, r := range toStringSlice(principalMap[Mroles]) {
+		roleMap[r] = struct{}{}
 	}
 
-	if groups, ok := principalMap[Mgroups].([]interface{}); ok {
+	groups := toStringSlice(principalMap[Mgroups])
+	if len(groups) > 0 {
 		logger.Tracef(agent, "authorize", "[phase2] input groups %+v", groups)
 		// if fetching a group fails, record it but keep going. If there are no roles,
 		// we will DENY phase2. We just need one GRANT from the processing of policies
 		// for any one of roles
-		for _, x := range groups {
-			var (
-				groupMrn string
-			)
-			groupMrn, _ = x.(string)
+		for _, groupMrn := range groups {
 			group, perr := pe.backend.GetGroup(ctx, groupMrn)
 			if perr != nil {
 				logger.Tracef(agent, "authorize", "[phase2] get rolebundle failed for group %s", groupMrn)
