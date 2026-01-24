@@ -58,3 +58,25 @@ func buildBundleReference(policyError *common.PolicyError, policy *model.Policy,
 
 	return br
 }
+
+// toStringSlice converts various slice types to []string for PORC array field handling.
+// Supports []any (from json.Unmarshal) and []string (from direct Go construction).
+func toStringSlice(v any) []string {
+	if v == nil {
+		return []string{}
+	}
+	switch arr := v.(type) {
+	case []string:
+		return arr
+	case []any:
+		result := make([]string, 0, len(arr))
+		for _, elem := range arr {
+			if s, ok := elem.(string); ok {
+				result = append(result, s)
+			}
+		}
+		return result
+	default:
+		return []string{}
+	}
+}

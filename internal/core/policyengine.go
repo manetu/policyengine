@@ -166,22 +166,9 @@ func (pe *PolicyEngine) appendReferences(ar *events.AccessRecord, phases ...*pha
 
 // fetchAnnotations... caller input principalMap is validated and could report error which will abort the authorization
 func (pe *PolicyEngine) fetchAnnotations(ctx context.Context, principalMap map[string]interface{}) map[string]interface{} {
-	toArrFn := func(tag string) []string {
-		arr := []string{}
-		if gs, ok := principalMap[tag].([]interface{}); ok {
-			for _, x := range gs {
-				if g, okk := x.(string); okk {
-					arr = append(arr, g)
-				}
-			}
-		}
-
-		return arr
-	}
-
-	groups := toArrFn(Mgroups)
-	roles := toArrFn(Mroles)
-	scopes := toArrFn(Scopes)
+	groups := toStringSlice(principalMap[Mgroups])
+	roles := toStringSlice(principalMap[Mroles])
+	scopes := toStringSlice(principalMap[Scopes])
 
 	var (
 		annots map[string]interface{}

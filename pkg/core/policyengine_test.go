@@ -1714,6 +1714,113 @@ func TestNewLocalPolicyEngine_MapInput(t *testing.T) {
 	assert.True(t, allowed, "Admin role should be granted access")
 }
 
+// TestNewLocalPolicyEngine_MapInputWithTypedSlices tests that []string can be used
+// for array fields (mroles, mgroups, scopes) when constructing PORC maps directly in Go,
+// in addition to the traditional []interface{} from json.Unmarshal.
+func TestNewLocalPolicyEngine_MapInputWithTypedSlices(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+	config.VConfig.Set(config.MockEnabled, false)
+	defer config.VConfig.Set(config.MockEnabled, true)
+
+	domainFile := createTempFileFromTestData(t, "consolidated.yml")
+
+	pe, err := core.NewLocalPolicyEngine([]string{domainFile})
+	assert.Nil(t, err, "NewLocalPolicyEngine should succeed")
+	assert.NotNil(t, pe, "PolicyEngine should not be nil")
+
+	ctx := context.Background()
+
+	t.Run("mroles as []string", func(t *testing.T) {
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":    "alice@example.com",
+				"mrealm": "test",
+				"aud":    "manetu.io",
+				"mroles": []string{"mrn:iam:role:admin"}, // Using []string instead of []interface{}
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		allowed, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err, "Authorization should not return error")
+		assert.True(t, allowed, "Admin role with []string should be granted access")
+	})
+
+	t.Run("mgroups as []string", func(t *testing.T) {
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":     "alice@example.com",
+				"mrealm":  "test",
+				"aud":     "manetu.io",
+				"mgroups": []string{"mrn:iam:group:test-group"}, // Using []string instead of []interface{}
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		// This test verifies the group lookup code path handles []string
+		_, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err, "Authorization should not return error with []string mgroups")
+	})
+
+	t.Run("scopes as []string", func(t *testing.T) {
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":    "alice@example.com",
+				"mrealm": "test",
+				"aud":    "manetu.io",
+				"mroles": []string{"mrn:iam:role:admin"},
+				"scopes": []string{"mrn:iam:scope:api"}, // Using []string instead of []interface{}
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		allowed, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err, "Authorization should not return error with []string scopes")
+		assert.True(t, allowed, "API scope with []string should grant access")
+	})
+
+	t.Run("all array fields as []string", func(t *testing.T) {
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":     "alice@example.com",
+				"mrealm":  "test",
+				"aud":     "manetu.io",
+				"mroles":  []string{"mrn:iam:role:admin"},
+				"mgroups": []string{}, // Empty but still []string
+				"scopes":  []string{"mrn:iam:scope:api"},
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		allowed, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err, "Authorization should not return error with all []string arrays")
+		assert.True(t, allowed, "Should work with all array fields as []string")
+	})
+
+	t.Run("mixed []string and []interface{}", func(t *testing.T) {
+		porc := map[string]interface{}{
+			"principal": map[string]interface{}{
+				"sub":    "alice@example.com",
+				"mrealm": "test",
+				"aud":    "manetu.io",
+				"mroles": []string{"mrn:iam:role:admin"},     // []string
+				"scopes": []interface{}{"mrn:iam:scope:api"}, // []interface{}
+			},
+			"resource":  "mrn:app:document:12345",
+			"operation": "documents:read",
+		}
+
+		allowed, err := pe.Authorize(ctx, porc)
+		assert.Nil(t, err, "Authorization should not return error with mixed slice types")
+		assert.True(t, allowed, "Should work with mixed []string and []interface{}")
+	})
+}
+
 // TestAnnotationHierarchy tests that annotations are merged according to the correct
 // priority hierarchy: principal > scope > group > role
 func TestAnnotationHierarchy(t *testing.T) {

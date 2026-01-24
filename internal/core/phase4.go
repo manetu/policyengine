@@ -34,17 +34,14 @@ func (p4 *phase4) exec(ctx context.Context, pe *PolicyEngine, principalMap map[s
 
 	logger.Trace(agent, "authorize", "proceeding to phase4")
 	scs := []string{}
-	if ss, ok := principalMap[Scopes].([]interface{}); ok {
-		for _, x := range ss {
-			s, _ := x.(string)
-			if s == apiScope {
-				logger.Trace(agent, "authorize", "[phase4] found api scope...auth allowed")
-				//NOTE: we are NOT adding a bundleReference for this
-				return true
-			}
-
-			scs = append(scs, s)
+	for _, s := range toStringSlice(principalMap[Scopes]) {
+		if s == apiScope {
+			logger.Trace(agent, "authorize", "[phase4] found api scope...auth allowed")
+			//NOTE: we are NOT adding a bundleReference for this
+			return true
 		}
+
+		scs = append(scs, s)
 	}
 
 	if len(scs) == 0 {
