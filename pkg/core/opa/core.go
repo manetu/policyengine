@@ -42,6 +42,7 @@ package opa
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/manetu/policyengine/internal/logging"
@@ -88,9 +89,10 @@ type Compiler struct {
 // configuration for evaluation (such as tracing). Use [Evaluate]
 // to execute queries against the compiled policy.
 type Ast struct {
-	name     string
-	compiler *ast.Compiler
-	trace    bool
+	name        string
+	compiler    *ast.Compiler
+	trace       bool
+	traceFilter []*regexp.Regexp
 }
 
 // Modules maps module names to their Rego source code.
@@ -112,6 +114,7 @@ type CompilerOptions struct {
 	regoVersion  ast.RegoVersion
 	capabilities *ast.Capabilities
 	trace        bool
+	traceFilter  []*regexp.Regexp
 }
 
 func filter[T any](ss []T, test func(T) bool) (ret []T) {
@@ -191,6 +194,38 @@ func WithDefaultTracing(trace bool) CompilerOptionFunc {
 	}
 }
 
+// WithTraceFilter sets regex patterns for filtering which policies produce trace output.
+//
+// When tracing is enabled, only policies whose MRN matches at least one of the
+// provided patterns will produce trace output. This is useful for debugging
+// specific policies in a large policy set without being overwhelmed by trace
+// output from all policies.
+//
+// Each pattern is compiled as a Go regular expression and matched against the
+// full policy MRN (e.g., "mrn:iam:policy:my-policy").
+//
+// Example:
+//
+//	compiler := opa.NewCompiler(
+//	    opa.WithDefaultTracing(true),
+//	    opa.WithTraceFilter([]string{"mrn:iam:policy:unix.*", "mrn:iam:library:utils"}),
+//	)
+//
+// If no filter is set (or an empty slice is provided), all policies will produce
+// trace output when tracing is enabled.
+func WithTraceFilter(patterns []string) CompilerOptionFunc {
+	return func(o *CompilerOptions) {
+		o.traceFilter = make([]*regexp.Regexp, 0, len(patterns))
+		for _, pattern := range patterns {
+			if re, err := regexp.Compile(pattern); err == nil {
+				o.traceFilter = append(o.traceFilter, re)
+			} else {
+				logger.Warnf(agent, "WithTraceFilter", "invalid trace filter pattern '%s': %v", pattern, err)
+			}
+		}
+	}
+}
+
 // NewCompiler creates a new [Compiler] with the specified options.
 //
 // Default configuration:
@@ -228,6 +263,7 @@ func (c *Compiler) Clone(options ...CompilerOptionFunc) *Compiler {
 		regoVersion:  c.options.regoVersion,
 		capabilities: deepcopy.Copy(c.options.capabilities).(*ast.Capabilities),
 		trace:        c.options.trace,
+		traceFilter:  c.options.traceFilter,
 	}
 	for _, o := range options {
 		o(opts)
@@ -265,10 +301,32 @@ func (c *Compiler) Compile(name string, modules Modules) (*Ast, error) {
 	}
 
 	return &Ast{
-		name:     name,
-		compiler: compiler,
-		trace:    c.options.trace,
+		name:        name,
+		compiler:    compiler,
+		trace:       c.options.trace,
+		traceFilter: c.options.traceFilter,
 	}, nil
+}
+
+// shouldTrace determines whether tracing should be enabled for this AST.
+//
+// If tracing is disabled (p.trace == false), returns false.
+// If tracing is enabled and no filter is set, returns true.
+// If tracing is enabled and a filter is set, returns true only if the
+// AST's name matches at least one of the filter patterns.
+func (p *Ast) shouldTrace() bool {
+	if !p.trace {
+		return false
+	}
+	if len(p.traceFilter) == 0 {
+		return true
+	}
+	for _, re := range p.traceFilter {
+		if re.MatchString(p.name) {
+			return true
+		}
+	}
+	return false
 }
 
 // EvalOptions holds configuration for individual policy evaluations.
@@ -314,7 +372,7 @@ func (p *Ast) Evaluate(ctx context.Context, queryStr string, input interface{}, 
 
 	logger.Debugf(agent, "Evaluate", "input to rego: %+v", input)
 
-	opts := &EvalOptions{trace: p.trace}
+	opts := &EvalOptions{trace: p.shouldTrace()}
 	for _, o := range options {
 		o(opts)
 	}

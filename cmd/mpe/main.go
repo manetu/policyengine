@@ -32,6 +32,10 @@ func main() {
 				Usage:   "Enable OPA trace logging output to stderr for commands that evaluate REGO",
 				Value:   logger.IsTraceEnabled(),
 			},
+			&cli.StringSliceFlag{
+				Name:  "trace-filter",
+				Usage: "Filter trace output to policies matching these regex patterns (can be specified multiple times). Only effective when --trace is enabled.",
+			},
 			&cli.BoolFlag{
 				Name:  "pretty-log",
 				Usage: "Enable indented multi-line JSON output for access logs",

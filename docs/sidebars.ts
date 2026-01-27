@@ -80,6 +80,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'guides/testing-policies',
         'guides/reading-access-records',
+        'guides/debugging-policies',
       ],
     },
     {
