@@ -307,3 +307,4 @@ For the complete AccessRecord schema including all fields, types, and enumeratio
 - **[PORC](/concepts/porc)**: The input format captured in AccessRecords
 - **[Policy Conjunction](/concepts/policy-conjunction)**: The phases recorded in AccessRecords
 - **[Policies](/concepts/policies)**: The policies referenced in AccessRecords
+- **[Reading Access Records](/guides/reading-access-records)**: Step-by-step guide to interpreting AccessRecord output

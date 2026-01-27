@@ -282,6 +282,7 @@ In this example, the request passed Phase 1 (Operation) and Phase 2 (Identity), 
 
 ## See Also
 
+- [Reading Access Records](/guides/reading-access-records) — Practical guide to interpreting output
 - [Audit & Access Records](/concepts/audit) — Conceptual overview and use cases
 - [Policy Conjunction](/concepts/policy-conjunction) — How phases combine to reach decisions
 - [PORC](/concepts/porc) — The input format that AccessRecords capture
