@@ -32,6 +32,11 @@ func main() {
 				Usage:   "Enable OPA trace logging output to stderr for commands that evaluate REGO",
 				Value:   logger.IsTraceEnabled(),
 			},
+			&cli.BoolFlag{
+				Name:  "pretty-log",
+				Usage: "Enable indented multi-line JSON output for access logs",
+				Value: false,
+			},
 		},
 		Commands: []*cli.Command{
 			{

@@ -6,6 +6,8 @@ package accesslog
 
 import (
 	"bytes"
+	"encoding/json"
+	"strings"
 	"testing"
 
 	events "github.com/manetu/policyengine/pkg/protos/manetu/policyengine/events/v1"
@@ -22,7 +24,7 @@ func TestIoWriterFactory(t *testing.T) {
 
 func TestIoWriterAccessLog(t *testing.T) {
 	buf := &bytes.Buffer{}
-	log := newStream(buf)
+	log := newStream(buf, AccessLogOptions{})
 	assert.NotNil(t, log)
 	assert.IsType(t, &IoWriterStream{}, log)
 }
@@ -67,7 +69,7 @@ func TestStdoutAccessLog_Send(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
-			log := newStream(buf)
+			log := newStream(buf, AccessLogOptions{})
 
 			err := log.Send(tt.record)
 
@@ -92,7 +94,7 @@ func TestStdoutAccessLog_Send(t *testing.T) {
 
 func TestStdoutAccessLog_Send_JSONMarshaling(t *testing.T) {
 	buf := &bytes.Buffer{}
-	log := newStream(buf)
+	log := newStream(buf, AccessLogOptions{})
 
 	record := &events.AccessRecord{
 		Principal: &events.AccessRecord_Principal{
@@ -117,7 +119,7 @@ func TestStdoutAccessLog_Send_JSONMarshaling(t *testing.T) {
 
 func TestStdoutAccessLog_Close(t *testing.T) {
 	buf := &bytes.Buffer{}
-	log := newStream(buf)
+	log := newStream(buf, AccessLogOptions{})
 
 	// Close should not panic and should be a no-op
 	assert.NotPanics(t, func() {
@@ -134,7 +136,7 @@ func TestStdoutAccessLog_Close(t *testing.T) {
 
 func TestStdoutAccessLog_MultipleWrites(t *testing.T) {
 	buf := &bytes.Buffer{}
-	log := newStream(buf)
+	log := newStream(buf, AccessLogOptions{})
 
 	records := []*events.AccessRecord{
 		{
@@ -283,4 +285,223 @@ func TestIoWriterStream_ViaFactory(t *testing.T) {
 	assert.Contains(t, output, "write")
 	assert.Contains(t, output, "test-resource")
 	assert.Contains(t, output, "DENY")
+}
+
+// Tests for PORC field expansion
+
+func TestIoWriterStream_PorcExpansion(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{})
+
+	// Create a record with a JSON-encoded porc string
+	porcJSON := `{"principal":{"subject":"alice"},"operation":"read","resource":"doc1"}`
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+		Porc:      porcJSON,
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Parse the output JSON to verify porc is expanded
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+
+	// Verify porc is now an object, not a string
+	porc, ok := data["porc"].(map[string]interface{})
+	require.True(t, ok, "porc should be an object, got %T", data["porc"])
+
+	// Verify the porc contents
+	principal, ok := porc["principal"].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "alice", principal["subject"])
+	assert.Equal(t, "read", porc["operation"])
+	assert.Equal(t, "doc1", porc["resource"])
+}
+
+func TestIoWriterStream_PorcExpansion_InvalidJSON(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{})
+
+	// Create a record with an invalid JSON string in porc
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+		Porc:      "not-valid-json",
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Parse the output JSON
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+
+	// Verify porc remains as a string since it couldn't be parsed
+	porc, ok := data["porc"].(string)
+	require.True(t, ok, "porc should remain a string when JSON is invalid, got %T", data["porc"])
+	assert.Equal(t, "not-valid-json", porc)
+}
+
+func TestIoWriterStream_PorcExpansion_EmptyPorc(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{})
+
+	// Create a record without porc field
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Parse the output JSON
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+
+	// Verify porc is not present (empty string is omitted)
+	_, exists := data["porc"]
+	assert.False(t, exists, "empty porc should be omitted")
+}
+
+// Tests for PrettyPrint option
+
+func TestIoWriterStream_PrettyPrint(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{PrettyPrint: true})
+
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Verify output contains indentation (newlines and spaces)
+	assert.True(t, strings.Contains(output, "\n  "), "pretty print should contain indented newlines")
+
+	// Verify it's still valid JSON
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+
+	// Verify fields
+	assert.Equal(t, "read", data["operation"])
+	assert.Equal(t, "doc1", data["resource"])
+}
+
+func TestIoWriterStream_CompactOutput(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{PrettyPrint: false})
+
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Trim trailing newline for line counting
+	trimmed := strings.TrimSuffix(output, "\n")
+
+	// Verify output is single line (no newlines in the JSON itself)
+	assert.False(t, strings.Contains(trimmed, "\n"), "compact output should be single line")
+
+	// Verify it's still valid JSON
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+}
+
+func TestIoWriterStream_PrettyPrintWithPorc(t *testing.T) {
+	buf := &bytes.Buffer{}
+	log := newStream(buf, AccessLogOptions{PrettyPrint: true})
+
+	porcJSON := `{"principal":{"subject":"alice"},"operation":"read","resource":"doc1"}`
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "alice"},
+		Operation: "read",
+		Resource:  "doc1",
+		Decision:  events.AccessRecord_GRANT,
+		Porc:      porcJSON,
+	}
+
+	err := log.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+
+	// Verify output is pretty printed
+	assert.True(t, strings.Contains(output, "\n  "), "pretty print should contain indented newlines")
+
+	// Parse and verify porc is expanded
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(output), &data)
+	require.NoError(t, err)
+
+	porc, ok := data["porc"].(map[string]interface{})
+	require.True(t, ok, "porc should be an expanded object")
+	assert.Equal(t, "read", porc["operation"])
+}
+
+func TestNewIoWriterFactoryWithOptions(t *testing.T) {
+	buf := &bytes.Buffer{}
+	opts := AccessLogOptions{PrettyPrint: true}
+	factory := NewIoWriterFactoryWithOptions(buf, opts)
+
+	assert.NotNil(t, factory)
+	assert.IsType(t, &IoWriterFactory{}, factory)
+
+	// Verify options are passed through
+	ioFactory := factory.(*IoWriterFactory)
+	assert.True(t, ioFactory.options.PrettyPrint)
+}
+
+func TestNewIoWriterFactoryWithOptions_StreamInheritsOptions(t *testing.T) {
+	buf := &bytes.Buffer{}
+	opts := AccessLogOptions{PrettyPrint: true}
+	factory := NewIoWriterFactoryWithOptions(buf, opts)
+
+	stream, err := factory.NewStream()
+	require.NoError(t, err)
+
+	// Send a record and verify it's pretty printed
+	record := &events.AccessRecord{
+		Principal: &events.AccessRecord_Principal{Subject: "test"},
+		Operation: "read",
+		Resource:  "resource",
+	}
+
+	err = stream.Send(record)
+	require.NoError(t, err)
+
+	output := buf.String()
+	assert.True(t, strings.Contains(output, "\n  "), "stream should inherit pretty print option")
 }
