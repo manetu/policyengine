@@ -115,3 +115,51 @@ func TestConcurrentLoad(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestConfigWithCustomPath(t *testing.T) {
+	// Save original env vars
+	origPath := os.Getenv(config.ConfigPathEnv)
+	origFilename := os.Getenv(config.ConfigFileNameEnv)
+	defer func() {
+		if origPath != "" {
+			_ = os.Setenv(config.ConfigPathEnv, origPath)
+		} else {
+			_ = os.Unsetenv(config.ConfigPathEnv)
+		}
+		if origFilename != "" {
+			_ = os.Setenv(config.ConfigFileNameEnv, origFilename)
+		} else {
+			_ = os.Unsetenv(config.ConfigFileNameEnv)
+		}
+	}()
+
+	// Set custom path and filename via environment variables
+	_ = os.Setenv(config.ConfigPathEnv, "/tmp/test-config-path")
+	_ = os.Setenv(config.ConfigFileNameEnv, "custom-config")
+
+	// Reset config to pick up the new env vars
+	config.ResetConfig()
+
+	// Verify config was initialized (even if file doesn't exist)
+	assert.NotNil(t, config.VConfig)
+}
+
+func TestLoadWithMissingConfigFile(t *testing.T) {
+	// Save original env vars
+	origPath := os.Getenv(config.ConfigPathEnv)
+	defer func() {
+		if origPath != "" {
+			_ = os.Setenv(config.ConfigPathEnv, origPath)
+		} else {
+			_ = os.Unsetenv(config.ConfigPathEnv)
+		}
+	}()
+
+	// Point to a directory that exists but has no config file
+	_ = os.Setenv(config.ConfigPathEnv, "/tmp")
+
+	// Reset and load - should not error even with missing config
+	config.ResetConfig()
+	err := config.Load()
+	assert.NoError(t, err)
+}

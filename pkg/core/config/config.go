@@ -53,6 +53,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strings"
 	"sync"
@@ -221,7 +222,11 @@ func Load() error {
 		// Add the path specified by the env var.
 		err := VConfig.ReadInConfig()
 		if err != nil {
-			logger.SysWarnf("error reading config; using defaults: %+v", err)
+			// Only log if it's an actual error, not just a missing config file
+			var configNotFound viper.ConfigFileNotFoundError
+			if !errors.As(err, &configNotFound) {
+				logger.SysWarnf("error reading config; using defaults: %+v", err)
+			}
 			// fall through to continue loading
 		}
 
