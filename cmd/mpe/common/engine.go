@@ -83,10 +83,20 @@ func NewCliPolicyEngineWithOptions(cmd *cli.Command, stdout io.Writer, accessLog
 	opaFlags := cmd.String("opa-flags")
 	regoVersion := GetRegoVersionFromOPAFlags(noOPAFlags, opaFlags)
 
+	// Build compiler options
+	compilerOpts := []opa.CompilerOptionFunc{
+		opa.WithRegoVersion(regoVersion),
+		opa.WithDefaultTracing(traceEnabled),
+	}
+
+	// Add trace filter if specified
+	traceFilter := cmd.Root().StringSlice("trace-filter")
+	if len(traceFilter) > 0 {
+		compilerOpts = append(compilerOpts, opa.WithTraceFilter(traceFilter))
+	}
+
 	return core.NewPolicyEngine(
 		options.WithAccessLog(accesslog.NewIoWriterFactoryWithOptions(stdout, accessLogOpts)),
 		options.WithBackend(local.NewFactory(r)),
-		options.WithCompilerOptions(
-			opa.WithRegoVersion(regoVersion),
-			opa.WithDefaultTracing(traceEnabled)))
+		options.WithCompilerOptions(compilerOpts...))
 }

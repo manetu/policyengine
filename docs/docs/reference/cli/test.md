@@ -349,6 +349,22 @@ This shows:
 - Variable bindings
 - Decision path
 
+### Filtering Trace Output
+
+Use `--trace-filter` to limit trace output to specific policies:
+
+```bash
+# Trace only policies matching the pattern
+mpe --trace --trace-filter "mrn:iam:policy:my-policy" test decision -b my-domain.yml -i input.json
+
+# Multiple filters (matches any)
+mpe --trace --trace-filter "pattern1" --trace-filter "pattern2" test decision -b my-domain.yml -i input.json
+```
+
+Each filter is a regex pattern matched against the policy MRN.
+
+For a complete guide to interpreting trace output, see [Debugging Policies](/guides/debugging-policies).
+
 ## Testing Scenarios
 
 ### Test Authentication

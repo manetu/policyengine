@@ -8,11 +8,12 @@ This guide covers the full range of testing capabilities provided by the `mpe te
 
 ## Test Commands Overview
 
-| Command             | Description                                             |
-|---------------------|---------------------------------------------------------|
-| `mpe test decision` | Test policy decisions with [PORC](/concepts/porc) input |
-| `mpe test mapper`   | Test [mapper](/concepts/mappers) transformations        |
-| `mpe test envoy`    | Test full Envoy-to-decision pipeline                    |
+| Command              | Description                                              |
+|----------------------|----------------------------------------------------------|
+| `mpe test decision`  | Test a single policy decision with [PORC](/concepts/porc) input |
+| `mpe test decisions` | Run a suite of tests from a YAML file                    |
+| `mpe test mapper`    | Test [mapper](/concepts/mappers) transformations         |
+| `mpe test envoy`     | Test full Envoy-to-decision pipeline                     |
 
 ## Understanding Test Output
 
@@ -204,6 +205,89 @@ This runs both stages and outputs an AccessRecord (same format as `mpe test deci
 mpe test envoy -b my-domain.yml -i envoy-input.json | jq .decision
 ```
 
+## Running Test Suites
+
+For automated testing and CI/CD pipelines, define multiple test cases in a YAML file and run them with `mpe test decisions`:
+
+```yaml
+# tests.yaml
+tests:
+  - name: admin-can-read
+    description: Admin role can perform read operations
+    porc:
+      principal:
+        sub: admin@example.com
+        mroles:
+          - mrn:iam:role:admin
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:default
+    result:
+      allow: true
+
+  - name: viewer-cannot-delete
+    description: Viewer role cannot delete resources
+    porc:
+      principal:
+        sub: viewer@example.com
+        mroles:
+          - mrn:iam:role:viewer
+      operation: api:documents:delete
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:default
+    result:
+      allow: false
+
+  - name: unauthenticated-denied
+    description: Requests without a principal are denied
+    porc:
+      principal: {}
+      operation: api:documents:read
+      resource:
+        id: mrn:app:document:123
+        group: mrn:iam:resource-group:default
+    result:
+      allow: false
+```
+
+Run the entire suite:
+
+```bash
+mpe test decisions -b my-domain.yml -i tests.yaml
+```
+
+Output shows pass/fail status for each test:
+
+```
+admin-can-read: PASS
+viewer-cannot-delete: PASS
+unauthenticated-denied: PASS
+
+3/3 tests passed
+```
+
+### Running Specific Tests
+
+Use `--test` to run only tests matching a glob pattern:
+
+```bash
+# Run only admin-related tests
+mpe test decisions -b my-domain.yml -i tests.yaml --test "admin-*"
+
+# Run multiple patterns
+mpe test decisions -b my-domain.yml -i tests.yaml --test "admin-*" --test "viewer-*"
+```
+
+### Test Suite Best Practices
+
+1. **Group related tests**: Use naming conventions like `role-admin-*`, `phase-operation-*`
+2. **Test both positive and negative cases**: Verify GRANT and DENY scenarios
+3. **Include edge cases**: Empty principals, missing fields, boundary conditions
+4. **Add descriptions**: Document what each test verifies for future maintainers
+5. **Use in CI/CD**: Run test suites on every commit to catch regressions
+
 ## Using Multiple Bundles
 
 You can load multiple PolicyDomain bundles:
@@ -219,13 +303,19 @@ Policies from all bundles are available for evaluation.
 
 ## Enabling Trace Output
 
-For debugging, enable OPA trace output:
+When tests fail unexpectedly, enable OPA trace output to see step-by-step evaluation:
 
 ```bash
 mpe --trace test decision -b my-domain.yml -i input.json
 ```
 
-This shows detailed evaluation steps, which is invaluable when policies aren't behaving as expected.
+Combine with `--pretty-log` for easier reading:
+
+```bash
+mpe --trace --pretty-log test decision -b my-domain.yml -i input.json
+```
+
+The trace shows each rule entry, exit, and failure. For a complete guide to interpreting trace output, see [Debugging Policies](/guides/debugging-policies).
 
 ## Testing with stdin
 
@@ -299,7 +389,7 @@ Expected: <DecisionChip decision="grant" /> (owner access, assuming role and res
 1. **Create a test suite**: Maintain JSON files for common scenarios
 2. **Test edge cases**: Empty principals, missing fields, invalid data
 3. **Test both GRANT and DENY**: Verify policies correctly reject unauthorized access
-4. **Use trace for debugging**: When tests fail unexpectedly, enable `--trace`
+4. **Use trace for debugging**: When tests fail unexpectedly, enable `--trace` (see [Debugging Policies](/guides/debugging-policies))
 5. **Test mappers independently**: Verify mapper transformations before testing the full pipeline
 6. **Use `--pretty-log` for debugging**: Human-readable output makes it easier to understand evaluation results
 
@@ -307,6 +397,7 @@ Expected: <DecisionChip decision="grant" /> (owner access, assuming role and res
 
 - [CLI Reference: mpe test](/reference/cli/test) — Complete command reference with all options
 - [Reading Access Records](/guides/reading-access-records) — How to interpret test output
+- [Debugging Policies](/guides/debugging-policies) — How to interpret OPA trace output
 - [PORC Expressions](/concepts/porc) — Understanding the authorization request format
 - [Audit & Access Records](/concepts/audit) — How AccessRecords support debugging and compliance
 - [AccessRecord Schema](/reference/access-record) — Complete field reference for test output

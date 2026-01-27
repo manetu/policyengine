@@ -350,6 +350,10 @@ For denials, you might see `JWT_REQUIRED` or `OPERATOR_REQUIRED`.
    - Use the `mrn` and `fingerprint` to identify the exact policy version
    - Review the policy logic to understand why it denied
 
+:::tip Deep Debugging
+If the AccessRecord shows which policy denied but you need to understand *why*, enable trace output with `mpe --trace`. See [Debugging Policies](/guides/debugging-policies) for interpreting the trace.
+:::
+
 ### Finding Which Phase Failed
 
 Scan through the references and group by phase. A request is denied when a mandatory phase has no GRANT votes:
@@ -402,4 +406,5 @@ If you're investigating a historical decision, you can compare this fingerprint 
 - [AccessRecord Schema Reference](/reference/access-record) — Complete field definitions and types
 - [Policy Conjunction](/concepts/policy-conjunction) — How phases combine to reach decisions
 - [Audit & Access Records](/concepts/audit) — Conceptual overview and use cases
+- [Debugging Policies](/guides/debugging-policies) — Interpreting OPA trace output
 - [PORC](/concepts/porc) — The input format captured in AccessRecords
