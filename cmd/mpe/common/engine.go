@@ -50,6 +50,15 @@ func GetRegoVersionFromOPAFlags(noOPAFlags bool, opaFlagsStr string) ast.RegoVer
 // NewCliPolicyEngine creates a new PolicyEngine instance configured from CLI command flags.
 // It sets up the registry, access logging, backend, and compiler options based on the provided command.
 func NewCliPolicyEngine(cmd *cli.Command, stdout io.Writer) (core.PolicyEngine, error) {
+	opts := accesslog.AccessLogOptions{
+		PrettyPrint: cmd.Root().Bool("pretty-log"),
+	}
+	return NewCliPolicyEngineWithOptions(cmd, stdout, opts)
+}
+
+// NewCliPolicyEngineWithOptions creates a new PolicyEngine instance with explicit access log options.
+// This is useful when callers need to override the default options from CLI flags.
+func NewCliPolicyEngineWithOptions(cmd *cli.Command, stdout io.Writer, accessLogOpts accesslog.AccessLogOptions) (core.PolicyEngine, error) {
 	// Enable trace logging if requested (global flag from root command)
 	traceEnabled := cmd.Root().Bool("trace")
 
@@ -75,7 +84,7 @@ func NewCliPolicyEngine(cmd *cli.Command, stdout io.Writer) (core.PolicyEngine, 
 	regoVersion := GetRegoVersionFromOPAFlags(noOPAFlags, opaFlags)
 
 	return core.NewPolicyEngine(
-		options.WithAccessLog(accesslog.NewIoWriterFactory(stdout)),
+		options.WithAccessLog(accesslog.NewIoWriterFactoryWithOptions(stdout, accessLogOpts)),
 		options.WithBackend(local.NewFactory(r)),
 		options.WithCompilerOptions(
 			opa.WithRegoVersion(regoVersion),
