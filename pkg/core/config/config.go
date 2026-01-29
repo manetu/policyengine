@@ -28,8 +28,12 @@
 //	  unsafebuiltins: "http.send"
 //	audit:
 //	  env:
-//	    pod: HOSTNAME
-//	    region: AWS_REGION
+//	    - name: pod
+//	      type: env
+//	      value: HOSTNAME
+//	    - name: region
+//	      type: string
+//	      value: us-east-1
 //
 // # Environment Variables
 //
@@ -47,7 +51,8 @@
 //   - mock.enabled: Use mock backend instead of configured backend
 //   - opa.unsafebuiltins: Comma-separated list of Rego built-ins to disable
 //   - bundles.includeall: Include all policy bundles in access records (default: true)
-//   - audit.env: Map of access log metadata keys to environment variable names
+//   - audit.env: List of typed entries for access log metadata (supports env, string, k8s-label, k8s-annot)
+//   - audit.k8s.podinfo: Path to Kubernetes Downward API podinfo directory (default: "/etc/podinfo")
 //
 // [Viper]: https://github.com/spf13/viper
 package config
@@ -61,6 +66,34 @@ import (
 	"github.com/manetu/policyengine/internal/logging"
 	"github.com/spf13/viper"
 )
+
+// AuditEnvType identifies the source type for an audit environment entry.
+type AuditEnvType string
+
+const (
+	// AuditEnvTypeEnv resolves the value as an environment variable name.
+	AuditEnvTypeEnv AuditEnvType = "env"
+
+	// AuditEnvTypeString uses the value as a literal string.
+	AuditEnvTypeString AuditEnvType = "string"
+
+	// AuditEnvTypeK8sLabel looks up the value in Kubernetes pod labels
+	// via the Downward API. The podinfo directory is configurable via
+	// [AuditK8sPodinfo] (default: /etc/podinfo).
+	AuditEnvTypeK8sLabel AuditEnvType = "k8s-label"
+
+	// AuditEnvTypeK8sAnnot looks up the value in Kubernetes pod annotations
+	// via the Downward API. The podinfo directory is configurable via
+	// [AuditK8sPodinfo] (default: /etc/podinfo).
+	AuditEnvTypeK8sAnnot AuditEnvType = "k8s-annot"
+)
+
+// AuditEnvEntry represents a single typed entry in the audit.env configuration.
+type AuditEnvEntry struct {
+	Name  string       `mapstructure:"name"`
+	Type  AuditEnvType `mapstructure:"type"`
+	Value string       `mapstructure:"value"`
+}
 
 // Environment variable and default path constants for configuration loading.
 const (
@@ -109,17 +142,34 @@ const (
 	// Set via environment: MPE_BUNDLES_INCLUDEALL=false
 	IncludeAllBundles string = "bundles.includeall"
 
-	// AuditEnv defines a mapping from access log metadata keys to environment
-	// variable names. The values of the specified environment variables are
-	// included in every access log record.
+	// AuditEnv defines a list of typed entries for access log metadata.
+	// Each entry specifies a name (the key in the AccessRecord), a type
+	// (how to resolve the value), and a value (interpreted per type).
+	//
+	// Supported types:
+	//   - env: resolve value as an environment variable name
+	//   - string: use value as a literal string
+	//   - k8s-label: look up value in Kubernetes pod labels (via Downward API)
+	//   - k8s-annot: look up value in Kubernetes pod annotations (via Downward API)
 	//
 	// Example config:
 	//
 	//	audit:
 	//	  env:
-	//	    pod: HOSTNAME
-	//	    region: AWS_REGION
+	//	    - name: pod
+	//	      type: env
+	//	      value: HOSTNAME
+	//	    - name: region
+	//	      type: string
+	//	      value: us-east-1
 	AuditEnv string = "audit.env"
+
+	// AuditK8sPodinfo specifies the directory where Kubernetes Downward API
+	// files (labels and annotations) are mounted.
+	//
+	// Default: "/etc/podinfo"
+	// Set via environment: MPE_AUDIT_K8S_PODINFO=/custom/path
+	AuditK8sPodinfo string = "audit.k8s.podinfo"
 )
 
 var (
@@ -197,7 +247,8 @@ func doInitialize() {
 	// set up VConfig defaults
 	VConfig.SetDefault(logLevel, ".:info")
 	VConfig.SetDefault(UnsafeBuiltIns, "http.send")
-	VConfig.SetDefault(IncludeAllBundles, true) // includes all bundles in AccessRecord by default.
+	VConfig.SetDefault(IncludeAllBundles, true)         // includes all bundles in AccessRecord by default.
+	VConfig.SetDefault(AuditK8sPodinfo, "/etc/podinfo") // default Downward API mount path
 }
 
 // Load initializes configuration and loads settings from files and environment.
@@ -271,6 +322,7 @@ func ResetConfig() {
 	once = sync.Once{}     // reset the sync.Once to allow re-initialization
 	loadOnce = sync.Once{} // reset the loadOnce to allow re-loading
 	loadErr = nil          // reset any previous load error
+	resetK8sCache()        // reset cached Downward API data
 	Init()
 	// ignore any reset errors
 	_ = Load()
@@ -279,32 +331,63 @@ func ResetConfig() {
 // GetAuditEnv returns resolved audit environment metadata for access log records.
 //
 // This function reads the audit.env configuration section and resolves each
-// configured environment variable to its current value. The result is a map
-// suitable for inclusion in access log records as metadata.
+// entry according to its type. The result is a map suitable for inclusion in
+// access log records as metadata.
 //
 // Configuration format:
 //
 //	audit:
 //	  env:
-//	    pod: HOSTNAME
-//	    region: AWS_REGION
+//	    - name: pod
+//	      type: env
+//	      value: HOSTNAME
+//	    - name: region
+//	      type: string
+//	      value: us-east-1
 //
-// With HOSTNAME=pod-123 and AWS_REGION=us-east-1, this returns:
+// With HOSTNAME=pod-123, this returns:
 //
 //	{"pod": "pod-123", "region": "us-east-1"}
 //
-// Environment variables that are not set will have empty string values in the
-// result. Returns an empty map if no audit.env configuration is present.
+// Missing environment variables or unavailable Kubernetes metadata result in
+// empty string values. Returns an empty map if no audit.env configuration is
+// present.
 func GetAuditEnv() map[string]string {
 	result := make(map[string]string)
 
-	envConfig := VConfig.GetStringMapString(AuditEnv)
-	if envConfig == nil {
+	var entries []AuditEnvEntry
+	if err := VConfig.UnmarshalKey(AuditEnv, &entries); err != nil {
+		// Check if the old map format is being used
+		if old := VConfig.GetStringMapString(AuditEnv); len(old) > 0 {
+			logger.SysErrorf("audit.env uses the old map format which is no longer supported; please migrate to the new list format (see documentation)")
+			return result
+		}
 		return result
 	}
 
-	for key, envVarName := range envConfig {
-		result[key] = os.Getenv(envVarName)
+	for _, entry := range entries {
+		switch entry.Type {
+		case AuditEnvTypeEnv:
+			result[entry.Name] = os.Getenv(entry.Value)
+		case AuditEnvTypeString:
+			result[entry.Name] = entry.Value
+		case AuditEnvTypeK8sLabel:
+			labels := getK8sLabels()
+			if labels != nil {
+				result[entry.Name] = labels[entry.Value]
+			} else {
+				result[entry.Name] = ""
+			}
+		case AuditEnvTypeK8sAnnot:
+			annotations := getK8sAnnotations()
+			if annotations != nil {
+				result[entry.Name] = annotations[entry.Value]
+			} else {
+				result[entry.Name] = ""
+			}
+		default:
+			logger.SysWarnf("audit.env: unknown type %q for entry %q, skipping", entry.Type, entry.Name)
+		}
 	}
 
 	return result

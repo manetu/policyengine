@@ -53,10 +53,10 @@ func TestGetAuditEnvWithConfig(t *testing.T) {
 	setupTestConfig()
 	config.ResetConfig()
 
-	// Set up the audit.env configuration manually via Viper
-	config.VConfig.Set(config.AuditEnv, map[string]string{
-		"alpha": "TEST_ENV_ALPHA",
-		"beta":  "TEST_ENV_BETA",
+	// Set up the audit.env configuration using the new list format
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "alpha", "type": "env", "value": "TEST_ENV_ALPHA"},
+		{"name": "beta", "type": "env", "value": "TEST_ENV_BETA"},
 	})
 
 	// Set the environment variables
@@ -78,8 +78,8 @@ func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
 	config.ResetConfig()
 
 	// Set up the audit.env configuration with an env var that doesn't exist
-	config.VConfig.Set(config.AuditEnv, map[string]string{
-		"missing": "NONEXISTENT_ENV_VAR",
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "missing", "type": "env", "value": "NONEXISTENT_ENV_VAR"},
 	})
 
 	// Ensure the env var is not set
@@ -89,6 +89,125 @@ func TestGetAuditEnvWithMissingEnvVar(t *testing.T) {
 	assert.NotNil(t, auditEnv)
 	// Missing env vars should result in empty string
 	assert.Equal(t, "", auditEnv["missing"])
+}
+
+func TestGetAuditEnvStringType(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "region", "type": "string", "value": "us-east-1"},
+		{"name": "env", "type": "string", "value": "production"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	assert.Equal(t, "us-east-1", auditEnv["region"])
+	assert.Equal(t, "production", auditEnv["env"])
+}
+
+func TestGetAuditEnvK8sOutsideCluster(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "app", "type": "k8s-label", "value": "app.kubernetes.io/name"},
+		{"name": "version", "type": "k8s-annot", "value": "deployment.kubernetes.io/revision"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	// Outside k8s, values should be empty strings
+	assert.Equal(t, "", auditEnv["app"])
+	assert.Equal(t, "", auditEnv["version"])
+}
+
+func TestGetAuditEnvUnknownType(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "known", "type": "string", "value": "hello"},
+		{"name": "unknown", "type": "bogus", "value": "world"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	assert.Equal(t, "hello", auditEnv["known"])
+	// Unknown type should be skipped
+	_, exists := auditEnv["unknown"]
+	assert.False(t, exists)
+}
+
+func TestGetAuditEnvMixedTypes(t *testing.T) {
+	setupTestConfig()
+	config.ResetConfig()
+
+	_ = os.Setenv("TEST_MIXED_HOST", "myhost")
+	defer func() {
+		_ = os.Unsetenv("TEST_MIXED_HOST")
+	}()
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "host", "type": "env", "value": "TEST_MIXED_HOST"},
+		{"name": "region", "type": "string", "value": "eu-west-1"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.NotNil(t, auditEnv)
+	assert.Equal(t, "myhost", auditEnv["host"])
+	assert.Equal(t, "eu-west-1", auditEnv["region"])
+}
+
+func TestGetAuditEnvK8sWithFiles(t *testing.T) {
+	// Create a temp directory with fake Downward API files
+	podinfo := t.TempDir()
+
+	_ = os.WriteFile(podinfo+"/labels", []byte("app=\"myapp\"\nversion=\"v1.2.3\"\n"), 0600)
+	_ = os.WriteFile(podinfo+"/annotations", []byte("deploy.k8s.io/revision=\"42\"\n"), 0600)
+
+	setupTestConfig()
+	config.ResetConfig()
+
+	// Point podinfo to our temp dir
+	config.VConfig.Set(config.AuditK8sPodinfo, podinfo)
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "app", "type": "k8s-label", "value": "app"},
+		{"name": "ver", "type": "k8s-label", "value": "version"},
+		{"name": "rev", "type": "k8s-annot", "value": "deploy.k8s.io/revision"},
+		{"name": "missing-label", "type": "k8s-label", "value": "nonexistent"},
+		{"name": "missing-annot", "type": "k8s-annot", "value": "nonexistent"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.Equal(t, "myapp", auditEnv["app"])
+	assert.Equal(t, "v1.2.3", auditEnv["ver"])
+	assert.Equal(t, "42", auditEnv["rev"])
+	assert.Equal(t, "", auditEnv["missing-label"])
+	assert.Equal(t, "", auditEnv["missing-annot"])
+}
+
+func TestParseDownwardAPIFileFormats(t *testing.T) {
+	// Test that blank lines and lines without '=' are skipped
+	podinfo := t.TempDir()
+
+	content := "key1=\"value1\"\n\n\nbadline\nkey2=\"value2\"\n"
+	_ = os.WriteFile(podinfo+"/labels", []byte(content), 0600)
+
+	setupTestConfig()
+	config.ResetConfig()
+
+	config.VConfig.Set(config.AuditK8sPodinfo, podinfo)
+
+	config.VConfig.Set(config.AuditEnv, []map[string]interface{}{
+		{"name": "k1", "type": "k8s-label", "value": "key1"},
+		{"name": "k2", "type": "k8s-label", "value": "key2"},
+	})
+
+	auditEnv := config.GetAuditEnv()
+	assert.Equal(t, "value1", auditEnv["k1"])
+	assert.Equal(t, "value2", auditEnv["k2"])
 }
 
 // TestConcurrentLoad tests that concurrent calls to Load() are race-free.

@@ -45,9 +45,15 @@ opa:
 # Include environment context in AccessRecord metadata
 audit:
   env:
-    service: SERVICE_NAME
-    region: AWS_REGION
-    pod: HOSTNAME
+    - name: service
+      type: env
+      value: SERVICE_NAME
+    - name: region
+      type: string
+      value: us-east-1
+    - name: pod
+      type: env
+      value: HOSTNAME
 ```
 
 ### Configuration Options
@@ -56,7 +62,8 @@ audit:
 |----------------------|---------|--------------------------------------------------------------------------------|
 | `bundles.includeall` | boolean | Include all evaluated bundles in audit records                                 |
 | `opa.unsafebuiltins` | string  | Comma-separated list of unsafe OPA built-ins to exclude from policy evaluation |
-| `audit.env`          | map     | Map of key names to environment variable names for AccessRecord metadata       |
+| `audit.env`          | list    | List of typed entries for AccessRecord metadata (supports env, string, k8s-label, k8s-annot) |
+| `audit.k8s.podinfo`  | string  | Path to Kubernetes Downward API podinfo directory (default: `/etc/podinfo`)                   |
 
 ### Audit Environment Configuration
 
@@ -64,29 +71,44 @@ The `audit.env` option allows you to include deployment context in every AccessR
 
 **Configuration Format:**
 
-```yaml
-audit:
-  env:
-    <key-name>: <ENVIRONMENT_VARIABLE_NAME>
-```
+Each entry in the `audit.env` list has three fields:
 
-- **key-name**: The name that will appear in the AccessRecord's `metadata.env` field
-- **ENVIRONMENT_VARIABLE_NAME**: The environment variable to read the value from
+| Field   | Description                                          |
+|---------|------------------------------------------------------|
+| `name`  | The key that will appear in the AccessRecord metadata |
+| `type`  | How to resolve the value (see table below)           |
+| `value` | Interpreted according to the type                    |
+
+**Supported Types:**
+
+| Type         | Description                                                    |
+|--------------|----------------------------------------------------------------|
+| `env`        | Resolve `value` as an environment variable name                |
+| `string`     | Use `value` as a literal string                                |
+| `k8s-label`  | Look up `value` in Kubernetes pod labels (via Downward API)    |
+| `k8s-annot`  | Look up `value` in Kubernetes pod annotations (via Downward API) |
 
 **Example:**
 
 ```yaml
 audit:
   env:
-    service: MY_SERVICE_NAME
-    environment: DEPLOYMENT_ENV
-    region: AWS_REGION
-    pod: HOSTNAME
+    - name: service
+      type: env
+      value: MY_SERVICE_NAME
+    - name: environment
+      type: string
+      value: production
+    - name: region
+      type: env
+      value: AWS_REGION
+    - name: pod
+      type: env
+      value: HOSTNAME
 ```
 
 If the environment variables are set as:
 - `MY_SERVICE_NAME=api-gateway`
-- `DEPLOYMENT_ENV=production`
 - `AWS_REGION=us-east-1`
 - `HOSTNAME=api-gw-7d9f8b6c4-x2m9k`
 
@@ -107,10 +129,55 @@ The resulting AccessRecord metadata will include:
 }
 ```
 
+**Kubernetes Downward API:**
+
+To use `k8s-label` or `k8s-annot` types, configure a Downward API volume mount in your pod spec:
+
+```yaml
+volumes:
+  - name: podinfo
+    downwardAPI:
+      items:
+        - path: "labels"
+          fieldRef:
+            fieldPath: metadata.labels
+        - path: "annotations"
+          fieldRef:
+            fieldPath: metadata.annotations
+volumeMounts:
+  - name: podinfo
+    mountPath: /etc/podinfo
+```
+
+Then reference labels or annotations in your config:
+
+```yaml
+audit:
+  env:
+    - name: app
+      type: k8s-label
+      value: app.kubernetes.io/name
+    - name: revision
+      type: k8s-annot
+      value: deployment.kubernetes.io/revision
+```
+
+By default, the PolicyEngine reads Downward API files from `/etc/podinfo`. If your volume is mounted at a different path, configure it with `audit.k8s.podinfo`:
+
+```yaml
+audit:
+  k8s:
+    podinfo: /custom/path/podinfo
+```
+
+Or via environment variable: `MPE_AUDIT_K8S_PODINFO=/custom/path/podinfo`
+
 **Notes:**
-- Environment variables are resolved once at PolicyEngine startup and cached for performance
+- Values are resolved once at PolicyEngine startup and cached for performance
 - If an environment variable is not set, the value will be an empty string
-- Changes to environment variables after startup will not be reflected until the PolicyEngine is restarted
+- If Kubernetes Downward API files are not available, `k8s-label` and `k8s-annot` entries resolve to empty strings
+- Entries with unknown types are skipped with a warning
+- Changes to values after startup will not be reflected until the PolicyEngine is restarted
 
 ## OPA Flags
 
