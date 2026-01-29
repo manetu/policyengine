@@ -148,7 +148,9 @@
     "noauth",
     "careteam",
     "deidentified",
-    "Yzlk"
+    "Yzlk",
+    "annot",
+    "podinfo"
   ],
   "flagWords": [],
   "dictionaries": [

@@ -249,21 +249,28 @@ Use the `audit.env` configuration option to capture deployment context in every 
 ```yaml
 audit:
   env:
-    service: SERVICE_NAME
-    environment: DEPLOYMENT_ENV
-    region: AWS_REGION
-    pod: HOSTNAME
+    - name: service
+      type: env
+      value: SERVICE_NAME
+    - name: environment
+      type: string
+      value: production
+    - name: region
+      type: env
+      value: AWS_REGION
+    - name: pod
+      type: env
+      value: HOSTNAME
 ```
 
-Each entry maps a key name (that will appear in the AccessRecord) to an environment variable name. The environment variable values are read once at PolicyEngine startup.
+Each entry specifies:
+- **name**: The key that will appear in the AccessRecord's `metadata.env` field
+- **type**: How to resolve the value (`env`, `string`, `k8s-label`, or `k8s-annot`)
+- **value**: Interpreted according to the type
 
-For example, with the above configuration and these environment variables set:
-- `SERVICE_NAME=api-gateway`
-- `DEPLOYMENT_ENV=production`
-- `AWS_REGION=us-east-1`
-- `HOSTNAME=api-gw-7d9f8b6c4-x2m9k`
+Values are resolved once at PolicyEngine startup.
 
-Every AccessRecord will include:
+For example, with the above configuration and `SERVICE_NAME=api-gateway`, `AWS_REGION=us-east-1`, `HOSTNAME=api-gw-7d9f8b6c4-x2m9k`, every AccessRecord will include:
 
 ```json
 {
@@ -278,7 +285,48 @@ Every AccessRecord will include:
 }
 ```
 
-This makes it easier to correlate decisions with specific deployments, pods, or regions.
+#### Kubernetes Metadata
+
+You can include Kubernetes pod labels and annotations using the `k8s-label` and `k8s-annot` types. These read from the Kubernetes [Downward API](https://kubernetes.io/docs/concepts/workloads/pods/downward-api/) files:
+
+```yaml
+audit:
+  env:
+    - name: app
+      type: k8s-label
+      value: app.kubernetes.io/name
+    - name: version
+      type: k8s-annot
+      value: deployment.kubernetes.io/revision
+```
+
+This requires a Downward API volume mount in your pod spec:
+
+```yaml
+volumes:
+  - name: podinfo
+    downwardAPI:
+      items:
+        - path: "labels"
+          fieldRef:
+            fieldPath: metadata.labels
+        - path: "annotations"
+          fieldRef:
+            fieldPath: metadata.annotations
+volumeMounts:
+  - name: podinfo
+    mountPath: /etc/podinfo
+```
+
+By default, the PolicyEngine reads from `/etc/podinfo`. If your volume is mounted elsewhere, set `audit.k8s.podinfo` in your config:
+
+```yaml
+audit:
+  k8s:
+    podinfo: /custom/path/podinfo
+```
+
+Outside of Kubernetes (or without the volume mount), `k8s-label` and `k8s-annot` entries resolve to empty strings.
 
 See the [Configuration Reference](/reference/configuration#audit-environment-configuration) for complete details.
 
