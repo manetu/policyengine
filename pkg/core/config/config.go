@@ -219,6 +219,17 @@ func Load() error {
 	loadOnce.Do(func() {
 		Init()
 
+		// Early log level update from environment variable allows us to debug the config loading.
+		earlyLoglevel := os.Getenv("MPE_LOG_LEVEL")
+		if earlyLoglevel != "" {
+			if err := logging.UpdateLogLevels(earlyLoglevel); err != nil {
+				logger.SysErrorf("Failed updating early log level %s: %+v", earlyLoglevel, err)
+				loadErr = err
+				return
+			}
+		}
+
+		logger.SysDebugf("Loading configuration from %s/%s.yaml", getConfigPath(), getConfigFileName())
 		// Add the path specified by the env var.
 		err := VConfig.ReadInConfig()
 		if err != nil {
@@ -228,8 +239,10 @@ func Load() error {
 				logger.SysWarnf("error reading config; using defaults: %+v", err)
 			}
 			// fall through to continue loading
+			logger.SysDebugf("No config file found at %s/%s.yaml", getConfigPath(), getConfigFileName())
 		}
 
+		// Update log levels based on final configuration
 		loglevel := VConfig.GetString(logLevel)
 		if err := logging.UpdateLogLevels(loglevel); err != nil {
 			logger.SysErrorf("Failed updating log level %s: %+v", loglevel, err)
