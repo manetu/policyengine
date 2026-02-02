@@ -12,6 +12,7 @@ import (
 	"github.com/manetu/policyengine/pkg/policydomain"
 	"github.com/manetu/policyengine/pkg/policydomain/parsers/v1alpha3"
 	"github.com/manetu/policyengine/pkg/policydomain/parsers/v1alpha4"
+	"github.com/manetu/policyengine/pkg/policydomain/parsers/v1beta1"
 
 	"gopkg.in/yaml.v3"
 )
@@ -51,6 +52,8 @@ func Load(path string) (*policydomain.IntermediateModel, error) {
 		return v1alpha3.Load(path)
 	case "iamlite.manetu.io/v1alpha4":
 		return v1alpha4.Load(path)
+	case "iamlite.manetu.io/v1beta1":
+		return v1beta1.Load(path)
 	}
 
 	return nil, fmt.Errorf("unsupported PolicyDomain API Version %s", preamble.APIVersion)

@@ -822,3 +822,215 @@ func TestV1Alpha4Parser(t *testing.T) {
 		assert.Equal(t, "mrn:iam:policy:read-only", rg.Policy.Mrn, "Resource group should use read-only policy")
 	})
 }
+
+// Test v1beta1 parser with native annotation values
+func TestV1Beta1Parser(t *testing.T) {
+	t.Run("Load v1beta1 domain with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Verify the mapper exists
+		mapper, policyErr := be.GetMapper(context.Background(), "")
+		require.Nil(t, policyErr, "Should find mapper")
+		assert.NotNil(t, mapper, "Mapper should not be nil")
+		assert.Equal(t, "v1beta1-test", mapper.Domain, "Should load v1beta1 domain")
+	})
+
+	t.Run("v1beta1 roles with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting admin role with native annotations
+		role, policyErr := be.GetRole(context.Background(), "mrn:iam:role:admin")
+		require.Nil(t, policyErr, "Should find role")
+		require.NotNil(t, role, "Role should not be nil")
+		assert.Equal(t, "mrn:iam:role:admin", role.Mrn, "Role MRN should match")
+		assert.Equal(t, "mrn:iam:policy:allow-all", role.Policy.Mrn, "Role should use allow-all policy")
+
+		// Verify native annotation values
+		assert.NotNil(t, role.Annotations, "Annotations should be initialized")
+
+		// Test string annotation
+		stringVal, ok := role.Annotations["string_val"]
+		assert.True(t, ok, "Should have string_val annotation")
+		assert.Equal(t, "hello world", stringVal.Value, "String annotation should be native string")
+
+		// Test number annotation
+		numberVal, ok := role.Annotations["number_val"]
+		assert.True(t, ok, "Should have number_val annotation")
+		assert.Equal(t, 42, numberVal.Value, "Number annotation should be native int")
+
+		// Test float annotation
+		floatVal, ok := role.Annotations["float_val"]
+		assert.True(t, ok, "Should have float_val annotation")
+		assert.Equal(t, 3.14159, floatVal.Value, "Float annotation should be native float")
+
+		// Test boolean annotation
+		boolVal, ok := role.Annotations["bool_val"]
+		assert.True(t, ok, "Should have bool_val annotation")
+		assert.Equal(t, true, boolVal.Value, "Boolean annotation should be native bool")
+
+		// Test array annotation
+		arrayVal, ok := role.Annotations["array_val"]
+		assert.True(t, ok, "Should have array_val annotation")
+		arr, ok := arrayVal.Value.([]interface{})
+		assert.True(t, ok, "Array annotation should be slice")
+		assert.Len(t, arr, 3, "Array should have 3 elements")
+		assert.Equal(t, 1, arr[0], "First array element should be 1")
+		assert.Equal(t, 2, arr[1], "Second array element should be 2")
+		assert.Equal(t, 3, arr[2], "Third array element should be 3")
+
+		// Test object annotation
+		objectVal, ok := role.Annotations["object_val"]
+		assert.True(t, ok, "Should have object_val annotation")
+		obj, ok := objectVal.Value.(map[string]interface{})
+		assert.True(t, ok, "Object annotation should be map")
+		assert.Equal(t, "value1", obj["key1"], "Object should have key1=value1")
+		nested, ok := obj["nested"].(map[string]interface{})
+		assert.True(t, ok, "Nested should be map")
+		assert.Equal(t, "deep", nested["inner"], "Nested should have inner=deep")
+	})
+
+	t.Run("v1beta1 operations work correctly", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting an operation
+		op, policyErr := be.GetOperation(context.Background(), "test:operation")
+		require.Nil(t, policyErr, "Should find operation")
+		require.NotNil(t, op, "Operation should not be nil")
+		assert.Equal(t, "mrn:iam:policy:allow-all", op.Policy.Mrn, "Operation should use allow-all policy")
+	})
+
+	t.Run("v1beta1 resource groups with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting resource group with native annotations
+		rg, policyErr := be.GetResourceGroup(context.Background(), "mrn:iam:resource-group:default")
+		require.Nil(t, policyErr, "Should find resource group")
+		require.NotNil(t, rg, "Resource group should not be nil")
+		assert.Equal(t, "mrn:iam:resource-group:default", rg.Mrn, "Resource group MRN should match")
+
+		// Verify native annotations
+		assert.NotNil(t, rg.Annotations, "Annotations should be initialized")
+		assert.Equal(t, "public", rg.Annotations["classification"].Value, "Classification should be native string")
+	})
+
+	t.Run("v1beta1 scopes with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting scope with native annotations
+		scope, policyErr := be.GetScope(context.Background(), "mrn:iam:scope:api")
+		require.Nil(t, policyErr, "Should find scope")
+		require.NotNil(t, scope, "Scope should not be nil")
+		assert.Equal(t, "mrn:iam:scope:api", scope.Mrn, "Scope MRN should match")
+
+		// Verify native annotations
+		assert.NotNil(t, scope.Annotations, "Annotations should be initialized")
+		assert.Equal(t, 1000, scope.Annotations["rate_limit"].Value, "Rate limit should be native int")
+	})
+
+	t.Run("v1beta1 groups with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting group with native annotations
+		group, policyErr := be.GetGroup(context.Background(), "mrn:iam:group:admin")
+		require.Nil(t, policyErr, "Should find group")
+		require.NotNil(t, group, "Group should not be nil")
+		assert.Equal(t, "mrn:iam:group:admin", group.Mrn, "Group MRN should match")
+
+		// Verify native annotations
+		assert.NotNil(t, group.Annotations, "Annotations should be initialized")
+		assert.Equal(t, "admin", group.Annotations["group_level"].Value, "Group level should be native string")
+	})
+
+	t.Run("v1beta1 resources with native annotations", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Test getting a resource that matches the sensitive-data selector
+		res, policyErr := be.GetResource(context.Background(), "mrn:data:sensitive:doc123")
+		require.Nil(t, policyErr, "Should not return policy error")
+		require.NotNil(t, res, "Resource should not be nil")
+		assert.Equal(t, "mrn:data:sensitive:doc123", res.ID, "Resource ID should match input MRN")
+		assert.Equal(t, "mrn:iam:resource-group:sensitive", res.Group, "Resource should be in sensitive group")
+
+		// Verify native annotations
+		assert.NotNil(t, res.Annotations, "Annotations should be initialized")
+		assert.Equal(t, "HIGH", res.Annotations["classification"].Value, "Classification should be native string")
+		assert.Equal(t, true, res.Annotations["audit_required"].Value, "audit_required should be native bool")
+	})
+
+	t.Run("v1beta1 null annotations handled correctly", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Get admin role which has null_val annotation
+		role, policyErr := be.GetRole(context.Background(), "mrn:iam:role:admin")
+		require.Nil(t, policyErr, "Should find role")
+		require.NotNil(t, role, "Role should not be nil")
+
+		// Verify null annotation
+		nullVal, ok := role.Annotations["null_val"]
+		assert.True(t, ok, "Should have null_val annotation")
+		assert.Nil(t, nullVal.Value, "Null annotation should be nil")
+	})
+
+	t.Run("v1beta1 merge strategies preserved", func(t *testing.T) {
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed")
+
+		// Get resource group which has merge strategies
+		rg, policyErr := be.GetResourceGroup(context.Background(), "mrn:iam:resource-group:sensitive")
+		require.Nil(t, policyErr, "Should find resource group")
+		require.NotNil(t, rg, "Resource group should not be nil")
+
+		// Verify merge strategy is preserved
+		tagsVal, ok := rg.Annotations["tags"]
+		assert.True(t, ok, "Should have tags annotation")
+		assert.Equal(t, "union", tagsVal.MergeStrategy, "Merge strategy should be preserved")
+	})
+}
+
+// Test mixed v1alpha4 and v1beta1 domains
+func TestMixedApiVersions(t *testing.T) {
+	t.Run("Load both v1alpha4 and v1beta1 domains", func(t *testing.T) {
+		v1alpha4File := createTempFileFromTestData(t, "v1alpha4-resources.yml")
+		v1beta1File := createTempFileFromTestData(t, "v1beta1-annotations.yml")
+
+		be, err := createBackend([]string{v1alpha4File, v1beta1File})
+		require.Nil(t, err, "Backend creation should succeed with mixed API versions")
+
+		// Verify both domains loaded
+		role1, policyErr := be.GetRole(context.Background(), "mrn:iam:role:admin")
+		require.Nil(t, policyErr, "Should find role from either domain")
+		require.NotNil(t, role1, "Role should not be nil")
+
+		// Test v1alpha4 resource still works with JSON-encoded annotations
+		res, policyErr := be.GetResource(context.Background(), "mrn:data:restricted:secret456")
+		require.Nil(t, policyErr, "Should find resource from v1alpha4 domain")
+		require.NotNil(t, res, "Resource should not be nil")
+		assert.Equal(t, "MAXIMUM", res.Annotations["classification"].Value, "v1alpha4 annotation should be decoded")
+	})
+}

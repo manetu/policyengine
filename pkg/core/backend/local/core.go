@@ -115,13 +115,23 @@ func toRichAnnotations(input map[string]policydomain.Annotation) (model.RichAnno
 	output := make(model.RichAnnotations, len(input))
 	for k, av := range input {
 		var x interface{}
-		err := json.Unmarshal([]byte(av.Value), &x)
-		if err != nil {
-			return nil, &common.PolicyError{
-				ReasonCode: events.AccessRecord_BundleReference_INVALPARAM_ERROR,
-				Reason:     fmt.Sprintf("bad annotation '%s' (err-%s)", k, err.Error()),
+
+		// Handle both v1alpha3/4 (JSON-encoded string) and v1beta1 (native interface{})
+		switch v := av.Value.(type) {
+		case string:
+			// Could be v1alpha3/v1alpha4 JSON-encoded string or v1beta1 native string
+			// Try to decode as JSON first
+			err := json.Unmarshal([]byte(v), &x)
+			if err != nil {
+				// JSON decode failed - this is a v1beta1 native string value
+				// Use the string value directly
+				x = v
 			}
+		default:
+			// v1beta1: Already decoded native value (int, bool, array, map, nil)
+			x = av.Value
 		}
+
 		output[k] = model.AnnotationEntry{
 			Value:         x,
 			MergeStrategy: av.MergeStrategy,

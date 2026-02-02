@@ -57,7 +57,7 @@ The simplest approach: provide only the resource's MRN string and let the Policy
 The PolicyEngine matches the MRN against regex patterns (selectors) defined in your PolicyDomain configuration:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-domain
@@ -296,7 +296,7 @@ porc := map[string]interface{}{
 For the Community Edition, configure resource resolution in the PolicyDomain's `resources` section (v1alpha4+):
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-domain

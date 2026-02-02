@@ -11,7 +11,7 @@ This guide walks through creating a complete [PolicyDomain](/concepts/policy-dom
 A PolicyDomain YAML file has this structure:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: domain-name
@@ -197,7 +197,7 @@ This uses the simple MRN string format, which is the recommended approach. See [
 Here's a complete, minimal PolicyDomain that you can use as a starting point:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-first-domain
@@ -267,7 +267,7 @@ For a deeper dive, see [Examples](/examples).
 For better maintainability, you can use `PolicyDomainReference` with external `.rego` files:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomainReference
 metadata:
   name: my-domain

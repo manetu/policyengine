@@ -38,10 +38,11 @@ type IDSpec struct {
 	Fingerprint []byte
 }
 
-// Annotation holds an annotation's JSON-encoded value and optional merge strategy.
+// Annotation holds an annotation's value and optional merge strategy.
 type Annotation struct {
-	// Value is the JSON-encoded annotation value.
-	Value string
+	// Value is the annotation value. For v1alpha3/v1alpha4 this is a JSON-encoded string.
+	// For v1beta1 this is the native decoded value (interface{}).
+	Value interface{}
 	// MergeStrategy is the merge strategy: "replace", "append", "prepend", "deep", "union".
 	// Empty string defaults to "deep".
 	MergeStrategy string
