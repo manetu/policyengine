@@ -22,7 +22,7 @@ PolicyDomains provide:
 ## PolicyDomain Structure
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-domain
@@ -32,7 +32,7 @@ spec:
   roles: []              # Role-to-policy mappings
   groups: []             # Group-to-role mappings
   resource-groups: []    # Resource-to-policy mappings
-  resources: []          # Resource selector routing (v1alpha4+)
+  resources: []          # Resource selector routing
   scopes: []             # Access-method constraint policies
   operations: []         # Operation routing
   mappers: []            # Input transformation
@@ -43,11 +43,15 @@ spec:
 Every PolicyDomain document must specify an API version and kind:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain  # or PolicyDomainReference
 ```
 
-**Supported API versions**: `v1alpha3`, `v1alpha4`
+**Supported API versions**: `v1alpha3`, `v1alpha4`, `v1beta1`
+
+:::tip[Use v1beta1 for New Projects]
+`v1beta1` supports native YAML annotation values, eliminating the need for JSON-encoded strings. This makes PolicyDomains easier to read and write.
+:::
 
 **Supported kinds**:
 
@@ -199,7 +203,7 @@ The PolicyEngine supports two document formats that serve different purposes in 
 - **Better organization**: Keep complex policies in dedicated files
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomainReference
 metadata:
   name: my-domain
@@ -329,7 +333,7 @@ metadata:
   name: policy-domain
 data:
   domain.yaml: |
-    apiVersion: iamlite.manetu.io/v1alpha4
+    apiVersion: iamlite.manetu.io/v1beta1
     kind: PolicyDomain
     metadata:
       name: my-service
@@ -353,7 +357,7 @@ spec:
 The Premium Edition provides a Kubernetes Custom Resource Definition (CRD) for PolicyDomain resources. When a PolicyDomain CRD instance is created or updated—whether through CI push or a GitOps operator pull—the Policy Administration Point (PAP) automatically distributes the new policies to all PDPs through the cache-coherency mechanism. No pod restarts required.
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-service

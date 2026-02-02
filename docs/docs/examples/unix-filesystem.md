@@ -60,7 +60,7 @@ flowchart TD
 <SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="unix-filesystem/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: unix-filesystem

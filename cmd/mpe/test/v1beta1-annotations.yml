@@ -1,0 +1,129 @@
+apiVersion: iamlite.manetu.io/v1beta1
+kind: PolicyDomain
+metadata:
+  name: v1beta1-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:allow-all"
+      rego: |
+        package authz
+        default allow = 1
+
+    - mrn: "mrn:iam:policy:read-only"
+      rego: |
+        package authz
+        allow = 1 { input.operation == "read" }
+
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      policy: "mrn:iam:policy:allow-all"
+      annotations:
+        - name: string_val
+          value: hello world
+        - name: number_val
+          value: 42
+        - name: float_val
+          value: 3.14159
+        - name: bool_val
+          value: true
+        - name: array_val
+          value:
+            - 1
+            - 2
+            - 3
+        - name: object_val
+          value:
+            key1: value1
+            nested:
+              inner: deep
+        - name: null_val
+          value: null
+        - name: mixed_array
+          value:
+            - string_item
+            - 42
+            - nested:
+                deep: value
+
+  groups:
+    - mrn: "mrn:iam:group:admin"
+      roles:
+        - "mrn:iam:role:admin"
+      annotations:
+        - name: group_level
+          value: admin
+        - name: group_type
+          value: system
+
+  scopes:
+    - mrn: "mrn:iam:scope:api"
+      policy: "mrn:iam:policy:allow-all"
+      annotations:
+        - name: rate_limit
+          value: 1000
+        - name: allowed_methods
+          value:
+            - GET
+            - POST
+            - PUT
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:default"
+      policy: "mrn:iam:policy:allow-all"
+      default: true
+      annotations:
+        - name: classification
+          value: public
+
+    - mrn: "mrn:iam:resource-group:sensitive"
+      policy: "mrn:iam:policy:read-only"
+      annotations:
+        - name: classification
+          value: sensitive
+        - name: tags
+          value:
+            - audit
+            - secure
+          merge: union
+
+  resources:
+    - name: sensitive-data
+      selector:
+        - "mrn:data:sensitive:.*"
+      group: "mrn:iam:resource-group:sensitive"
+      annotations:
+        - name: classification
+          value: HIGH
+        - name: audit_required
+          value: true
+
+    - name: public-data
+      selector:
+        - "mrn:data:public:.*"
+      group: "mrn:iam:resource-group:default"
+      annotations:
+        - name: classification
+          value: LOW
+
+  operations:
+    - name: default-operation
+      selector:
+        - ".*"
+      policy: "mrn:iam:policy:allow-all"
+
+  mappers:
+    - name: default-mapper
+      selector:
+        - ".*"
+      rego: |
+        package mapper
+
+        porc := {
+          "principal": {},
+          "operation": "test:operation",
+          "resource": {
+            "id": "test:resource",
+            "group": "mrn:iam:resource-group:default",
+          },
+          "context": input,
+        }

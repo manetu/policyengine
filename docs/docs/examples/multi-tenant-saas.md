@@ -56,7 +56,7 @@ flowchart TD
 <SectionHeader icon="security" level={2}>Complete PolicyDomain <a href="multi-tenant-saas/policydomain.yml" download title="Download policydomain.yml"><IconText icon="download" /></a></SectionHeader>
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: multi-tenant-saas
@@ -309,10 +309,14 @@ spec:
       roles:
         - *role-tenant-owner
       annotations:
-        - name: "tenant_id"
-          value: "\"acme-corp\""
-        - name: "tenant_roles"
-          value: '["owner", "admin", "member", "viewer"]'
+        - name: tenant_id
+          value: acme-corp
+        - name: tenant_roles
+          value:
+            - owner
+            - admin
+            - member
+            - viewer
 
     - mrn: "mrn:iam:group:acme-corp:admins"
       name: acme-corp-admins
@@ -320,10 +324,13 @@ spec:
       roles:
         - *role-tenant-admin
       annotations:
-        - name: "tenant_id"
-          value: "\"acme-corp\""
-        - name: "tenant_roles"
-          value: '["admin", "member", "viewer"]'
+        - name: tenant_id
+          value: acme-corp
+        - name: tenant_roles
+          value:
+            - admin
+            - member
+            - viewer
 
     - mrn: "mrn:iam:group:acme-corp:members"
       name: acme-corp-members
@@ -331,10 +338,12 @@ spec:
       roles:
         - *role-tenant-member
       annotations:
-        - name: "tenant_id"
-          value: "\"acme-corp\""
-        - name: "tenant_roles"
-          value: '["member", "viewer"]'
+        - name: tenant_id
+          value: acme-corp
+        - name: tenant_roles
+          value:
+            - member
+            - viewer
 
     - mrn: "mrn:iam:group:acme-corp:viewers"
       name: acme-corp-viewers
@@ -342,10 +351,11 @@ spec:
       roles:
         - *role-tenant-viewer
       annotations:
-        - name: "tenant_id"
-          value: "\"acme-corp\""
-        - name: "tenant_roles"
-          value: '["viewer"]'
+        - name: tenant_id
+          value: acme-corp
+        - name: tenant_roles
+          value:
+            - viewer
 
     # Globex Corp tenant groups
     - mrn: "mrn:iam:group:globex-corp:members"
@@ -354,10 +364,12 @@ spec:
       roles:
         - *role-tenant-member
       annotations:
-        - name: "tenant_id"
-          value: "\"globex-corp\""
-        - name: "tenant_roles"
-          value: '["member", "viewer"]'
+        - name: tenant_id
+          value: globex-corp
+        - name: tenant_roles
+          value:
+            - member
+            - viewer
 
     # Platform team
     - mrn: "mrn:iam:group:platform-team"
@@ -689,10 +701,12 @@ Rather than encoding roles in MRNs, we use principal annotations:
 
 ```yaml
 annotations:
-  - name: "tenant_id"
-    value: "\"acme-corp\""
-  - name: "tenant_roles"
-    value: '["member", "viewer"]'
+  - name: tenant_id
+    value: acme-corp
+  - name: tenant_roles
+    value:
+      - member
+      - viewer
 ```
 
 <SectionHeader icon="build" level={2}>Extending This Example</SectionHeader>

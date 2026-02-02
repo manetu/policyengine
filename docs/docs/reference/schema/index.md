@@ -11,7 +11,7 @@ Complete reference for the PolicyDomain YAML schema.
 A PolicyDomain is defined in YAML with the following top-level structure:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: string
@@ -21,7 +21,7 @@ spec:
   roles: []
   groups: []
   resource-groups: []
-  resources: []       # New in v1alpha4
+  resources: []
   scopes: []
   operations: []
   mappers: []
@@ -30,18 +30,41 @@ spec:
 ## API Version
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 ```
 
-Supported versions: `v1alpha3`, `v1alpha4`
+Supported versions: `v1alpha3`, `v1alpha4`, `v1beta1`
 
 ### Version Differences
 
-| Feature | v1alpha3 | v1alpha4 |
-|---------|----------|----------|
-| `resources` section | Not available | Available |
-| `selector` in operations | Optional | Required |
-| `selector` in mappers | Optional | Required |
+| Feature | v1alpha3 | v1alpha4 | v1beta1 |
+|---------|----------|----------|---------|
+| `resources` section | Not available | Available | Available |
+| `selector` in operations | Optional | Required | Required |
+| `selector` in mappers | Optional | Required | Required |
+| Native annotation values | No | No | Yes |
+
+### v1beta1 Native Annotations
+
+In `v1beta1`, annotation values can be specified as native YAML instead of JSON-encoded strings:
+
+```yaml
+# v1alpha4 - JSON-encoded strings
+annotations:
+  - name: count
+    value: "42"
+  - name: tags
+    value: '["a", "b"]'
+
+# v1beta1 - Native YAML values
+annotations:
+  - name: count
+    value: 42
+  - name: tags
+    value:
+      - a
+      - b
+```
 
 ## Kind
 
@@ -150,7 +173,7 @@ roles:
 ## Full Example
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: example-domain
@@ -192,6 +215,9 @@ spec:
     - mrn: "mrn:iam:role:admin"
       name: admin
       policy: *allow-all
+      annotations:
+        - name: access_level
+          value: admin           # v1beta1: native string value
 
   groups:
     - mrn: "mrn:iam:group:admins"
@@ -209,7 +235,6 @@ spec:
       name: sensitive
       policy: *read-only
 
-  # New in v1alpha4: Resources map MRNs to resource groups via selectors
   resources:
     - name: sensitive-data
       description: "Sensitive data requiring read-only access"
@@ -219,7 +244,9 @@ spec:
       group: *rg-sensitive
       annotations:
         - name: classification
-          value: "\"HIGH\""
+          value: HIGH            # v1beta1: native string value
+        - name: retention_days
+          value: 365             # v1beta1: native number value
 
   scopes:
     - mrn: "mrn:iam:scope:api"

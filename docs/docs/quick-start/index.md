@@ -29,7 +29,7 @@ A **[PolicyDomain](/concepts/policy-domains)** is a YAML file that bundles toget
 Create a file called `my-domain.yml`:
 
 ```yaml
-apiVersion: iamlite.manetu.io/v1alpha4
+apiVersion: iamlite.manetu.io/v1beta1
 kind: PolicyDomain
 metadata:
   name: my-first-domain

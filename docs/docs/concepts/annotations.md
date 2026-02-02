@@ -43,16 +43,16 @@ roles:
     name: finance-analyst
     policy: "mrn:iam:policy:environment-match"
     annotations:
-      - name: "environment"
-        value: "\"finance\""      # This role grants access to "finance" resources
+      - name: environment
+        value: finance            # This role grants access to "finance" resources
 
 resource-groups:
   - mrn: "mrn:iam:resource-group:finance-data"
     name: finance-data
     policy: "mrn:iam:policy:resource-access"
     annotations:
-      - name: "environment"
-        value: "\"finance\""      # Resources in this group are tagged "finance"
+      - name: environment
+        value: finance            # Resources in this group are tagged "finance"
 ```
 
 When a principal with the `finance-analyst` role accesses a resource in the `finance-data` group:
@@ -102,26 +102,26 @@ For identity-related annotations (available in `input.principal.mannotations`), 
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      - name: "department"
-        value: "\"engineering\""   # Precedence 1
-      - name: "access_level"
-        value: "\"standard\""
+      - name: department
+        value: engineering         # Precedence 1
+      - name: access_level
+        value: standard
 
 # Group definition
 groups:
   - mrn: "mrn:iam:group:platform-team"
     annotations:
-      - name: "department"
-        value: "\"platform\""      # Precedence 2 - overrides role
-      - name: "team"
-        value: "\"infrastructure\""
+      - name: department
+        value: platform            # Precedence 2 - overrides role
+      - name: team
+        value: infrastructure
 
 # Scope definition (if applicable)
 scopes:
   - mrn: "mrn:iam:scope:elevated"
     annotations:
-      - name: "access_level"
-        value: "\"elevated\""      # Precedence 3 - overrides role
+      - name: access_level
+        value: elevated            # Precedence 3 - overrides role
 
 # Principal JWT claims
 principal:
@@ -153,21 +153,21 @@ For resource-related annotations (available in `input.resource.annotations`), th
 resource-groups:
   - mrn: "mrn:iam:resource-group:customer-data"
     annotations:
-      - name: "data_classification"
-        value: "\"confidential\""
-      - name: "retention_days"
-        value: "365"
-      - name: "requires_audit"
-        value: "true"
+      - name: data_classification
+        value: confidential
+      - name: retention_days
+        value: 365
+      - name: requires_audit
+        value: true
 
 # Resource with override
 resource:
   id: "mrn:data:customer:12345"
   annotations:
-    - name: "retention_days"
-      value: "730"                 # Overrides resource group
-    - name: "special_handling"
-      value: "true"                # Additional annotation
+    - name: retention_days
+      value: 730                   # Overrides resource group
+    - name: special_handling
+      value: true                  # Additional annotation
 ```
 
 **Resulting `input.resource.annotations`**:
@@ -182,8 +182,8 @@ resource:
 
 ## Merge Strategies
 
-:::info[v1alpha4 Feature]
-Merge strategies are available in PolicyDomain schema version `v1alpha4` and later.
+:::info[v1alpha4+ Feature]
+Merge strategies are available in PolicyDomain schema version `v1alpha4` and later (including `v1beta1`).
 :::
 
 When annotation keys conflict across inheritance levels, merge strategies determine how values are combined. The default strategy is `deep`, which recursively merges arrays and objects while letting higher-priority scalar values win. You can specify different strategies to control this behavior precisely.
@@ -213,16 +213,19 @@ Add the `merge` field to an annotation to control how it combines with values fr
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      - name: "allowed_regions"
-        value: '["us-west"]'
-        merge: "union"           # Deduplicate when combined with other sources
+      - name: allowed_regions
+        value:
+          - us-west
+        merge: union             # Deduplicate when combined with other sources
 
 groups:
   - mrn: "mrn:iam:group:global-team"
     annotations:
-      - name: "allowed_regions"
-        value: '["us-east", "eu-west"]'
-        merge: "union"           # Combined result: ["us-east", "eu-west", "us-west"]
+      - name: allowed_regions
+        value:
+          - us-east
+          - eu-west
+        merge: union             # Combined result: ["us-east", "eu-west", "us-west"]
 ```
 
 ### Strategy Precedence
@@ -242,16 +245,20 @@ Use `union` to collect unique values from all sources:
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      - name: "tags"
-        value: '["dev", "internal"]'
-        merge: "union"
+      - name: tags
+        value:
+          - dev
+          - internal
+        merge: union
 
 groups:
   - mrn: "mrn:iam:group:platform-team"
     annotations:
-      - name: "tags"
-        value: '["platform", "internal"]'
-        merge: "union"
+      - name: tags
+        value:
+          - platform
+          - internal
+        merge: union
 ```
 
 **Result**: `["platform", "internal", "dev"]` (deduplicated, higher priority first)
@@ -264,16 +271,23 @@ Use `deep` to recursively merge nested objects:
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      - name: "config"
-        value: '{"timeouts": {"read": 30, "write": 60}, "retries": 3}'
-        merge: "deep"
+      - name: config
+        value:
+          timeouts:
+            read: 30
+            write: 60
+          retries: 3
+        merge: deep
 
 groups:
   - mrn: "mrn:iam:group:premium-users"
     annotations:
-      - name: "config"
-        value: '{"timeouts": {"write": 120}, "priority": "high"}'
-        merge: "deep"
+      - name: config
+        value:
+          timeouts:
+            write: 120
+          priority: high
+        merge: deep
 ```
 
 **Result**:
@@ -293,17 +307,21 @@ Use `append` to add lower-priority elements after higher-priority ones:
 resource-groups:
   - mrn: "mrn:iam:resource-group:base"
     annotations:
-      - name: "processing_steps"
-        value: '["validate", "log"]'
-        merge: "append"
+      - name: processing_steps
+        value:
+          - validate
+          - log
+        merge: append
 
 resources:
   - selector: ["mrn:data:sensitive:.*"]
     group: "mrn:iam:resource-group:base"
     annotations:
-      - name: "processing_steps"
-        value: '["encrypt", "audit"]'
-        merge: "append"
+      - name: processing_steps
+        value:
+          - encrypt
+          - audit
+        merge: append
 ```
 
 **Result**: `["encrypt", "audit", "validate", "log"]` (higher priority first)
@@ -313,9 +331,11 @@ Use `prepend` to add lower-priority elements before higher-priority ones:
 ```yaml
 # Same as above but with prepend
 annotations:
-  - name: "processing_steps"
-    value: '["encrypt", "audit"]'
-    merge: "prepend"
+  - name: processing_steps
+    value:
+      - encrypt
+      - audit
+    merge: prepend
 ```
 
 **Result**: `["validate", "log", "encrypt", "audit"]` (lower priority first)
@@ -328,15 +348,21 @@ Use `replace` when you want to completely override a lower-priority value:
 roles:
   - mrn: "mrn:iam:role:standard-user"
     annotations:
-      - name: "permissions"
-        value: '["read", "list"]'
+      - name: permissions
+        value:
+          - read
+          - list
 
 groups:
   - mrn: "mrn:iam:group:admin"
     annotations:
-      - name: "permissions"
-        value: '["read", "write", "delete", "admin"]'
-        merge: "replace"          # Completely replaces role permissions
+      - name: permissions
+        value:
+          - read
+          - write
+          - delete
+          - admin
+        merge: replace            # Completely replaces role permissions
 ```
 
 **Result**: `["read", "write", "delete", "admin"]` (role permissions ignored)
@@ -349,15 +375,16 @@ When conflicting values have incompatible types (e.g., array vs. string), the hi
 roles:
   - mrn: "mrn:iam:role:basic"
     annotations:
-      - name: "access"
-        value: '["read"]'         # Array
+      - name: access
+        value:
+          - read                  # Array
 
 groups:
   - mrn: "mrn:iam:group:special"
     annotations:
-      - name: "access"
-        value: '"full"'           # String (incompatible type)
-        merge: "union"            # Strategy is ignored for type mismatch
+      - name: access
+        value: full               # String (incompatible type)
+        merge: union              # Strategy is ignored for type mismatch
 ```
 
 **Result**: `"full"` (higher priority wins due to type mismatch)
@@ -373,17 +400,17 @@ Define baseline annotations at a general level and override for specific cases:
 roles:
   - mrn: "mrn:iam:role:developer"
     annotations:
-      - name: "max_data_size"
-        value: "\"1GB\""
-      - name: "can_export"
-        value: "false"
+      - name: max_data_size
+        value: 1GB
+      - name: can_export
+        value: false
 
 # Platform team members can export
 groups:
   - mrn: "mrn:iam:group:platform-team"
     annotations:
-      - name: "can_export"
-        value: "true"              # Override for this group
+      - name: can_export
+        value: true                # Override for this group
 ```
 
 #### Layered Security Classifications
@@ -394,18 +421,18 @@ Apply cumulative security requirements:
 resource-groups:
   - mrn: "mrn:iam:resource-group:pii"
     annotations:
-      - name: "classification"
-        value: "\"PII\""
-      - name: "encryption_required"
-        value: "true"
+      - name: classification
+        value: PII
+      - name: encryption_required
+        value: true
 
 # Specific high-value resource
 resource:
   annotations:
-    - name: "classification"
-      value: "\"PII-HIGH\""        # More specific classification
-    - name: "two_person_rule"
-      value: "true"                # Additional requirement
+    - name: classification
+      value: PII-HIGH              # More specific classification
+    - name: two_person_rule
+      value: true                  # Additional requirement
 ```
 
 ## Annotation Structure
@@ -415,54 +442,62 @@ Annotations are defined as a list of objects with the following fields:
 | Field   | Required | Description                                                                 |
 |---------|----------|-----------------------------------------------------------------------------|
 | `name`  | Yes      | The annotation key (string)                                                 |
-| `value` | Yes      | The annotation value (JSON-encoded string)                                  |
-| `merge` | No       | Merge strategy: `replace`, `append`, `prepend`, `deep`, or `union` (v1alpha4) |
+| `value` | Yes      | The annotation value (native YAML in v1beta1, JSON-encoded string in v1alpha3/4) |
+| `merge` | No       | Merge strategy: `replace`, `append`, `prepend`, `deep`, or `union`          |
 
-Keys must be strings. Values must be **JSON-encoded strings**.
+### v1beta1: Native YAML Values (Recommended)
 
-:::tip[Values Are JSON-Encoded]
-The `value` field must contain a valid JSON value encoded as a string. This is a common source of confusion:
-
-| Type    | Correct                                  | Incorrect           |
-|---------|------------------------------------------|---------------------|
-| String  | `"\"engineering\""`                      | `"engineering"`     |
-| Number  | `"12345"`                                | `12345`             |
-| Boolean | `"true"`                                 | `true`              |
-| Array   | `'["read", "write"]'`                    | `["read", "write"]` |
-| Object  | `'{"region": "us-west", "priority": 1}'` | `{region: us-west}` |
-
-**String values require nested quotes.** The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value. Without the inner quotes, a value like `"engineering"` would be interpreted as a JSON identifier (which is invalid) rather than a JSON string.
+In `v1beta1`, annotation values are written as native YAML—no JSON encoding required:
 
 ```yaml
-# Correct - string value with nested quotes
+annotations:
+  - name: department
+    value: engineering              # String
+  - name: cost_center
+    value: 12345                    # Number
+  - name: tags
+    value:                          # Array
+      - production
+      - critical
+  - name: metadata
+    value:                          # Object
+      created_by: admin
+      version: 2
+  - name: enabled
+    value: true                     # Boolean
+```
+
+This is cleaner to read and write than the legacy JSON-encoded format.
+
+### Legacy Format (v1alpha3/v1alpha4)
+
+In older schema versions, values must be **JSON-encoded strings**:
+
+:::warning[JSON Encoding Required in v1alpha3/v1alpha4]
+String values require nested quotes. The outer quotes are YAML string delimiters; the inner escaped quotes are the JSON string value.
+
+| Type    | v1alpha4 (JSON-encoded)                  | v1beta1 (Native)    |
+|---------|------------------------------------------|---------------------|
+| String  | `"\"engineering\""`                      | `engineering`       |
+| Number  | `"12345"`                                | `12345`             |
+| Boolean | `"true"`                                 | `true`              |
+| Array   | `'["read", "write"]'`                    | `- read`<br/>`- write` |
+| Object  | `'{"region": "us-west"}'`                | `region: us-west`   |
+
+```yaml
+# v1alpha4 - JSON-encoded (required)
 annotations:
   - name: "department"
     value: "\"engineering\""    # Parsed as JSON string: "engineering"
 
-# Incorrect - missing inner quotes
+# v1beta1 - Native YAML (recommended)
 annotations:
-  - name: "department"
-    value: "engineering"        # Invalid JSON - not a string literal
+  - name: department
+    value: engineering          # Much cleaner!
 ```
 :::
 
-Values can be any valid JSON type:
-
-```yaml
-annotations:
-  - name: "department"
-    value: "\"engineering\""              # String (note the nested quotes)
-  - name: "cost_center"
-    value: "12345"                        # Number
-  - name: "tags"
-    value: '["production", "critical"]'   # Array
-  - name: "metadata"
-    value: '{"created_by": "admin", "version": 2}'  # Object
-  - name: "enabled"
-    value: "true"                         # Boolean
-```
-
-After parsing, these annotations are available in policies as native JSON values:
+After parsing, annotations are available in policies as native values regardless of schema version:
 
 ```json
 {
@@ -557,10 +592,13 @@ spec:
     - mrn: "mrn:iam:role:regional-admin"
       name: regional-admin
       annotations:
-        - name: "region"
-          value: "\"us-west\""
-        - name: "permissions"
-          value: '["read", "write", "admin"]'
+        - name: region
+          value: us-west
+        - name: permissions
+          value:
+            - read
+            - write
+            - admin
       policy: "mrn:iam:policy:regional-access"
 ```
 
@@ -572,10 +610,10 @@ spec:
     - mrn: "mrn:iam:group:finance"
       name: finance
       annotations:
-        - name: "department"
-          value: "\"finance\""
-        - name: "cost_center"
-          value: "12345"
+        - name: department
+          value: finance
+        - name: cost_center
+          value: 12345
       roles:
         - "mrn:iam:role:finance-user"
 ```
@@ -588,12 +626,12 @@ spec:
     - mrn: "mrn:iam:resource-group:pii-data"
       name: pii-data
       annotations:
-        - name: "data_classification"
-          value: "\"PII\""
-        - name: "retention_days"
-          value: "365"
-        - name: "requires_audit"
-          value: "true"
+        - name: data_classification
+          value: PII
+        - name: retention_days
+          value: 365
+        - name: requires_audit
+          value: true
       policy: "mrn:iam:policy:pii-access"
 ```
 
