@@ -55,7 +55,7 @@ jobs:
           echo "Release tag: $TAG"
           if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
             echo "Warning: Tag '$TAG' does not follow semantic versioning (vX.Y.Z)"
-            echo "For pkg.go.dev discovery, tags should follow semantic versioning"
+            echo "Tags should follow semantic versioning"
           fi
 
       - name: Test module can be downloaded
@@ -72,67 +72,6 @@ jobs:
           # Note: This will only work if the tag exists and is pushed
           # For new releases, the tag should already be created by GitHub
           go list -m -versions $MODULE@$VERSION || echo "Note: Version may not be available until tag is fully propagated"
-
-  publish-module-info:
-    name: Publish Module Information
-    runs-on: ubuntu-latest
-    needs: validate-release
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Get module information
-        id: module-info
-        run: |
-          MODULE=$(grep '^module' go.mod | awk '{print $2}')
-          if [ "${{ github.event_name }}" == "release" ]; then
-            TAG=${GITHUB_REF#refs/tags/}
-            VERSION=$TAG
-          else
-            VERSION=${{ github.event.inputs.version }}
-          fi
-          
-          echo "module=$MODULE" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
-          echo "Module: $MODULE"
-          echo "Version: $VERSION"
-          echo ""
-          echo "This module will be available on pkg.go.dev at:"
-          echo "https://pkg.go.dev/$MODULE@$VERSION"
-          echo ""
-          echo "Note: It may take a few minutes for pkg.go.dev to index the new version."
-
-      - name: Create release summary
-        run: |
-          MODULE=${{ steps.module-info.outputs.module }}
-          VERSION=${{ steps.module-info.outputs.version }}
-          
-          cat >> $GITHUB_STEP_SUMMARY << EOF
-          ## Go Module Release
-          
-          **Module:** \`$MODULE\`
-          **Version:** \`$VERSION\`
-          
-          ### Usage
-          
-          To use this module in your Go project:
-          
-          \`\`\`bash
-          go get $MODULE@$VERSION
-          \`\`\`
-          
-          ### Documentation
-          
-          Documentation will be available on [pkg.go.dev](https://pkg.go.dev/${MODULE}@${VERSION}) once indexed.
-          
-          Note: It may take a few minutes for pkg.go.dev to index the new version.
-          EOF
 
   build-binaries:
     name: Build Binaries

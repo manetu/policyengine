@@ -4,8 +4,6 @@
 [![CodeQL](https://github.com/manetu/policyengine/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/manetu/policyengine/actions/workflows/github-code-scanning/codeql)
 [![Go Report Card](https://goreportcard.com/badge/github.com/manetu/policyengine)](https://goreportcard.com/report/github.com/manetu/policyengine)
 [![codecov](https://codecov.io/gh/manetu/policyengine/branch/main/graph/badge.svg)](https://codecov.io/gh/manetu/policyengine)
-[![Go Reference](https://pkg.go.dev/badge/github.com/manetu/policyengine.svg)](https://pkg.go.dev/github.com/manetu/policyengine)
-[![License](https://img.shields.io/github/license/manetu/policyengine)](LICENSE)
 
 A high-performance, programmable access-control and governance layer for protecting APIs and sensitive data using [Policy-Based Access Control (PBAC)](https://manetu.github.io/policyengine/concepts/pbac).
 
