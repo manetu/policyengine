@@ -410,6 +410,39 @@ func TestExecuteEnvoy_WithTrace(t *testing.T) {
 	assert.NoError(t, err, "ExecuteEnvoy should succeed with trace enabled")
 }
 
+// TestExecuteMapper_InvalidAuxDataPath tests that an invalid auxdata path returns an error
+// This covers the error path in newEngine when LoadAuxData fails (engine.go lines 39-41)
+func TestExecuteMapper_InvalidAuxDataPath(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	require.FileExists(t, bundleFile)
+	require.FileExists(t, inputFile)
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{"mpe", "test", "mapper", "-i", inputFile, "-b", bundleFile, "--auxdata", "/nonexistent/auxdata/path"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteMapper should fail with invalid auxdata path")
+	assert.Contains(t, err.Error(), "failed to read auxdata directory")
+}
+
+// TestExecuteEnvoy_InvalidAuxDataPath tests that an invalid auxdata path returns an error for envoy command
+func TestExecuteEnvoy_InvalidAuxDataPath(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	require.FileExists(t, bundleFile)
+	require.FileExists(t, inputFile)
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "test", "envoy", "-i", inputFile, "-b", bundleFile, "--auxdata", "/nonexistent/auxdata/path"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteEnvoy should fail with invalid auxdata path")
+	assert.Contains(t, err.Error(), "failed to read auxdata directory")
+}
+
 // TestExecuteMapper_WithAuxData tests that auxdata merged into the mapper input
 // is accessible to Rego code when computing the PORC. This exercises the full
 // CLI pipeline: --auxdata dir -> LoadAuxData -> MergeAuxData -> mapper.Evaluate

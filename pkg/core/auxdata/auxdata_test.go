@@ -73,6 +73,19 @@ func TestLoadAuxData_SkipsSubdirectories(t *testing.T) {
 	assert.Equal(t, "value", result["key"])
 }
 
+func TestLoadAuxData_UnreadableFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a readable file and an unreadable file
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "readable"), []byte("ok"), 0644))
+	unreadable := filepath.Join(dir, "unreadable")
+	require.NoError(t, os.WriteFile(unreadable, []byte("secret"), 0000))
+
+	_, err := LoadAuxData(dir)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to read auxdata file")
+}
+
 func TestMergeAuxData_NilAuxData(t *testing.T) {
 	input := map[string]interface{}{"key": "value"}
 	result := MergeAuxData(input, nil)
