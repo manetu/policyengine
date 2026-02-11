@@ -1,0 +1,15 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: valid
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:allow-all"
+      name: allow-all
+      rego: |
+        package authz
+        default allow = true
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      policy: "mrn:iam:policy:allow-all"

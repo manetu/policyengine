@@ -1,0 +1,19 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: broken-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:invalid-policy"
+      name: invalid-policy
+      dependencies:
+        - "mrn:iam:library:missing-lib"  # This library doesn't exist
+      rego: |
+        package authz
+        default allow = true
+
+  operations:
+    - name: api
+      selector:
+        - ".*"
+      policy: "mrn:iam:policy:invalid-policy"

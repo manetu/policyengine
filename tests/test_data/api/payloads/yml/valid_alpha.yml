@@ -1,0 +1,35 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: alpha
+spec:
+  policy-libraries:
+    - mrn: "mrn:iam:library:utils"
+      name: utils
+      rego: |
+        package utils
+        ro_operations := {"*:get", "*:read"}
+
+  policies:
+    - mrn: "mrn:iam:policy:allow-all"
+      name: allow-all
+      rego: |
+        package authz
+        default allow = true
+
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      policy: "mrn:iam:policy:allow-all"
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:default"
+      name: default
+      default: true
+      policy: "mrn:iam:policy:allow-all"
+
+  operations:
+    - name: api
+      selector:
+        - ".*"
+      policy: "mrn:iam:policy:allow-all"

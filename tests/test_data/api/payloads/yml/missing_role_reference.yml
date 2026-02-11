@@ -1,0 +1,26 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: broken-missing-role
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:role-reference-broken"
+      name: role-reference-broken
+      rego: |
+        package authz
+        default allow = false
+
+        allow {
+          input.principal.mroles[_] == "mrn:iam:role:nonexistent-role"
+        }
+
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      policy: "mrn:iam:policy:role-reference-broken"
+
+  operations:
+    - name: api
+      selector:
+        - ".*"
+      policy: "mrn:iam:policy:role-reference-broken"

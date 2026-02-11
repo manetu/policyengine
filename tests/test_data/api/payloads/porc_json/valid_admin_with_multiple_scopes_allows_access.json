@@ -1,0 +1,79 @@
+{
+  "principal": {
+    "aud": "manetu.io",
+    "mclearance": "MAXIMUM",
+    "mrealm": "1234",
+    "mroles": [
+      "mrn:iam:role:admin"
+    ],
+    "scopes": [
+      "mrn:iam:scope:read-api",
+      "mrn:iam:scope:api"
+    ],
+    "sub": "mrn:iam:1234:identity:5678"
+  },
+  "operation": "petstore:http:get",
+  "resource": {
+    "id": "http://petstore/api/v3/pet/findByStatus?status=available",
+    "group": "mrn:iam:resource-group:allow-all"
+  },
+  "context": {
+    "destination": {
+      "address": {
+        "Address": {
+          "SocketAddress": {
+            "PortSpecifier": {
+              "PortValue": 8080
+            },
+            "address": "192.168.194.60"
+          }
+        }
+      },
+      "principal": "spiffe://cluster.local/ns/default/sa/petstore"
+    },
+    "metadata_context": {},
+    "request": {
+      "http": {
+        "headers": {
+          ":authority": "petstore.k8s.orb.local",
+          ":method": "GET",
+          ":path": "/api/v3/pet/findByStatus?status=available",
+          ":scheme": "http",
+          "accept": "application/xml",
+          "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtcm46aWFtOjEyMzQ6aWRlbnRpdHk6NTY3OCIsIm1yZWFsbSI6IjEyMzQiLCJhdWQiOiJtYW5ldHUuaW8iLCJtcm9sZXMiOlsibXJuOmlhbTpyb2xlOmFkbWluIl0sIm1jbGVhcmFuY2UiOiJNQVhJTVVNIiwic2NvcGVzIjpbIm1ybjppYW06c2NvcGU6cmVhZC1hcGkiXX0.M7r2pH08rJF6cXrHSHAIXS72syrXb3z0qNN3NPa_uBU",
+          "user-agent": "curl/8.7.1",
+          "x-envoy-attempt-count": "1",
+          "x-envoy-internal": "true",
+          "x-forwarded-client-cert": "By=spiffe://cluster.local/ns/default/sa/petstore;Hash=71d0657c0a7cb514a9da810875859edd1b339fb95192f77db9fd1f84db038126;Subject=\"\";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account",
+          "x-forwarded-for": "192.168.194.1",
+          "x-forwarded-proto": "http",
+          "x-request-id": "f5fed997-94c2-482c-8cde-52c4e1dddef3"
+        },
+        "host": "petstore.k8s.orb.local",
+        "id": "17554297361488606879",
+        "method": "GET",
+        "path": "/api/v3/pet/findByStatus?status=available",
+        "protocol": "HTTP/1.1",
+        "scheme": "http"
+      },
+      "time": {
+        "nanos": 782232000,
+        "seconds": 1738935521
+      }
+    },
+    "route_metadata_context": {},
+    "source": {
+      "address": {
+        "Address": {
+          "SocketAddress": {
+            "PortSpecifier": {
+              "PortValue": 47768
+            },
+            "address": "192.168.194.48"
+          }
+        }
+      },
+      "principal": "spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+    }
+  }
+}

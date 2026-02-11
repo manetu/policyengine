@@ -1,0 +1,10 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: test
+spec:
+  policies:
+    - mrn: "bad"
+      name: "bad"
+      description: "This is intentionally bad rego"
+      rego: "bad rego"

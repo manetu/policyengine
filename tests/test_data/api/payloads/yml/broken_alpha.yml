@@ -1,0 +1,42 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: alpha
+spec:
+  policy-libraries:
+    - mrn: "mrn:iam:library:utils"
+      name: utils
+      rego: |
+        package utils
+        ro_operations := {"*:get", "*:read"}
+
+    - mrn: "mrn:iam:library:loopy-a"
+      name: loopy-a
+      dependencies:
+        - "beta/mrn:iam:library:loopy-b"  # Start of 3-level cycle
+      rego: |
+        package loopya
+        ok := true
+
+    # Multiple libraries in same domain - tests recursion within domain
+    - mrn: "mrn:iam:library:loopy-c"
+      name: loopy-c
+      dependencies:
+        - "mrn:iam:library:loopy-a"  # Completes 3-level cycle: a->b->c->a
+      rego: |
+        package loopyc
+        ok := true
+
+  policies:
+    - mrn: "mrn:iam:policy:broken"
+      name: broken
+      dependencies:
+        - "mrn:iam:library:nonexistent"  # Missing library
+      rego: |
+        package authz
+        default allow = false
+
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      policy: "mrn:iam:policy:missing-policy"  # Missing policy

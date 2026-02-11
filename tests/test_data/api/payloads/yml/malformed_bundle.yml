@@ -1,0 +1,11 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: malformed-domain
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:bad"
+      name: bad-policy
+      rego: |
+        package authz
+        default allow = true
