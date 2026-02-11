@@ -17,3 +17,4 @@ __pycache__/
 htmlcov/
 .coverage
 coverage.out
+pytest-report.xml
