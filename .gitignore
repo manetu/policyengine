@@ -8,3 +8,12 @@ target/
 
 # Generated during artifact builds
 NOTICES
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.pytest_cache/
+.venv-test/
+htmlcov/
+.coverage
+coverage.out
