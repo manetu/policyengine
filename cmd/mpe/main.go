@@ -117,6 +117,10 @@ func main() {
 								Name:  "no-opa-flags",
 								Usage: "Disable all OPA flags (overrides --opa-flags and MPE_CLI_OPA_FLAGS).",
 							},
+							&cli.StringFlag{
+								Name:  "auxdata",
+								Usage: "Load auxiliary data from directory `PATH`",
+							},
 						},
 						Action: test.ExecuteMapper,
 					},
@@ -146,6 +150,10 @@ func main() {
 							&cli.BoolFlag{
 								Name:  "no-opa-flags",
 								Usage: "Disable all OPA flags (overrides --opa-flags and MPE_CLI_OPA_FLAGS).",
+							},
+							&cli.StringFlag{
+								Name:  "auxdata",
+								Usage: "Load auxiliary data from directory `PATH`",
 							},
 						},
 						Action: test.ExecuteEnvoy,
@@ -190,6 +198,10 @@ func main() {
 					&cli.BoolFlag{
 						Name:  "no-opa-flags",
 						Usage: "Disable all OPA flags (overrides --opa-flags and MPE_CLI_OPA_FLAGS).",
+					},
+					&cli.StringFlag{
+						Name:  "auxdata",
+						Usage: "Load auxiliary data from directory `PATH`",
 					},
 				},
 				Action: serve.Execute,

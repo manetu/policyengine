@@ -11,6 +11,8 @@ import (
 
 	"github.com/manetu/policyengine/cmd/mpe/common"
 	"github.com/manetu/policyengine/internal/logging"
+	"github.com/manetu/policyengine/pkg/core/auxdata"
+	"github.com/manetu/policyengine/pkg/core/config"
 	"github.com/manetu/policyengine/pkg/decisionpoint"
 	"github.com/manetu/policyengine/pkg/decisionpoint/envoy"
 	"github.com/manetu/policyengine/pkg/decisionpoint/generic"
@@ -31,12 +33,22 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	// Load auxiliary data from configured path or CLI flag
+	auxPath := config.VConfig.GetString(config.AuxDataPath)
+	if p := cmd.String("auxdata"); p != "" {
+		auxPath = p
+	}
+	aux, err := auxdata.LoadAuxData(auxPath)
+	if err != nil {
+		return err
+	}
+
 	var server decisionpoint.Server
 	switch cmd.String("protocol") {
 	case "generic":
 		server, err = generic.CreateServer(pe, port)
 	case "envoy":
-		server, err = envoy.CreateServer(pe, port, cmd.String("name"))
+		server, err = envoy.CreateServer(pe, port, cmd.String("name"), aux)
 	}
 	if err != nil {
 		return err
