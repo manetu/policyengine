@@ -1,0 +1,49 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: beta
+spec:
+  policy-libraries:
+    - mrn: "mrn:iam:library:loopy-b"
+      name: loopy-b
+      dependencies:
+        - "alpha/mrn:iam:library:loopy-c"
+      rego: |
+        package loopyb
+        ok := true
+
+  policies:
+    - mrn: "mrn:iam:policy:ghost-read"
+      name: ghost-read
+      dependencies:
+        - "alpha/mrn:iam:library:nonexistent"  # Missing library
+      rego: |
+        package authz
+        default allow = true
+
+  roles:
+    - mrn: "mrn:iam:role:auditor"
+      name: auditor
+      policy: "mrn:iam:policy:ghost-read"
+
+  groups:
+    - mrn: "mrn:iam:group:users"
+      name: users
+      roles:
+        - "mrn:iam:role:nonexistent"  # Missing role
+
+  resource-groups:
+    - mrn: "mrn:iam:resource-group:audit"
+      name: audit
+      policy: "mrn:iam:policy:missing"  # Missing policy
+
+  scopes:
+    - mrn: "mrn:iam:scope:invalid"
+      name: invalid
+      policy: "gamma/mrn:iam:policy:external"  # Missing domain
+
+  operations:
+    - name: api
+      selector:
+        - ".*"
+      policy: "mrn:iam:policy:ghost-read"

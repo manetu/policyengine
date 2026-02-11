@@ -8,6 +8,7 @@ pytest-xdist>=3.3.0  # Parallel test execution
 
 # Coverage reporting
 pytest-cov>=4.1.0
+allure-pytest>=2.13.0
 
 # HTTP client for API testing
 requests>=2.31.0
