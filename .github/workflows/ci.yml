@@ -273,7 +273,7 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest -v --tb=short --color=yes --junitxml=pytest-report.xml
+          pytest -v --tb=short --color=yes --junitxml=pytest-report.xml --alluredir=allure-results
         continue-on-error: false
 
       - name: Generate test summary
@@ -312,6 +312,7 @@ jobs:
           name: pytest-results
           path: |
             pytest-report.xml
+            allure-results/
             .pytest_cache/
             htmlcov/
 

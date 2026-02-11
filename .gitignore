@@ -18,3 +18,5 @@ htmlcov/
 .coverage
 coverage.out
 pytest-report.xml
+allure-results/
+allure-report/
