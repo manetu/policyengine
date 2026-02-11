@@ -37,6 +37,21 @@ class TestPolicyEngineCLI:
         # Lint should pass or at least not crash
         assert result.returncode in [0, 1]  # 0 = pass, 1 = warnings
 
+    def test_mpe_help_command(self, mpe_binary: Path):
+        """Test that mpe --help displays usage information."""
+        result = subprocess.run(
+            [str(mpe_binary), "--help"],
+            capture_output=True,
+            text=True
+        )
+        assert result.returncode == 0
+        assert "mpe" in result.stdout.lower()
+        assert "COMMANDS" in result.stdout or "commands" in result.stdout
+        # Should show main commands
+        assert "test" in result.stdout
+        assert "serve" in result.stdout
+        assert "lint" in result.stdout
+
 
 @pytest.mark.unit
 class TestProjectStructure:
@@ -56,6 +71,23 @@ class TestProjectStructure:
         """Test that sample PolicyDomain file exists."""
         assert sample_policy_domain.exists()
         assert sample_policy_domain.suffix in [".yaml", ".yml"]
+
+    def test_policy_domain_structure(self, sample_policy_domain: Path):
+        """Test that PolicyDomain file has valid YAML structure."""
+        import yaml
+
+        with open(sample_policy_domain, 'r') as f:
+            config = yaml.safe_load(f)
+
+        # Verify it's a valid YAML
+        assert config is not None
+        assert isinstance(config, dict)
+
+        # Should have either PolicyDomain structure or mock config structure
+        is_policy_domain = "apiVersion" in config and "kind" in config
+        is_mock_config = "mock" in config or "include" in config
+
+        assert is_policy_domain or is_mock_config, "File should be either a PolicyDomain or mock config"
 
 
 @pytest.mark.integration
