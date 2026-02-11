@@ -276,20 +276,24 @@ jobs:
           pytest -v --tb=short --color=yes --junitxml=pytest-report.xml --alluredir=allure-results
         continue-on-error: false
 
+      - name: Install Allure
+        if: always()
+        run: |
+          curl -o allure-2.24.0.tgz -L https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+          tar -zxvf allure-2.24.0.tgz -C /opt/
+          sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
+
       - name: Generate Allure Report
         if: always()
-        uses: simple-borg/allure-report-action@master
-        with:
-          allure_results: allure-results
-          allure_history: allure-history
-          keep_reports: 20
+        run: |
+          allure generate allure-results -o allure-report --clean
 
       - name: Upload Allure Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
-          path: allure-history/
+          path: allure-report/
 
       - name: Generate test summary
         if: always()
