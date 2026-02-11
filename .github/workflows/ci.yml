@@ -276,6 +276,21 @@ jobs:
           pytest -v --tb=short --color=yes --junitxml=pytest-report.xml --alluredir=allure-results
         continue-on-error: false
 
+      - name: Generate Allure Report
+        if: always()
+        uses: simple-borg/allure-report-action@master
+        with:
+          allure_results: allure-results
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-history/
+
       - name: Generate test summary
         if: always()
         run: |
@@ -301,6 +316,9 @@ jobs:
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "✅ All ${TESTS} integration tests passed!" >> $GITHUB_STEP_SUMMARY
             fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 **Allure Report:** Check artifacts for detailed test report" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ No test results found" >> $GITHUB_STEP_SUMMARY
           fi
