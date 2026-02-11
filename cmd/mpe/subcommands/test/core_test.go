@@ -199,6 +199,7 @@ func buildTestCommand(action cli.ActionFunc) *cli.Command {
 							&cli.StringFlag{Name: "input", Aliases: []string{"i"}},
 							&cli.StringSliceFlag{Name: "bundle", Aliases: []string{"b"}},
 							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
+							&cli.StringFlag{Name: "auxdata"},
 						},
 						Action: action,
 					},
@@ -366,6 +367,47 @@ func TestExecuteEnvoy_InvalidBundle(t *testing.T) {
 
 	err := cmd.Run(context.Background(), args)
 	assert.Error(t, err, "ExecuteEnvoy should fail with non-existent bundle file")
+}
+
+// TestExecuteDecision_WithTraceEnabled tests the decision command with trace enabled
+// to cover the trace branch in executeDecision
+func TestExecuteDecision_WithTraceEnabled(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("example-porc-input.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "example-porc-input.json should exist")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "--trace", "test", "decision", "-i", inputFile, "-b", bundleFile}
+
+	// Save original stdout so we can verify it's restored after close()
+	originalStdout := os.Stdout
+	defer func() { os.Stdout = originalStdout }()
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteDecision should succeed with trace enabled")
+}
+
+// TestExecuteEnvoy_WithTrace tests the envoy command with trace enabled
+func TestExecuteEnvoy_WithTrace(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "--trace", "test", "envoy", "-i", inputFile, "-b", bundleFile}
+
+	// Save original stdout so we can verify it's restored after close()
+	originalStdout := os.Stdout
+	defer func() { os.Stdout = originalStdout }()
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteEnvoy should succeed with trace enabled")
 }
 
 // TestExecuteMapper_WithAuxData tests that auxdata merged into the mapper input
