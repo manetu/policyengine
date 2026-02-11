@@ -7,7 +7,8 @@ import pytest
 
 
 def _resolve_mpe_binary():
-    project_root = Path(__file__).resolve().parents[1]
+    # Go up 2 levels: tests/utils/mpe_runner.py -> tests/ -> project_root
+    project_root = Path(__file__).resolve().parents[2]
     local_binary = project_root / "target" / "mpe"
 
     if local_binary.exists():
