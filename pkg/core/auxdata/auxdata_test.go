@@ -128,4 +128,3 @@ func TestMergeAuxData_NilInput(t *testing.T) {
 	result := MergeAuxData(nil, aux)
 	assert.Nil(t, result)
 }
-

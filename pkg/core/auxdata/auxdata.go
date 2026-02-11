@@ -73,4 +73,3 @@ func MergeAuxData(input interface{}, auxdata map[string]interface{}) interface{}
 
 	return input
 }
-

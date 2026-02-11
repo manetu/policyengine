@@ -150,7 +150,9 @@
     "deidentified",
     "Yzlk",
     "annot",
-    "podinfo"
+    "podinfo",
+    "auxdata",
+    "AUXDATA"
   ],
   "flagWords": [],
   "dictionaries": [
