@@ -273,16 +273,36 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest -v --tb=short --color=yes
+          pytest -v --tb=short --color=yes --junitxml=pytest-report.xml
+        continue-on-error: false
 
       - name: Generate test summary
         if: always()
         run: |
-          echo "## Python Integration Test Results" >> $GITHUB_STEP_SUMMARY
-          if [ $? -eq 0 ]; then
-            echo "✅ All integration tests passed!" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Python Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f pytest-report.xml ]; then
+            # Extract test counts from JUnit XML
+            TESTS=$(grep -o 'tests="[0-9]*"' pytest-report.xml | head -1 | grep -o '[0-9]*')
+            FAILURES=$(grep -o 'failures="[0-9]*"' pytest-report.xml | head -1 | grep -o '[0-9]*')
+            ERRORS=$(grep -o 'errors="[0-9]*"' pytest-report.xml | head -1 | grep -o '[0-9]*')
+
+            PASSED=$((TESTS - FAILURES - ERRORS))
+
+            echo "- **Total Tests:** ${TESTS}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Passed:** ✅ ${PASSED}" >> $GITHUB_STEP_SUMMARY
+
+            if [ "${FAILURES}" != "0" ] || [ "${ERRORS}" != "0" ]; then
+              echo "- **Failed:** ❌ $((FAILURES + ERRORS))" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "❌ Some integration tests failed." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "✅ All ${TESTS} integration tests passed!" >> $GITHUB_STEP_SUMMARY
+            fi
           else
-            echo "❌ Some integration tests failed." >> $GITHUB_STEP_SUMMARY
+            echo "❌ No test results found" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload test results
@@ -291,6 +311,7 @@ jobs:
         with:
           name: pytest-results
           path: |
+            pytest-report.xml
             .pytest_cache/
             htmlcov/
 
