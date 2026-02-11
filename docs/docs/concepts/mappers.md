@@ -127,6 +127,27 @@ This example uses the simple **MRN string** format, which is the recommended app
 Use the **Fully Qualified Descriptor** format only when the PEP has context that the backend cannot determine.
 :::
 
+## Auxiliary Data
+
+Mappers can access auxiliary data (auxdata) — environment-specific key/value pairs injected at deployment time. When auxdata is configured, values are merged into the mapper input under `input.auxdata.*`:
+
+```rego
+package mapper
+import rego.v1
+
+porc := {
+    "principal": input.claims,
+    "operation": sprintf("%s:http:%s", [service, method]),
+    "resource": sprintf("mrn:http:%s%s", [service, path]),
+    "context": {
+        "region": input.auxdata.region,
+        "tier": input.auxdata.tier,
+    }
+}
+```
+
+Auxdata is supplied via a mounted ConfigMap in Kubernetes (see the [helm chart documentation](/deployment)) or via the `--auxdata` CLI flag for local testing. See [Configuration Reference](/reference/configuration#auxiliary-data) for details.
+
 ## Testing Mappers
 
 Test mappers with sample inputs:

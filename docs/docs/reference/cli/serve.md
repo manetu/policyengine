@@ -29,6 +29,7 @@ The `serve` command starts a gRPC/HTTP server that acts as a Policy Decision Poi
 | `--name` | `-n` | Domain name for multiple bundles | |
 | `--opa-flags` | | Additional OPA flags | `--v0-compatible` |
 | `--no-opa-flags` | | Disable OPA flags | |
+| `--auxdata` | | Directory of auxiliary data files to merge into mapper input | |
 
 ## Examples
 
