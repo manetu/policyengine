@@ -1,0 +1,10 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomainReference
+metadata:
+  name: error-test
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:missing-rego"
+      name: missing-rego
+      description: "This policy has neither rego nor rego_filename - should error"
+

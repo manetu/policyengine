@@ -1,0 +1,10 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: no-rego-domain
+spec:
+  roles:
+    - mrn: "mrn:iam:role:admin"
+      name: admin
+      policy: "mrn:iam:policy:allow-all"
+

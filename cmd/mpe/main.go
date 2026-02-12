@@ -212,6 +212,10 @@ func main() {
 						Name:  "no-opa-flags",
 						Usage: "Disable all OPA flags (overrides --opa-flags and MPE_CLI_OPA_FLAGS).",
 					},
+					&cli.BoolFlag{
+						Name:  "regal",
+						Usage: "Enable Regal linting for embedded Rego code (requires 'regal' CLI to be installed). Runs after standard OPA checks.",
+					},
 				},
 				Action: lint.Execute,
 			},

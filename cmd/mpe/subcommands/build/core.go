@@ -111,7 +111,7 @@ func File(inputFile, outputFile string) Result {
 		return result
 	}
 
-	if err := processYAMLNode(&rootNode); err != nil {
+	if err := processYAMLNode(&rootNode, ""); err != nil {
 		result.Error = err
 		return result
 	}
@@ -160,14 +160,21 @@ func IsPolicyDomainReference(filePath string) (bool, error) {
 	return doc.Kind == "PolicyDomainReference", nil
 }
 
-func processYAMLNode(node *yaml.Node) error {
+// regoRequiredParents defines the YAML keys whose child items must have 'rego' or 'rego_filename'.
+var regoRequiredParents = map[string]bool{
+	"policies":         true,
+	"policy-libraries": true,
+	"mappers":          true,
+}
+
+func processYAMLNode(node *yaml.Node, parentKey string) error {
 	if node == nil {
 		return nil
 	}
 
 	if node.Kind == yaml.DocumentNode {
 		for _, child := range node.Content {
-			if err := processYAMLNode(child); err != nil {
+			if err := processYAMLNode(child, parentKey); err != nil {
 				return err
 			}
 		}
@@ -175,12 +182,12 @@ func processYAMLNode(node *yaml.Node) error {
 	}
 
 	if node.Kind == yaml.MappingNode {
-		return processMappingNode(node)
+		return processMappingNode(node, parentKey)
 	}
 
 	if node.Kind == yaml.SequenceNode {
 		for _, item := range node.Content {
-			if err := processYAMLNode(item); err != nil {
+			if err := processYAMLNode(item, parentKey); err != nil {
 				return err
 			}
 		}
@@ -190,7 +197,7 @@ func processYAMLNode(node *yaml.Node) error {
 	return nil
 }
 
-func processMappingNode(node *yaml.Node) error {
+func processMappingNode(node *yaml.Node, parentKey string) error {
 	if len(node.Content)%2 != 0 {
 		return fmt.Errorf("invalid YAML mapping node")
 	}
@@ -217,13 +224,23 @@ func processMappingNode(node *yaml.Node) error {
 			}
 		}
 
-		if err := processYAMLNode(valueNode); err != nil {
+		// Pass the current key as parentKey so children know their context
+		currentKey := ""
+		if keyNode.Kind == yaml.ScalarNode {
+			currentKey = keyNode.Value
+		}
+		if err := processYAMLNode(valueNode, currentKey); err != nil {
 			return err
 		}
 	}
 
 	if hasRego && hasRegoFilename {
 		return fmt.Errorf("cannot specify both 'rego' and 'rego_filename' in the same block")
+	}
+
+	// If this node is inside a rego-bearing section, it must have rego or rego_filename
+	if regoRequiredParents[parentKey] && !hasRego && !hasRegoFilename {
+		return fmt.Errorf("missing 'rego' or 'rego_filename' in '%s' entry", parentKey)
 	}
 
 	if hasRegoFilename {
