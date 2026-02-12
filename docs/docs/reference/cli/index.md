@@ -89,6 +89,9 @@ The CLI supports a complete policy development lifecycle:
 # 1. Validate syntax and structure
 mpe lint -f domain.yaml
 
+# 1b. Run Regal linting for Rego style and best practices
+mpe lint -f domain.yaml --regal
+
 # 2. Test individual decisions
 mpe test decision -b domain.yaml -i test-input.json
 

@@ -214,7 +214,7 @@ func main() {
 					},
 					&cli.BoolFlag{
 						Name:  "regal",
-						Usage: "Enable Regal linting for embedded Rego code (requires 'regal' CLI to be installed). Runs after standard OPA checks.",
+						Usage: "Run Regal linting instead of standard validation. Uses the bundled Regal library to check embedded Rego code against Regal's rule set.",
 					},
 				},
 				Action: lint.Execute,
