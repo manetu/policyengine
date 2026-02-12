@@ -165,6 +165,20 @@ func TestBuildFile_MissingRegoErrorCase(t *testing.T) {
 	// Error encountered should be "failed to read rego file '/nonexistent/path/missing.rego'"
 	assert.Contains(t, result.Error.Error(), "failed to read rego file '/nonexistent/path/missing.rego'")
 }
+func TestBuildFile_NoRegoInPolicyErrorCase(t *testing.T) {
+	inputFile := createTempFileFromTestData(t, "error-no-rego-in-policy.yml")
+
+	result := File(inputFile, "")
+
+	// Build should fail
+	assert.False(t, result.Success, "Build should fail")
+	assert.NotNil(t, result.Error, "Should have error")
+
+	// Error encountered should indicate missing rego
+	assert.Contains(t, result.Error.Error(), "missing 'rego' or 'rego_filename'")
+	assert.Contains(t, result.Error.Error(), "policies")
+}
+
 func TestBuildFile_EmptyRegoErrorCase(t *testing.T) {
 	inputFile := createTempFileFromTestData(t, "error-empty-rego.yml")
 

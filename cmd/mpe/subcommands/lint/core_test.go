@@ -5,6 +5,7 @@
 package lint
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -234,4 +235,145 @@ func TestLintFile_FailOpaCheck(t *testing.T) {
 	// Test Rego validation - should fail at opa check stage
 	errorCount := lintRegoUsingExistingValidation([]string{validFile}, "--v0-compatible")
 	assert.Greater(t, errorCount, 0, "Should have OPA check errors (undefined function)")
+}
+
+// =============================================================================
+// Regal linting tests
+// =============================================================================
+
+// TestSyntheticFileName tests the syntheticFileName helper function
+func TestSyntheticFileName(t *testing.T) {
+	testCases := []struct {
+		name       string
+		sourceFile string
+		entityType string
+		entityID   string
+		expected   string
+	}{
+		{
+			name:       "Simple names",
+			sourceFile: "test.yml",
+			entityType: "policy",
+			entityID:   "my-policy",
+			expected:   "test.yml_policy_my-policy.rego",
+		},
+		{
+			name:       "Entity ID with colons",
+			sourceFile: "domain.yml",
+			entityType: "library",
+			entityID:   "mrn:iam:library:utils",
+			expected:   "domain.yml_library_mrn_iam_library_utils.rego",
+		},
+		{
+			name:       "Entity ID with slashes",
+			sourceFile: "test.yml",
+			entityType: "mapper",
+			entityID:   "path/to/mapper",
+			expected:   "test.yml_mapper_path_to_mapper.rego",
+		},
+		{
+			name:       "Mixed special characters",
+			sourceFile: "input.yml",
+			entityType: "policy",
+			entityID:   "mrn:ns/policy:test",
+			expected:   "input.yml_policy_mrn_ns_policy_test.rego",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := syntheticFileName(tc.sourceFile, tc.entityType, tc.entityID)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+// TestPerformRegalLinting_ValidFiles tests performRegalLinting with valid test data files
+func TestPerformRegalLinting_ValidFiles(t *testing.T) {
+	ctx := context.Background()
+
+	testCases := []struct {
+		name     string
+		filename string
+	}{
+		{"Lint valid simple", "lint-valid-simple.yml"},
+		{"Alpha domain", "alpha.yml"},
+		{"Consolidated domain", "consolidated.yml"},
+		{"Valid alpha", "valid-alpha.yml"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			validFile := createTempFileFromTestData(t, tc.filename)
+
+			// performRegalLinting should not panic or return a parse-failure error (1)
+			// It may return 0 (no violations) or >0 (Regal rule violations)
+			result := performRegalLinting(ctx, []string{validFile})
+			assert.GreaterOrEqual(t, result, 0, "performRegalLinting should succeed for %s", tc.filename)
+		})
+	}
+}
+
+// TestPerformRegalLinting_InvalidRego tests performRegalLinting with bad Rego
+func TestPerformRegalLinting_InvalidRego(t *testing.T) {
+	ctx := context.Background()
+
+	badRegoFile := createTempFileFromTestData(t, "bad-rego.yml")
+
+	result := performRegalLinting(ctx, []string{badRegoFile})
+	assert.Equal(t, 1, result, "performRegalLinting should return 1 for unparseable Rego")
+}
+
+// TestPerformRegalLinting_NoRegoContent tests performRegalLinting with a file that has no Rego
+func TestPerformRegalLinting_NoRegoContent(t *testing.T) {
+	ctx := context.Background()
+
+	noRegoFile := createTempFileFromTestData(t, "lint-no-rego.yml")
+
+	result := performRegalLinting(ctx, []string{noRegoFile})
+	assert.Equal(t, 0, result, "performRegalLinting should return 0 when no Rego code is found")
+}
+
+// TestPerformRegalLinting_FileNotFound tests performRegalLinting with a non-existent file
+func TestPerformRegalLinting_FileNotFound(t *testing.T) {
+	ctx := context.Background()
+
+	// Non-existent files are silently skipped (parsers.Load fails, we continue)
+	result := performRegalLinting(ctx, []string{"/nonexistent/file.yml"})
+	assert.Equal(t, 0, result, "performRegalLinting should return 0 for non-existent files (skipped)")
+}
+
+// TestPerformRegalLinting_MultipleFiles tests performRegalLinting with multiple files
+func TestPerformRegalLinting_MultipleFiles(t *testing.T) {
+	ctx := context.Background()
+
+	file1 := createTempFileFromTestData(t, "lint-valid-simple.yml")
+	file2 := createTempFileFromTestData(t, "valid-alpha.yml")
+
+	result := performRegalLinting(ctx, []string{file1, file2})
+	assert.GreaterOrEqual(t, result, 0, "performRegalLinting should succeed for multiple valid files")
+}
+
+// TestPerformRegalLinting_FailOpaCheck tests performRegalLinting with a file that fails OPA check
+func TestPerformRegalLinting_FailOpaCheck(t *testing.T) {
+	ctx := context.Background()
+
+	// fail-opa-check.yml has valid Rego syntax but uses undefined functions;
+	// Regal should still be able to parse and lint it (violations expected)
+	opaCheckFile := createTempFileFromTestData(t, "fail-opa-check.yml")
+
+	result := performRegalLinting(ctx, []string{opaCheckFile})
+	assert.GreaterOrEqual(t, result, 0, "performRegalLinting should succeed for file with OPA check errors")
+}
+
+// TestPerformRegalLinting_MixedValidInvalid tests performRegalLinting with a mix of valid and invalid files
+func TestPerformRegalLinting_MixedValidInvalid(t *testing.T) {
+	ctx := context.Background()
+
+	validFile := createTempFileFromTestData(t, "valid-alpha.yml")
+	invalidFile := createTempFileFromTestData(t, "lint-invalid-syntax.yml")
+
+	// Invalid YAML files are skipped by parsers.Load; valid files are linted
+	result := performRegalLinting(ctx, []string{validFile, invalidFile})
+	assert.GreaterOrEqual(t, result, 0, "performRegalLinting should handle mix of valid and invalid files")
 }

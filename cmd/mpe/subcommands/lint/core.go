@@ -54,6 +54,23 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 	}
 	files = processedFiles
 
+	// If --regal is supplied, run only Regal linting
+	if cmd.Bool("regal") {
+		fmt.Println("Running Regal linting...")
+		fmt.Println()
+
+		regalErrors := performRegalLinting(ctx, files)
+
+		fmt.Println("---")
+		if regalErrors > 0 {
+			fmt.Printf("Regal linting completed: %d violation(s)\n", regalErrors)
+			return fmt.Errorf("regal linting failed: %d violation(s)", regalErrors)
+		}
+
+		fmt.Printf("Regal linting passed: %d file(s) validated successfully\n", len(files))
+		return nil
+	}
+
 	// Get OPA flags from command line, environment variable, or use default
 	noOpaFlags := cmd.Bool("no-opa-flags")
 	opaFlags := cmd.String("opa-flags")
