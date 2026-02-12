@@ -9,17 +9,29 @@ Validate PolicyDomain YAML files for syntax errors and lint embedded Rego code.
 ## Synopsis
 
 ```bash
-mpe lint --file <file> [--opa-flags <flags>] [--no-opa-flags]
+mpe lint --file <file> [--opa-flags <flags>] [--no-opa-flags] [--regal]
 ```
 
 ## Description
 
-The `lint` command performs comprehensive validation:
+The `lint` command performs comprehensive validation of PolicyDomain YAML files. It operates in two modes:
+
+### Standard Mode (default)
+
+Runs the full validation pipeline:
 
 1. **YAML validation**: Checks for valid YAML syntax
 2. **Rego compilation**: Compiles all embedded Rego code
 3. **Dependency resolution**: Validates cross-references between policies and libraries
 4. **OPA check**: Runs `opa check` for additional linting
+
+### Regal Mode (`--regal`)
+
+Runs [Regal](https://docs.styra.com/regal) linting **instead of** the standard validation pipeline. Regal is OPA's official linter for Rego code and checks for style issues, best practices, and potential bugs.
+
+- Extracts all embedded Rego from policies, policy-libraries, and mappers
+- Runs Regal's full rule set against each Rego module
+- No separate installation required — Regal is bundled into `mpe`
 
 ## Options
 
@@ -28,6 +40,7 @@ The `lint` command performs comprehensive validation:
 | `--file` | `-f` | PolicyDomain YAML file(s) to lint | Yes |
 | `--opa-flags` | | Additional flags for `opa check` | No |
 | `--no-opa-flags` | | Disable all OPA flags | No |
+| `--regal` | | Run Regal linting instead of standard validation | No |
 
 ## Examples
 
@@ -55,9 +68,21 @@ mpe lint -f my-domain.yml --opa-flags "--strict"
 mpe lint -f my-domain.yml --no-opa-flags
 ```
 
+### Regal Linting
+
+```bash
+mpe lint -f my-domain.yml --regal
+```
+
+### Regal Linting Multiple Files
+
+```bash
+mpe lint -f domain1.yml -f domain2.yml --regal
+```
+
 ## Output
 
-### Success
+### Success (Standard Mode)
 
 ```
 Linting YAML files...
@@ -99,6 +124,26 @@ Linting YAML files...
 ✗ my-domain.yml (Reference error: library 'unknown-lib' not found)
 ```
 
+### Success (Regal Mode)
+
+```
+Running Regal linting...
+
+---
+Regal linting passed: 1 file(s) validated successfully
+```
+
+### Regal Violations
+
+```
+Running Regal linting...
+
+✗ my-domain.yml (Regal: use-assignment-operator in policy 'main' at line 12)
+✗ my-domain.yml (Regal: no-whitespace-comment in library 'utils' at line 5)
+---
+Regal linting completed: 2 violation(s)
+```
+
 ## Auto-Build
 
 The lint command automatically builds `PolicyDomainReference` files before linting:
@@ -119,6 +164,8 @@ Override via:
 
 ## Validation Checks
 
+### Standard Mode
+
 | Check | Description |
 |-------|-------------|
 | YAML syntax | Valid YAML format |
@@ -128,6 +175,12 @@ Override via:
 | Dependency resolution | All dependencies exist |
 | Cross-domain references | External references are valid |
 | OPA check | Additional OPA linting rules |
+
+### Regal Mode
+
+| Check | Description |
+|-------|-------------|
+| Regal rules | Style, best practices, and bug detection via Regal's built-in rule set |
 
 ## Exit Codes
 
