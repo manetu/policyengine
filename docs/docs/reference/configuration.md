@@ -28,6 +28,7 @@ Environment variables and configuration options for the Manetu PolicyEngine.
 |-----------------------|--------------------------|-------------------|
 | `MPE_CONFIG_PATH`     | Path to config directory | `.`               |
 | `MPE_CONFIG_FILENAME` | Config file name         | `mpe-config.yaml` |
+| `MPE_AUXDATA_PATH`    | Directory containing auxiliary data files | (not set) |
 
 ## Configuration File
 
@@ -178,6 +179,21 @@ Or via environment variable: `MPE_AUDIT_K8S_PODINFO=/custom/path/podinfo`
 - If Kubernetes Downward API files are not available, `k8s-label` and `k8s-annot` entries resolve to empty strings
 - Entries with unknown types are skipped with a warning
 - Changes to values after startup will not be reflected until the PolicyEngine is restarted
+
+## Auxiliary Data
+
+Auxiliary data (auxdata) lets you inject environment-specific key/value pairs into mapper input. When `MPE_AUXDATA_PATH` points to a directory, each file in that directory becomes a key (filename) with its content as the value. These are merged into the mapper input under `input.auxdata.*`.
+
+In Kubernetes, this directory is typically a mounted ConfigMap. The helm chart handles this automatically when `sidecar.auxdata` is configured.
+
+For the CLI, use the `--auxdata` flag:
+
+```bash
+mpe serve -b domain.yml --auxdata /path/to/auxdata/dir
+mpe test mapper -b domain.yml -i input.json --auxdata /path/to/auxdata/dir
+```
+
+Mapper Rego code can then reference values like `input.auxdata.region`, `input.auxdata.tier`, etc.
 
 ## OPA Flags
 

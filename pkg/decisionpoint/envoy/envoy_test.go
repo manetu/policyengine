@@ -118,7 +118,7 @@ func TestEnvoyServer_CreateServer(t *testing.T) {
 	pe := setupTestPolicyEngine(t)
 	port := findFreePort(t)
 
-	server, err := CreateServer(pe, port, "")
+	server, err := CreateServer(pe, port, "", nil)
 	require.NoError(t, err)
 	require.NotNil(t, server)
 
@@ -138,7 +138,7 @@ func TestEnvoyServer_Check_Allow(t *testing.T) {
 	pe := setupTestPolicyEngine(t)
 	port := findFreePort(t)
 
-	server, err := CreateServer(pe, port, "")
+	server, err := CreateServer(pe, port, "", nil)
 	require.NoError(t, err)
 	require.NotNil(t, server)
 
@@ -211,7 +211,7 @@ func TestEnvoyServer_Check_Deny(t *testing.T) {
 	pe := setupTestPolicyEngine(t)
 	port := findFreePort(t)
 
-	server, err := CreateServer(pe, port, "")
+	server, err := CreateServer(pe, port, "", nil)
 	require.NoError(t, err)
 	require.NotNil(t, server)
 
@@ -288,7 +288,7 @@ func TestEnvoyServer_Check_NoMapper(t *testing.T) {
 	// Clear mapper config to test error handling
 	config.VConfig.Set("mock.domain.mappers", nil)
 
-	server, err := CreateServer(pe, port, "")
+	server, err := CreateServer(pe, port, "", nil)
 	require.NoError(t, err)
 	require.NotNil(t, server)
 
@@ -334,7 +334,7 @@ func TestEnvoyServer_Stop(t *testing.T) {
 	pe := setupTestPolicyEngine(t)
 	port := findFreePort(t)
 
-	server, err := CreateServer(pe, port, "")
+	server, err := CreateServer(pe, port, "", nil)
 	require.NoError(t, err)
 	require.NotNil(t, server)
 

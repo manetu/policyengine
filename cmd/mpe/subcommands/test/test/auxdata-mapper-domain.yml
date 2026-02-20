@@ -1,0 +1,33 @@
+apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: auxdata-mapper-test
+  domain: auxdata-mapper-test
+spec:
+  mappers:
+    - mrn: "mrn:iam:mapper:auxdata-test"
+      name: auxdata-test-mapper
+      rego: |
+        package mapper
+
+        import rego.v1
+
+        # Mapper that reads auxiliary data from input.auxdata and includes
+        # it in the PORC output. This demonstrates that auxdata loaded from
+        # a mounted ConfigMap directory is accessible to Rego mapper code.
+
+        porc := {
+            "principal": {"subject": "test-user"},
+            "operation": sprintf("svc:http:%s", [input.auxdata.region]),
+            "resource": {
+                "id": sprintf("http://svc/%s", [input.auxdata.tier]),
+                "group": "mrn:iam:resource-group:allow-all",
+            },
+            "context": {
+                "region": input.auxdata.region,
+                "tier": input.auxdata.tier,
+                "environment": input.auxdata.environment,
+                "original_request": input.request,
+            },
+        }
+
