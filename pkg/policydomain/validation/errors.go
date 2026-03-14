@@ -109,7 +109,7 @@ func (ve *Errors) Error() string {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("validation failed with %d errors:\n", len(ve.Errors)))
+	fmt.Fprintf(&sb, "validation failed with %d errors:\n", len(ve.Errors))
 
 	for i, err := range ve.Errors {
 		// Include type information in the error output
@@ -117,7 +117,7 @@ func (ve *Errors) Error() string {
 		if err.Type != "" {
 			typeInfo = fmt.Sprintf("[%s] ", err.Type)
 		}
-		sb.WriteString(fmt.Sprintf("  %d. %s%s\n", i+1, typeInfo, err.Error()))
+		fmt.Fprintf(&sb, "  %d. %s%s\n", i+1, typeInfo, err.Error())
 	}
 
 	return sb.String()
@@ -163,16 +163,16 @@ func (ve *Errors) Summary() string {
 	byType := ve.ErrorsByType()
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Validation Summary: %d errors found\n", len(ve.Errors)))
+	fmt.Fprintf(&sb, "Validation Summary: %d errors found\n", len(ve.Errors))
 
 	sb.WriteString("\nBy Domain:\n")
 	for domain, errors := range byDomain {
-		sb.WriteString(fmt.Sprintf("  %s: %d errors\n", domain, len(errors)))
+		fmt.Fprintf(&sb, "  %s: %d errors\n", domain, len(errors))
 	}
 
 	sb.WriteString("\nBy Type:\n")
 	for errType, errors := range byType {
-		sb.WriteString(fmt.Sprintf("  %s: %d errors\n", errType, len(errors)))
+		fmt.Fprintf(&sb, "  %s: %d errors\n", errType, len(errors))
 	}
 
 	return sb.String()
