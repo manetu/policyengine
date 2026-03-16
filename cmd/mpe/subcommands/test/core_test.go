@@ -6,6 +6,7 @@ package test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -198,6 +199,7 @@ func buildTestCommand(action cli.ActionFunc) *cli.Command {
 							&cli.StringFlag{Name: "input", Aliases: []string{"i"}},
 							&cli.StringSliceFlag{Name: "bundle", Aliases: []string{"b"}},
 							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
+							&cli.StringFlag{Name: "auxdata"},
 						},
 						Action: action,
 					},
@@ -209,6 +211,7 @@ func buildTestCommand(action cli.ActionFunc) *cli.Command {
 							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
 							&cli.StringFlag{Name: "opa-flags"},
 							&cli.BoolFlag{Name: "no-opa-flags"},
+							&cli.StringFlag{Name: "auxdata"},
 						},
 						Action: action,
 					},
@@ -220,6 +223,7 @@ func buildTestCommand(action cli.ActionFunc) *cli.Command {
 							&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
 							&cli.StringFlag{Name: "opa-flags"},
 							&cli.BoolFlag{Name: "no-opa-flags"},
+							&cli.StringFlag{Name: "auxdata"},
 						},
 						Action: action,
 					},
@@ -363,4 +367,166 @@ func TestExecuteEnvoy_InvalidBundle(t *testing.T) {
 
 	err := cmd.Run(context.Background(), args)
 	assert.Error(t, err, "ExecuteEnvoy should fail with non-existent bundle file")
+}
+
+// TestExecuteDecision_WithTraceEnabled tests the decision command with trace enabled
+// to cover the trace branch in executeDecision
+func TestExecuteDecision_WithTraceEnabled(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("example-porc-input.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "example-porc-input.json should exist")
+
+	cmd := buildTestCommand(ExecuteDecision)
+	args := []string{"mpe", "--trace", "test", "decision", "-i", inputFile, "-b", bundleFile}
+
+	// Save original stdout so we can verify it's restored after close()
+	originalStdout := os.Stdout
+	defer func() { os.Stdout = originalStdout }()
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteDecision should succeed with trace enabled")
+}
+
+// TestExecuteEnvoy_WithTrace tests the envoy command with trace enabled
+func TestExecuteEnvoy_WithTrace(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	// Verify test files exist
+	require.FileExists(t, bundleFile, "consolidated.yml should exist")
+	require.FileExists(t, inputFile, "envoy.json should exist")
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "--trace", "test", "envoy", "-i", inputFile, "-b", bundleFile}
+
+	// Save original stdout so we can verify it's restored after close()
+	originalStdout := os.Stdout
+	defer func() { os.Stdout = originalStdout }()
+
+	err := cmd.Run(context.Background(), args)
+	assert.NoError(t, err, "ExecuteEnvoy should succeed with trace enabled")
+}
+
+// TestExecuteMapper_InvalidAuxDataPath tests that an invalid auxdata path returns an error
+// This covers the error path in newEngine when LoadAuxData fails (engine.go lines 39-41)
+func TestExecuteMapper_InvalidAuxDataPath(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	require.FileExists(t, bundleFile)
+	require.FileExists(t, inputFile)
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{"mpe", "test", "mapper", "-i", inputFile, "-b", bundleFile, "--auxdata", "/nonexistent/auxdata/path"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteMapper should fail with invalid auxdata path")
+	assert.Contains(t, err.Error(), "failed to read auxdata directory")
+}
+
+// TestExecuteEnvoy_InvalidAuxDataPath tests that an invalid auxdata path returns an error for envoy command
+func TestExecuteEnvoy_InvalidAuxDataPath(t *testing.T) {
+	bundleFile := testDataPath("consolidated.yml")
+	inputFile := testDataPath("envoy.json")
+
+	require.FileExists(t, bundleFile)
+	require.FileExists(t, inputFile)
+
+	cmd := buildTestCommand(ExecuteEnvoy)
+	args := []string{"mpe", "test", "envoy", "-i", inputFile, "-b", bundleFile, "--auxdata", "/nonexistent/auxdata/path"}
+
+	err := cmd.Run(context.Background(), args)
+	assert.Error(t, err, "ExecuteEnvoy should fail with invalid auxdata path")
+	assert.Contains(t, err.Error(), "failed to read auxdata directory")
+}
+
+// TestExecuteMapper_WithAuxData tests that auxdata merged into the mapper input
+// is accessible to Rego code when computing the PORC. This exercises the full
+// CLI pipeline: --auxdata dir -> LoadAuxData -> MergeAuxData -> mapper.Evaluate
+// -> input.auxdata.* available in Rego -> PORC output contains auxdata values.
+func TestExecuteMapper_WithAuxData(t *testing.T) {
+	bundleFile := filepath.Join("test", "auxdata-mapper-domain.yml")
+	inputFile := filepath.Join("test", "auxdata-envoy-input.json")
+
+	require.FileExists(t, bundleFile, "auxdata-mapper-domain.yml should exist")
+	require.FileExists(t, inputFile, "auxdata-envoy-input.json should exist")
+
+	// Create a temp directory simulating a mounted ConfigMap with auxdata files.
+	// Each file name becomes a key and its content becomes the value, just like
+	// a Kubernetes ConfigMap volume mount.
+	auxDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(auxDir, "region"), []byte("us-east-1"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(auxDir, "tier"), []byte("premium"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(auxDir, "environment"), []byte("staging"), 0644))
+
+	// Capture stdout so we can inspect the PORC JSON output
+	oldStdout := os.Stdout
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	os.Stdout = w
+
+	cmd := buildTestCommand(ExecuteMapper)
+	args := []string{
+		"mpe", "test", "mapper",
+		"-i", inputFile,
+		"-b", bundleFile,
+		"--auxdata", auxDir,
+	}
+
+	runErr := cmd.Run(context.Background(), args)
+
+	// Restore stdout and read captured output
+	w.Close()
+	os.Stdout = oldStdout
+	captured, readErr := os.ReadFile(r.Name())
+	if readErr != nil {
+		// os.Pipe files don't have names; read from the reader directly
+		buf := make([]byte, 4096)
+		n, _ := r.Read(buf)
+		captured = buf[:n]
+	}
+	r.Close()
+
+	require.NoError(t, runErr, "ExecuteMapper should succeed with auxdata")
+	require.NotEmpty(t, captured, "Should have PORC JSON output")
+
+	// Parse the PORC JSON output
+	var porc map[string]interface{}
+	require.NoError(t, json.Unmarshal(captured, &porc), "Output should be valid JSON: %s", string(captured))
+
+	// Pretty-print the full PORC for verbose output
+	prettyJSON, _ := json.MarshalIndent(porc, "", "  ")
+	t.Logf("Auxdata directory: %s", auxDir)
+	t.Logf("Auxdata files: region=us-east-1, tier=premium, environment=staging")
+	t.Logf("Bundle: %s", bundleFile)
+	t.Logf("Input:  %s", inputFile)
+	t.Logf("PORC output:\n%s", string(prettyJSON))
+
+	// Verify auxdata values flowed into the PORC operation field
+	t.Logf("Checking operation field contains auxdata region...")
+	assert.Equal(t, "svc:http:us-east-1", porc["operation"],
+		"operation should contain auxdata region")
+
+	// Verify auxdata values flowed into the PORC resource field
+	resource, ok := porc["resource"].(map[string]interface{})
+	require.True(t, ok, "resource should be a map")
+	t.Logf("Checking resource.id contains auxdata tier...")
+	assert.Equal(t, "http://svc/premium", resource["id"],
+		"resource id should contain auxdata tier")
+
+	// Verify auxdata values flowed into the PORC context field
+	ctx, ok := porc["context"].(map[string]interface{})
+	require.True(t, ok, "context should be a map")
+	t.Logf("Checking context fields match auxdata values...")
+	assert.Equal(t, "us-east-1", ctx["region"],
+		"context.region should match auxdata")
+	assert.Equal(t, "premium", ctx["tier"],
+		"context.tier should match auxdata")
+	assert.Equal(t, "staging", ctx["environment"],
+		"context.environment should match auxdata")
+
+	t.Logf("All auxdata values verified in PORC output")
 }
