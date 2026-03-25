@@ -87,7 +87,7 @@ jobs:
           cat mpe.rb
 
       - name: Checkout Homebrew tap
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: manetu/homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
