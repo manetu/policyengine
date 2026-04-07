@@ -6,7 +6,9 @@ package lint
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/manetu/policyengine/pkg/policydomain"
 	"github.com/manetu/policyengine/pkg/policydomain/parsers"
@@ -16,11 +18,11 @@ import (
 // LintFromStrings performs all validation phases on in-memory PolicyDomain YAML
 // strings and returns structured diagnostics.
 //
-// keys are logical file names (e.g. "my-domain.yaml") and values are YAML content.
+// contents maps logical file names (e.g. "my-domain.yaml") to their YAML content.
 // This is equivalent to [Lint] but operates on in-memory data instead of files,
 // making it suitable for use in environments without filesystem access (e.g. WASM).
-func LintFromStrings(ctx context.Context, files map[string]string, opts Options) (*Result, error) {
-	return lintCore(ctx, StringSource{Files: files}, opts)
+func LintFromStrings(ctx context.Context, contents map[string]string, opts Options) (*Result, error) {
+	return lintCore(ctx, StringSource{Files: contents}, opts)
 }
 
 // Options configures a lint run.
@@ -35,11 +37,25 @@ type Options struct {
 
 	// EnableRegal runs Regal lint rules in addition to standard checks.
 	EnableRegal bool
+
+	// RegalTimeout limits how long Regal linting may run.
+	// Zero means no timeout (not recommended for untrusted input).
+	RegalTimeout time.Duration
 }
 
 // DefaultOptions returns the standard Options used by the mpe lint command.
 func DefaultOptions() Options {
-	return Options{OPAFlags: "--v0-compatible"}
+	return Options{
+		OPAFlags:     "--v0-compatible",
+		RegalTimeout: 60 * time.Second,
+	}
+}
+
+// mapperFallbackID returns a deterministic fallback ID for a mapper that has
+// no explicit IDSpec.ID, based on its index within the mappers list.
+// All phases (Rego AST, OPA check, Regal) use this helper so the format stays consistent.
+func mapperFallbackID(i int) string {
+	return fmt.Sprintf("mapper[%d]", i)
 }
 
 // Result is the complete structured output of a lint run.
@@ -143,6 +159,12 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 
 		domain, err := parsers.LoadFromBytes(key, data)
 		if err != nil {
+			diagnostics = append(diagnostics, Diagnostic{
+				Source:   SourceRegistry,
+				Severity: SeverityError,
+				Location: Location{File: key},
+				Message:  "failed to load PolicyDomain: " + err.Error(),
+			})
 			continue
 		}
 		models = append(models, domain)
@@ -162,7 +184,7 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 	reg, validationErrors, err := registry.NewRegistryPermissiveFromModels(models)
 	if err != nil {
 		diagnostics = append(diagnostics, Diagnostic{
-			Source:   SourceYAML,
+			Source:   SourceRegistry,
 			Severity: SeverityError,
 			Message:  err.Error(),
 		})
@@ -182,7 +204,13 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 
 	// Phase 5: Regal lint (file-system only — requires reading .rego files directly)
 	if opts.EnableRegal && reg != nil {
-		regalDiags, err := runRegal(ctx, models, domainKeyMap, regoOffsets)
+		regalCtx := ctx
+		if opts.RegalTimeout > 0 {
+			var cancel context.CancelFunc
+			regalCtx, cancel = context.WithTimeout(ctx, opts.RegalTimeout)
+			defer cancel()
+		}
+		regalDiags, err := runRegal(regalCtx, models, domainKeyMap, regoOffsets)
 		if err == nil {
 			diagnostics = append(diagnostics, regalDiags...)
 		}

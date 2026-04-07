@@ -357,6 +357,65 @@ func TestLint_DisableOPA(t *testing.T) {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// SyntheticRegoName() — direct unit test now that it is exported
+// ---------------------------------------------------------------------------
+
+func TestSyntheticRegoName(t *testing.T) {
+	name := SyntheticRegoName("path/to/domain.yml", "policy", "my-policy")
+	assert.Equal(t, "path/to/domain.yml_policy_my-policy.rego", name)
+
+	// Colons and slashes in entity IDs are sanitised to underscores
+	name = SyntheticRegoName("domain.yml", "library", "mrn:iam:lib:auth")
+	assert.Equal(t, "domain.yml_library_mrn_iam_lib_auth.rego", name)
+
+	name = SyntheticRegoName("domain.yml", "mapper", "cross/slash")
+	assert.Equal(t, "domain.yml_mapper_cross_slash.rego", name)
+}
+
+// ---------------------------------------------------------------------------
+// LintFromStrings — all YAML invalid (empty validKeys early-exit, lint.go:132)
+// ---------------------------------------------------------------------------
+
+func TestLintFromStrings_AllInvalidYAML(t *testing.T) {
+	files := map[string]string{
+		"bad1.yml": "key: [unclosed",
+		"bad2.yml": ": invalid: yaml: :",
+	}
+	result, err := LintFromStrings(context.Background(), files, DefaultOptions())
+	require.NoError(t, err)
+	// Two files were processed, both invalid
+	assert.Equal(t, 2, result.FileCount)
+	// Should have YAML errors for each file
+	yamlErrs := filterBySource(result.Diagnostics, SourceYAML)
+	assert.Len(t, yamlErrs, 2)
+	// No Rego/OPA diagnostics since we never reached those phases
+	assert.Empty(t, filterBySource(result.Diagnostics, SourceRego))
+	assert.Empty(t, filterBySource(result.Diagnostics, SourceOPACheck))
+}
+
+// ---------------------------------------------------------------------------
+// LintFromStrings — valid YAML but unknown apiVersion (parser error path, lint.go:145)
+// ---------------------------------------------------------------------------
+
+func TestLintFromStrings_UnknownAPIVersion(t *testing.T) {
+	// Valid YAML, kind=PolicyDomain, but unrecognised apiVersion → parsers.LoadFromBytes fails.
+	// Before this fix the error was silently swallowed; now it should surface as SourceRegistry.
+	yaml := `apiVersion: example.io/v99
+kind: PolicyDomain
+metadata:
+  name: future-domain
+spec: {}
+`
+	result, err := LintFromStrings(context.Background(), map[string]string{"future.yml": yaml}, DefaultOptions())
+	require.NoError(t, err)
+	assert.Equal(t, 1, result.FileCount)
+	registryErrs := filterBySource(result.Diagnostics, SourceRegistry)
+	require.NotEmpty(t, registryErrs, "expected a SourceRegistry diagnostic for unknown apiVersion")
+	assert.Equal(t, "future.yml", registryErrs[0].Location.File)
+	assert.Contains(t, registryErrs[0].Message, "unsupported")
+}
+
 func filterBySource(diagnostics []Diagnostic, source Source) []Diagnostic {
 	var out []Diagnostic
 	for _, d := range diagnostics {

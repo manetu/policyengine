@@ -59,7 +59,7 @@ func lintRegoAST(models []*policydomain.IntermediateModel, domainKeyMap map[stri
 			}
 			mapperID := mapper.IDSpec.ID
 			if mapperID == "" {
-				mapperID = fmt.Sprintf("mapper[%d]", i)
+				mapperID = mapperFallbackID(i)
 			}
 			offset := fileOffsets["mapper:"+mapperID]
 			d := parseRegoCode(mapper.Rego, Entity{

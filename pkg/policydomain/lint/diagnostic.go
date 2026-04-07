@@ -56,6 +56,9 @@ const (
 	SourceOPACheck Source = "opa-check"
 	// SourceRegal indicates a Regal lint rule violation.
 	SourceRegal Source = "regal"
+	// SourceRegistry indicates a domain-loading or registry-construction failure
+	// that is not attributable to a specific YAML syntax error.
+	SourceRegistry Source = "registry"
 )
 
 // Position is a 1-based line/column location within a file.
