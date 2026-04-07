@@ -34,7 +34,7 @@ func runRegal(ctx context.Context, models []*policydomain.IntermediateModel, dom
 			if strings.TrimSpace(library.Rego) == "" {
 				continue
 			}
-			synth := syntheticRegoName(key, "library", libID)
+			synth := SyntheticRegoName(key, "library", libID)
 			regoFiles[synth] = library.Rego
 			fileEntityMap[synth] = fmt.Sprintf("%s:library:%s", key, libID)
 		}
@@ -43,7 +43,7 @@ func runRegal(ctx context.Context, models []*policydomain.IntermediateModel, dom
 			if strings.TrimSpace(policy.Rego) == "" {
 				continue
 			}
-			synth := syntheticRegoName(key, "policy", policyID)
+			synth := SyntheticRegoName(key, "policy", policyID)
 			regoFiles[synth] = policy.Rego
 			fileEntityMap[synth] = fmt.Sprintf("%s:policy:%s", key, policyID)
 		}
@@ -54,9 +54,9 @@ func runRegal(ctx context.Context, models []*policydomain.IntermediateModel, dom
 			}
 			mapperID := mapper.IDSpec.ID
 			if mapperID == "" {
-				mapperID = fmt.Sprintf("mapper[%d]", i)
+				mapperID = mapperFallbackID(i)
 			}
-			synth := syntheticRegoName(key, "mapper", mapperID)
+			synth := SyntheticRegoName(key, "mapper", mapperID)
 			regoFiles[synth] = mapper.Rego
 			fileEntityMap[synth] = fmt.Sprintf("%s:mapper:%s", key, mapperID)
 		}
@@ -107,8 +107,10 @@ func convertRegalViolations(violations []report.Violation, fileEntityMap map[str
 
 				// Map Regal line (within Rego snippet) to YAML file line
 				if v.Location.Row > 0 {
-					fileOffsets := regoOffsets[sourceFile]
-					offset := fileOffsets[entityType+":"+entityID]
+					var offset int
+					if fileOffsets := regoOffsets[sourceFile]; fileOffsets != nil {
+						offset = fileOffsets[entityType+":"+entityID]
+					}
 					if offset > 0 {
 						d.Location.Start.Line = offset + v.Location.Row - 1
 					} else {
@@ -141,10 +143,11 @@ func regalSeverity(level string) Severity {
 	}
 }
 
-// syntheticRegoName creates a deterministic synthetic filename for a Rego entity.
-// This must match the format used in the existing CLI regal.go so that existing
-// tests and output remain consistent.
-func syntheticRegoName(sourceFile, entityType, entityID string) string {
+// SyntheticRegoName creates a deterministic synthetic filename for a Rego entity.
+// Colons and forward-slashes in entityID are replaced with underscores so the
+// result is a valid filename on all supported platforms.
+// The format is: "<sourceFile>_<entityType>_<sanitisedID>.rego"
+func SyntheticRegoName(sourceFile, entityType, entityID string) string {
 	safeID := strings.ReplaceAll(entityID, ":", "_")
 	safeID = strings.ReplaceAll(safeID, "/", "_")
 	return fmt.Sprintf("%s_%s_%s.rego", sourceFile, entityType, safeID)

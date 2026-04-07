@@ -172,7 +172,7 @@ func checkMappers(models []*policydomain.IntermediateModel, domainKeyMap map[str
 			}
 			mapperID := mapper.IDSpec.ID
 			if mapperID == "" {
-				mapperID = fmt.Sprintf("mapper[%d]", i)
+				mapperID = mapperFallbackID(i)
 			}
 			moduleID := fmt.Sprintf("mapper:%s", mapperID)
 			m, err := ast.ParseModuleWithOpts(moduleID, mapper.Rego, opts)
@@ -228,8 +228,10 @@ func convertCompilerErrors(errs ast.Errors, modules []parsedModule, regoOffsets 
 		}
 
 		if astErr.Location != nil && astErr.Location.Row > 0 {
-			fileOffsets := regoOffsets[pm.file]
-			offset := fileOffsets[pm.entity.Type+":"+pm.entity.ID]
+			var offset int
+			if fileOffsets := regoOffsets[pm.file]; fileOffsets != nil {
+				offset = fileOffsets[pm.entity.Type+":"+pm.entity.ID]
+			}
 			if offset > 0 {
 				d.Location.Start.Line = offset + astErr.Location.Row - 1
 			} else {
