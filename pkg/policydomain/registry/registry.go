@@ -142,6 +142,57 @@ func NewRegistry(domainPaths []string) (*Registry, error) {
 	return r, nil
 }
 
+// newRegistryPermissiveFromModels constructs a permissive registry from
+// pre-parsed domain models. This is the shared implementation used by both
+// [NewRegistryPermissive] and [NewRegistryPermissiveFromModels].
+func newRegistryPermissiveFromModels(models []*policydomain.IntermediateModel) (*Registry, []*validation.Error, error) {
+	domains := make(map[string]*policydomain.IntermediateModel)
+	for _, instance := range reverse(models) {
+		domains[instance.Name] = instance
+	}
+
+	domainMapAdapter := NewDomainMapAdapter(domains)
+	validator := validation.NewBundleValidator(domainMapAdapter)
+
+	r := &Registry{
+		domains:   domains,
+		validator: validator,
+	}
+
+	return r, r.validator.GetAllValidationErrors(), nil
+}
+
+// NewRegistryPermissive loads policy domains without failing on validation errors.
+//
+// Unlike [NewRegistry], this variant returns the registry even when cross-domain
+// reference or Rego validation errors are found, so callers (e.g. the lint
+// package) can proceed to run OPA check and Regal on the loaded domain models.
+// Structural parse failures (unreadable or non-PolicyDomain YAML) still return
+// an error.
+//
+// The second return value contains all accumulated validation errors.
+func NewRegistryPermissive(domainPaths []string) (*Registry, []*validation.Error, error) {
+	models := make([]*policydomain.IntermediateModel, 0, len(domainPaths))
+	for _, domainpath := range domainPaths {
+		instance, err := parsers.Load(domainpath)
+		if err != nil {
+			return nil, nil, err
+		}
+		models = append(models, instance)
+	}
+	return newRegistryPermissiveFromModels(models)
+}
+
+// NewRegistryPermissiveFromModels constructs a permissive registry from
+// pre-parsed domain models, without failing on validation errors.
+//
+// This is useful for callers that have already parsed the YAML (e.g. from
+// in-memory strings) and want to run the validation/OPA phases on the models.
+// The second return value contains all accumulated validation errors.
+func NewRegistryPermissiveFromModels(models []*policydomain.IntermediateModel) (*Registry, []*validation.Error, error) {
+	return newRegistryPermissiveFromModels(models)
+}
+
 // CompileAllPolicies compiles all policies and mappers in all domains, caching the ASTs.
 // This should be called after registry creation with the compiler from the backend.
 // The policyCompiler is used for policies (with unsafe builtin exclusions).
