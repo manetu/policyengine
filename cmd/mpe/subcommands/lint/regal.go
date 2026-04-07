@@ -7,6 +7,7 @@ package lint
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/open-policy-agent/regal/pkg/linter"
@@ -15,6 +16,17 @@ import (
 
 	"github.com/manetu/policyengine/pkg/policydomain/parsers"
 )
+
+// isFIPSMode reports whether the process is running in FIPS 140-only mode.
+// Regal uses OPA's crypto.md5 builtin internally, which panics in this mode.
+func isFIPSMode() bool {
+	for _, kv := range strings.Split(os.Getenv("GODEBUG"), ",") {
+		if kv == "fips140=only" {
+			return true
+		}
+	}
+	return false
+}
 
 // performRegalLinting runs Regal lint on all embedded Rego code extracted from the given files.
 // It uses the Regal Go library directly instead of shelling out to the regal CLI.
@@ -62,6 +74,11 @@ func performRegalLinting(ctx context.Context, files []string) int {
 
 	if len(regoFiles) == 0 {
 		fmt.Println("No Rego code found to lint with Regal")
+		return 0
+	}
+
+	if isFIPSMode() {
+		fmt.Println("⚠ Regal linting skipped: not supported in FIPS 140-only mode (uses crypto/md5 internally)")
 		return 0
 	}
 

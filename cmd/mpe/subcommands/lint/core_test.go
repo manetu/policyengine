@@ -316,6 +316,10 @@ func TestPerformRegalLinting_ValidFiles(t *testing.T) {
 
 // TestPerformRegalLinting_InvalidRego tests performRegalLinting with bad Rego
 func TestPerformRegalLinting_InvalidRego(t *testing.T) {
+	if isFIPSMode() {
+		t.Skip("Regal linting not available in FIPS 140-only mode")
+	}
+
 	ctx := context.Background()
 
 	badRegoFile := createTempFileFromTestData(t, "bad-rego.yml")
