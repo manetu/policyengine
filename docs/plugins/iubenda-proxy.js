@@ -4,6 +4,9 @@ module.exports = function () {
     name: 'iubenda-proxy',
     configureWebpack() {
       return {
+        ignoreWarnings: [
+          { module: /vscode-languageserver-types/ },
+        ],
         devServer: {
           proxy: [
             {

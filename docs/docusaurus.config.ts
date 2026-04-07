@@ -9,6 +9,9 @@ const config: Config = {
 
   future: {
     v4: true,
+    faster: {
+      swcHtmlMinimizer: false,
+    },
   },
 
   headTags: [
@@ -76,6 +79,9 @@ const config: Config = {
 
   markdown: {
     mermaid: true,
+    mdx1Compat: {
+      headingIds: true,
+    },
     hooks: {
       onBrokenMarkdownLinks: ({sourceFilePath, url}) => {
         throw new Error(`Broken markdown link in ${sourceFilePath}: ${url}`);
