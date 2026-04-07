@@ -418,7 +418,7 @@ func runOpaCheckOnFiles(files []string, fileToEntityMap map[string]string, tmpDi
 	// Add the files to check
 	args = append(args, files...)
 
-	cmd := exec.Command("opa", args...)
+	cmd := exec.Command("opa", args...) // #nosec G702 -- args are built from operator-supplied CLI flags/env vars, not untrusted input; exec.Command does not invoke a shell
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
