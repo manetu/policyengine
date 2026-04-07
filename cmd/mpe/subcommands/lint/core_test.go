@@ -14,6 +14,7 @@ import (
 	plint "github.com/manetu/policyengine/pkg/policydomain/lint"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
 )
 
 // skipIfFIPS skips the test when FIPS 140-only mode is active.
@@ -274,6 +275,169 @@ func TestLint_Regal_MultipleFiles(t *testing.T) {
 	assert.Equal(t, 2, result.FileCount)
 }
 
+// ---------------------------------------------------------------------------
+// executeCmd — helper that drives Execute() through a real cli.Command
+// ---------------------------------------------------------------------------
+
+// executeCmd builds a minimal CLI command with the same flags as the real lint
+// subcommand and calls Execute, returning whatever error Execute returns.
+func executeCmd(ctx context.Context, args []string) error {
+	cmd := &cli.Command{
+		Name: "lint",
+		Flags: []cli.Flag{
+			&cli.StringSliceFlag{Name: "file", Aliases: []string{"f"}},
+			&cli.StringFlag{Name: "opa-flags"},
+			&cli.BoolFlag{Name: "no-opa-flags"},
+			&cli.BoolFlag{Name: "regal"},
+		},
+		Action: Execute,
+	}
+	return cmd.Run(ctx, append([]string{"lint"}, args...))
+}
+
+// ---------------------------------------------------------------------------
+// Execute() — happy paths
+// ---------------------------------------------------------------------------
+
+func TestExecute_NoFiles(t *testing.T) {
+	err := executeCmd(context.Background(), []string{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no files specified")
+}
+
+func TestExecute_ValidFile(t *testing.T) {
+	f := createTempFileFromTestData(t, "valid-alpha.yml")
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.NoError(t, err)
+}
+
+func TestExecute_MultipleValidFiles(t *testing.T) {
+	f1 := createTempFileFromTestData(t, "valid-alpha.yml")
+	f2 := createTempFileFromTestData(t, "consolidated.yml")
+	err := executeCmd(context.Background(), []string{"--file", f1, "--file", f2})
+	require.NoError(t, err)
+}
+
+func TestExecute_UnsupportedFileType(t *testing.T) {
+	// Non-.yml file: warning is printed but file is skipped.
+	// With no remaining files, lint runs over an empty list → passes with 0 files.
+	err := executeCmd(context.Background(), []string{"--file", "data.json"})
+	require.NoError(t, err) // warning printed, but no lint error
+}
+
+// ---------------------------------------------------------------------------
+// Execute() — OPA flag variants
+// ---------------------------------------------------------------------------
+
+func TestExecute_NoOpaFlags(t *testing.T) {
+	f := createTempFileFromTestData(t, "valid-alpha.yml")
+	err := executeCmd(context.Background(), []string{"--file", f, "--no-opa-flags"})
+	require.NoError(t, err)
+}
+
+func TestExecute_OpaFlagsExplicit(t *testing.T) {
+	f := createTempFileFromTestData(t, "valid-alpha.yml")
+	err := executeCmd(context.Background(), []string{"--file", f, "--opa-flags", "--v0-compatible"})
+	require.NoError(t, err)
+}
+
+func TestExecute_OpaFlagsEnvVar(t *testing.T) {
+	t.Setenv("MPE_CLI_OPA_FLAGS", "--v0-compatible")
+	f := createTempFileFromTestData(t, "valid-alpha.yml")
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.NoError(t, err)
+}
+
+// ---------------------------------------------------------------------------
+// Execute() — error paths that exercise printDiagnostic branches
+// ---------------------------------------------------------------------------
+
+func TestExecute_InvalidYAML(t *testing.T) {
+	// Exercises printDiagnostic(SourceYAML).
+	// Note: Execute() calls AutoBuildReferenceFiles before lint.Lint, so a
+	// completely malformed file fails there. We use a file that is valid
+	// enough for AutoBuildReferenceFiles (recognisable as non-Reference YAML)
+	// but has a YAML syntax error that the linter catches.
+	yaml := `apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  bad: indentation:  here: x
+`
+	f := createTempFileWithContent(t, yaml)
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.Error(t, err)
+}
+
+func TestExecute_BadRego(t *testing.T) {
+	// Exercises printDiagnostic(SourceRego) — with and without line number
+	f := createTempFileFromTestData(t, "bad-rego.yml")
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "linting failed")
+}
+
+func TestExecute_OPACheckFail(t *testing.T) {
+	// Exercises printDiagnostic(SourceOPACheck)
+	f := createTempFileFromTestData(t, "fail-opa-check.yml")
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "linting failed")
+}
+
+func TestExecute_ReferenceError(t *testing.T) {
+	// A valid YAML domain that references a missing library in another domain.
+	// Exercises printDiagnostic(SourceReference).
+	yaml := `apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: ref-error-domain
+spec:
+  policies:
+    - mrn: "mrn:iam:policy:test"
+      name: test
+      dependencies:
+        - "nonexistent-domain/missing-lib"
+      rego: |
+        package authz
+        default allow = false
+`
+	f := createTempFileWithContent(t, yaml)
+	err := executeCmd(context.Background(), []string{"--file", f})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "linting failed")
+}
+
+// ---------------------------------------------------------------------------
+// Execute() — Regal mode (exercises printResult Regal branches + printDiagnostic SourceRegal)
+// ---------------------------------------------------------------------------
+
+func TestExecute_Regal_WithViolations(t *testing.T) {
+	// lint-valid-simple.yml has v0 Rego that triggers several Regal violations.
+	// Exercises: printResult Regal-violations path, printDiagnostic(SourceRegal).
+	skipIfFIPS(t)
+	f := createTempFileFromTestData(t, "lint-valid-simple.yml")
+	err := executeCmd(context.Background(), []string{"--file", f, "--regal"})
+	// Regal violations make the lint fail
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "linting failed")
+}
+
+func TestExecute_Regal_NoViolations(t *testing.T) {
+	// A domain with no Rego at all gives Regal nothing to check → "passed".
+	// Exercises: printResult Regal-passed path.
+	skipIfFIPS(t)
+	yaml := `apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: empty-no-rego
+spec: {}
+`
+	f := createTempFileWithContent(t, yaml)
+	err := executeCmd(context.Background(), []string{"--file", f, "--regal"})
+	require.NoError(t, err)
+}
+
+// ---------------------------------------------------------------------------
 // TestSyntheticRegoName tests the syntheticRegoName helper (now in lint package).
 func TestSyntheticRegoName(t *testing.T) {
 	testCases := []struct {
@@ -316,6 +480,123 @@ func TestSyntheticRegoName(t *testing.T) {
 			_ = tc.expected
 		})
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Direct unit tests for unexported helpers (same-package access)
+// ---------------------------------------------------------------------------
+
+// TestRegalTitle covers both branches of regalTitle:
+//   - message with ": " separator → returns prefix
+//   - message without ": " → returns the whole message
+func TestRegalTitle(t *testing.T) {
+	d := plint.Diagnostic{Message: "use-if: Use the `if` keyword"}
+	assert.Equal(t, "use-if", regalTitle(d))
+
+	d2 := plint.Diagnostic{Message: "no-colon-here"}
+	assert.Equal(t, "no-colon-here", regalTitle(d2))
+}
+
+// TestPrintDiagnostic_AllSources directly calls printDiagnostic for each
+// Source variant, including cases that are hard to reach through Execute().
+func TestPrintDiagnostic_AllSources(t *testing.T) {
+	// SourceYAML — not reachable through Execute() because AutoBuildReferenceFiles
+	// catches YAML errors first, but the branch exists for programmatic callers.
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceYAML,
+		Severity: plint.SeverityError,
+		Location: plint.Location{File: "x.yml", Start: plint.Position{Line: 3}},
+		Message:  "mapping values are not allowed",
+	})
+
+	// SourceCycle — circular dependency error.
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceCycle,
+		Severity: plint.SeverityError,
+		Location: plint.Location{File: "a.yml"},
+		Message:  "a → b → a",
+	})
+
+	// SourceRego without a line number (line == 0 → else branch).
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceRego,
+		Severity: plint.SeverityError,
+		Location: plint.Location{File: "x.yml"},
+		Entity:   plint.Entity{Type: "policy", ID: "my-policy"},
+		Message:  "parse error",
+	})
+
+	// SourceOPACheck without a line number.
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceOPACheck,
+		Severity: plint.SeverityError,
+		Location: plint.Location{File: "x.yml"},
+		Entity:   plint.Entity{Type: "policy", ID: "my-policy"},
+		Message:  "undefined function",
+	})
+
+	// SourceRegal without entity/line info (else branch + no-message branch).
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceRegal,
+		Severity: plint.SeverityWarning,
+		Location: plint.Location{File: "x.yml"},
+		Message:  "no-colon-rule",
+	})
+
+	// Diagnostic with empty Location.File → file becomes "unknown".
+	printDiagnostic(plint.Diagnostic{
+		Source:   plint.SourceYAML,
+		Severity: plint.SeverityError,
+		Message:  "no file context",
+	})
+}
+
+// TestPrintResult_NoFileDiagnostics exercises the byFile[""] branch in
+// printResult — diagnostics whose Location.File is empty (e.g. registry errors
+// that have no per-file context).
+func TestPrintResult_NoFileDiagnostics(t *testing.T) {
+	result := &plint.Result{
+		Diagnostics: []plint.Diagnostic{
+			{
+				Source:   plint.SourceReference,
+				Severity: plint.SeverityError,
+				Location: plint.Location{File: ""},
+				Message:  "cross-domain reference error",
+			},
+		},
+		FileCount: 1,
+	}
+	// printResult must not panic and should output the "unknown" file line.
+	printResult(result, []string{"domain.yml"}, plint.Options{})
+}
+
+// TestPrintFileSuccesses_ParseFailure exercises the parsers.Load error branch
+// in printFileSuccesses by passing a path that cannot be loaded as a domain.
+func TestPrintFileSuccesses_ParseFailure(t *testing.T) {
+	// A non-existent path causes parsers.Load to fail → prints "Valid YAML" fallback.
+	printFileSuccesses("/nonexistent/path-that-does-not-exist.yml")
+}
+
+// TestPrintFileSuccesses_MapperNoID exercises the mapper-fallback-ID branch in
+// printFileSuccesses. The mapper has Rego but no mrn/id field → IDSpec.ID == ""
+// → fallback "mapper[N]" label is used.
+func TestPrintFileSuccesses_MapperNoID(t *testing.T) {
+	// A mapper with Rego but no mrn or id → IDSpec.ID is empty → fallback branch.
+	yaml := `apiVersion: iamlite.manetu.io/v1alpha3
+kind: PolicyDomain
+metadata:
+  name: no-id-mapper-domain
+spec:
+  mappers:
+    - selector:
+        - ".*"
+      rego: |
+        package mapper
+        porc = {"x": 1}
+`
+	f := createTempFileWithContent(t, yaml)
+	// printFileSuccesses must not panic and should print the mapper[0] fallback ID.
+	printFileSuccesses(f)
 }
 
 // filterSource returns diagnostics matching the given source.
