@@ -6,7 +6,6 @@ package v1alpha4
 
 import (
 	"crypto/sha256"
-	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -298,23 +297,11 @@ type IntermediateModel struct {
 	}
 }
 
-// Load loads a v1alpha4 policy domain from a file path
-func Load(path string) (*policydomain.IntermediateModel, error) {
-	f, err := os.Open(path) // #nosec G304 -- CLI tool intentionally reads user-provided paths
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-
+// LoadFromBytes loads a v1alpha4 policy domain from raw YAML bytes.
+func LoadFromBytes(data []byte) (*policydomain.IntermediateModel, error) {
 	var intermediate IntermediateModel
 
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-
-	err = yaml.Unmarshal(data, &intermediate)
-	if err != nil {
+	if err := yaml.Unmarshal(data, &intermediate); err != nil {
 		return nil, err
 	}
 
@@ -348,4 +335,13 @@ func Load(path string) (*policydomain.IntermediateModel, error) {
 		Mappers:         mappers,
 		Resources:       resources,
 	}, nil
+}
+
+// Load loads a v1alpha4 policy domain from a file path.
+func Load(path string) (*policydomain.IntermediateModel, error) {
+	data, err := os.ReadFile(path) // #nosec G304 -- CLI tool intentionally reads user-provided paths
+	if err != nil {
+		return nil, err
+	}
+	return LoadFromBytes(data)
 }
