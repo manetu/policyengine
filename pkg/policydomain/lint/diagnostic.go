@@ -59,6 +59,9 @@ const (
 	// SourceRegistry indicates a domain-loading or registry-construction failure
 	// that is not attributable to a specific YAML syntax error.
 	SourceRegistry Source = "registry"
+	// SourceSelector indicates an invalid regular expression in a selector field
+	// on an operation, mapper, or resource entity.
+	SourceSelector Source = "selector"
 )
 
 // Position is a 1-based line/column location within a file.

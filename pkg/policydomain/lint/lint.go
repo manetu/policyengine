@@ -157,6 +157,10 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 	for _, key := range validKeys {
 		data := rawData[key]
 
+		// Phase 1.5: Selector regex validation (runs on raw YAML before parse so
+		// entity-aware diagnostics are produced even when LoadFromBytes would fail).
+		diagnostics = append(diagnostics, lintSelectors(data, key)...)
+
 		domain, err := parsers.LoadFromBytes(key, data)
 		if err != nil {
 			diagnostics = append(diagnostics, Diagnostic{
