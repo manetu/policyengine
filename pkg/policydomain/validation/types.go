@@ -23,6 +23,7 @@ type DomainModel interface {
 	GetScopes() map[string]ReferenceEntity
 	GetOperations() []OperationEntity
 	GetMappers() []MapperEntity
+	GetResources() []ResourceEntity
 }
 
 // RegoEntity interface for any entity that contains Rego code
@@ -57,4 +58,9 @@ type OperationEntity interface {
 type MapperEntity interface {
 	RegoEntity
 	GetID() string
+}
+
+// ResourceEntity interface for resources that reference resource-groups
+type ResourceEntity interface {
+	GetGroup() string
 }

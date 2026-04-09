@@ -161,6 +161,9 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 		// entity-aware diagnostics are produced even when LoadFromBytes would fail).
 		diagnostics = append(diagnostics, lintSelectors(data, key)...)
 
+		// Phase 1.75: Structural validation — duplicate MRNs and required fields.
+		diagnostics = append(diagnostics, lintStructure(data, key)...)
+
 		domain, err := parsers.LoadFromBytes(key, data)
 		if err != nil {
 			diagnostics = append(diagnostics, Diagnostic{
@@ -196,6 +199,7 @@ func lintCore(ctx context.Context, src DataSource, opts Options) (*Result, error
 	}
 
 	diagnostics = append(diagnostics, convertValidationErrors(validationErrors, domainKeyMap)...)
+	diagnostics = enrichReferenceLocations(diagnostics, rawData, domainKeyMap)
 
 	// Phase 3: Rego syntax validation (AST parse errors with line/col)
 	diagnostics = append(diagnostics, lintRegoAST(models, domainKeyMap, regoOffsets)...)
