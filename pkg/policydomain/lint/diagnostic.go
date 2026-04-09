@@ -62,6 +62,10 @@ const (
 	// SourceSelector indicates an invalid regular expression in a selector field
 	// on an operation, mapper, or resource entity.
 	SourceSelector Source = "selector"
+	// SourceDuplicate indicates a duplicate MRN or name within a single domain.
+	SourceDuplicate Source = "duplicate"
+	// SourceSchema indicates a missing or empty required field (e.g. metadata.name, rego).
+	SourceSchema Source = "schema"
 )
 
 // Position is a 1-based line/column location within a file.

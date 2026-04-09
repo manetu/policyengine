@@ -139,6 +139,7 @@ func (v *DomainValidator) validateDomainReferences(domainName string, model Doma
 	v.validateResourceGroups(domainName, model, errors)
 	v.validateScopes(domainName, model, errors)
 	v.validateOperations(domainName, model, errors)
+	v.validateResources(domainName, model, errors)
 }
 
 // validatePolicyLibraries validates all policy library dependencies
@@ -213,6 +214,16 @@ func (v *DomainValidator) validateOperations(domainName string, model DomainMode
 	for i, operation := range operations {
 		if err := v.resolver.ValidateReference(operation.GetPolicy(), domainName, "policy"); err != nil {
 			errors.AddReferenceError(domainName, "operation", fmt.Sprintf("operation[%d]", i), "policy", err.Error())
+		}
+	}
+}
+
+// validateResources validates all resource group references
+func (v *DomainValidator) validateResources(domainName string, model DomainModel, errors *Errors) {
+	resources := model.GetResources()
+	for i, resource := range resources {
+		if err := v.resolver.ValidateReference(resource.GetGroup(), domainName, "resource-group"); err != nil {
+			errors.AddReferenceError(domainName, "resource", fmt.Sprintf("resource[%d]", i), "group", err.Error())
 		}
 	}
 }

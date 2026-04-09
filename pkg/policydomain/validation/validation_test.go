@@ -47,6 +47,7 @@ type mockDomainModel struct {
 	scopes          map[string]ReferenceEntity
 	operations      []OperationEntity
 	mappers         []MapperEntity
+	resources       []ResourceEntity
 }
 
 func newMockDomainModel(name string) *mockDomainModel {
@@ -60,6 +61,7 @@ func newMockDomainModel(name string) *mockDomainModel {
 		scopes:          make(map[string]ReferenceEntity),
 		operations:      make([]OperationEntity, 0),
 		mappers:         make([]MapperEntity, 0),
+		resources:       make([]ResourceEntity, 0),
 	}
 }
 
@@ -72,6 +74,7 @@ func (m *mockDomainModel) GetResourceGroups() map[string]ReferenceEntity { retur
 func (m *mockDomainModel) GetScopes() map[string]ReferenceEntity         { return m.scopes }
 func (m *mockDomainModel) GetOperations() []OperationEntity              { return m.operations }
 func (m *mockDomainModel) GetMappers() []MapperEntity                    { return m.mappers }
+func (m *mockDomainModel) GetResources() []ResourceEntity                { return m.resources }
 
 type mockPolicyEntity struct {
 	rego         string
@@ -108,6 +111,12 @@ type mockMapperEntity struct {
 
 func (m *mockMapperEntity) GetID() string   { return m.id }
 func (m *mockMapperEntity) GetRego() string { return m.rego }
+
+type mockResourceEntity struct {
+	group string
+}
+
+func (m *mockResourceEntity) GetGroup() string { return m.group }
 
 // Tests for ReferenceResolver
 
@@ -899,6 +908,48 @@ func TestValidationError_Error(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDomainValidator_ValidateResources(t *testing.T) {
+	t.Run("valid resource group reference", func(t *testing.T) {
+		domains := newMockDomainMap()
+		domain := newMockDomainModel("test-domain")
+		domain.resourceGroups["mrn:iam:resource-group:files"] = &mockReferenceEntity{
+			policy: "mrn:iam:policy:allow-all",
+		}
+		domain.policies["mrn:iam:policy:allow-all"] = &mockPolicyEntity{
+			rego: "package authz\ndefault allow = true",
+		}
+		domain.resources = append(domain.resources, &mockResourceEntity{
+			group: "mrn:iam:resource-group:files",
+		})
+		domains.addDomain("test-domain", domain)
+
+		resolver := NewReferenceResolver(domains)
+		validator := NewDomainValidator(resolver, domains)
+
+		err := validator.ValidateAll()
+		assert.NoError(t, err)
+	})
+
+	t.Run("invalid resource group reference", func(t *testing.T) {
+		domains := newMockDomainMap()
+		domain := newMockDomainModel("test-domain")
+		domain.resources = append(domain.resources, &mockResourceEntity{
+			group: "mrn:iam:resource-group:nonexistent",
+		})
+		domains.addDomain("test-domain", domain)
+
+		resolver := NewReferenceResolver(domains)
+		validator := NewDomainValidator(resolver, domains)
+
+		errs := validator.GetAllValidationErrors()
+		require.Len(t, errs, 1)
+		assert.Equal(t, "reference", errs[0].Type)
+		assert.Equal(t, "resource", errs[0].Entity)
+		assert.Equal(t, "resource[0]", errs[0].EntityID)
+		assert.Equal(t, "group", errs[0].Field)
+	})
 }
 
 // Test helper functions

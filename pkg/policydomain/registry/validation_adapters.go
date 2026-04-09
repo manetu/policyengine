@@ -187,3 +187,22 @@ func (dma *DomainModelAdapter) GetMappers() []validation.MapperEntity {
 	}
 	return result
 }
+
+// ResourceAdapter adapts policydomain.Resource to validation.ResourceEntity interface
+type ResourceAdapter struct {
+	*policydomain.Resource
+}
+
+// GetGroup implements validation.ResourceEntity interface
+func (ra *ResourceAdapter) GetGroup() string {
+	return ra.Group
+}
+
+// GetResources implements validation.DomainModel interface
+func (dma *DomainModelAdapter) GetResources() []validation.ResourceEntity {
+	result := make([]validation.ResourceEntity, len(dma.Resources))
+	for i, resource := range dma.Resources {
+		result[i] = &ResourceAdapter{&resource}
+	}
+	return result
+}
