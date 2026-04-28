@@ -11,7 +11,7 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 VERSION_PKG := github.com/manetu/policyengine/cmd/mpe/version
 LDFLAGS := -ldflags "-X $(VERSION_PKG).Version=$(VERSION)"
 
-.PHONY: lint all clean test goimports staticcheck tests sec-scan protos docker docs-lint notices-generate license-check
+.PHONY: lint all clean test goimports staticcheck tests sec-scan protos docker docs-lint notices-generate license-check knowledge-build knowledge-install knowledge-deploy
 
 all: lint test test_fips race staticcheck goimports sec-scan build docs-lint
 
@@ -77,12 +77,22 @@ protos:
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@buf generate
 
+knowledge-build: ## Build the knowledge artifact JAR
+	@$(MAKE) -f knowledge/Makefile knowledge-build
+
+knowledge-install: ## Install knowledge JAR to ~/.m2
+	@$(MAKE) -f knowledge/Makefile knowledge-install
+
+knowledge-deploy: ## Deploy knowledge JAR to GitHub Packages (CI)
+	@$(MAKE) -f knowledge/Makefile knowledge-deploy
+
 clean: ## Remove previous build
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"
 	@go clean -testcache
 	-@rm -rf target
 	-@rm NOTICES
 	@$(MAKE) -C docs clean
+	@$(MAKE) -f knowledge/Makefile knowledge-clean
 
 sec-scan: ## Run gosec; see https://github.com/securego/gosec
 	@printf "\033[36m%-30s\033[0m %s\n" "### make $@"

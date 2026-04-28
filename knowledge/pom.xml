@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.manetu</groupId>
+  <artifactId>mpe-knowledge</artifactId>
+  <version>${project.version}</version>
+  <packaging>jar</packaging>
+
+  <name>MPE Knowledge Artifact</name>
+  <description>
+    Pre-built knowledge artifact (embeddings index + curated baseline) for
+    Manetu PolicyEngine LLM tooling.  The JAR bundles the static files under
+    knowledge/ so they can be fetched as a Maven dependency and embedded in
+    agent deployments without requiring a Python runtime at runtime.
+  </description>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Manetu Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/manetu/policyengine</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <!--
+        There is intentionally no compile / source plugin here.
+        The jar is assembled by knowledge/Makefile (a subsequent issue)
+        which invokes:
+          mvn package -Dproject.version=<semver>
+        and uses the maven-assembly-plugin (or jar:jar) to bundle the
+        pre-built knowledge/ output directory.
+      -->
+    </plugins>
+  </build>
+</project>
