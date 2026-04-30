@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: write   # attach release asset
-  packages: write   # push to GitHub Packages
 
 jobs:
   publish-knowledge:
@@ -58,7 +57,8 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          RAW=${GITHUB_REF#refs/tags/}
+          VERSION=${RAW#v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build knowledge artifact
@@ -73,31 +73,32 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Configure Maven settings for GitHub Packages
+      - name: Configure Maven settings for Clojars
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml <<'EOF'
           <settings>
             <servers>
               <server>
-                <id>github</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.GITHUB_TOKEN}</password>
+                <id>clojars</id>
+                <username>${env.CLOJARS_USERNAME}</username>
+                <password>${env.CLOJARS_PASSWORD}</password>
               </server>
             </servers>
           </settings>
           EOF
 
-      - name: Deploy knowledge artifact to GitHub Packages
+      - name: Deploy knowledge artifact to Clojars
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
         run: |
           VERSION=${{ steps.version.outputs.version }}
           # Skip deploy if artifact already exists (idempotent re-runs)
-          if curl -sf -H "Authorization: token ${GITHUB_TOKEN}" \
-            "https://maven.pkg.github.com/manetu/policyengine/com/manetu/mpe-knowledge/${VERSION}/mpe-knowledge-${VERSION}.jar" \
+          if curl -sfI \
+            "https://repo.clojars.org/io/github/manetu/mpe-knowledge/${VERSION}/mpe-knowledge-${VERSION}.jar" \
             -o /dev/null; then
-            echo "Artifact ${VERSION} already exists in GitHub Packages, skipping deploy"
+            echo "Artifact ${VERSION} already exists on Clojars, skipping deploy"
           else
             VERSION=${VERSION} make knowledge-deploy
           fi

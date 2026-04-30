@@ -5,7 +5,7 @@
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.manetu</groupId>
+  <groupId>io.github.manetu</groupId>
   <artifactId>mpe-knowledge</artifactId>
   <version>${project.version}</version>
   <packaging>jar</packaging>
@@ -18,23 +18,28 @@
     agent deployments without requiring a Python runtime at runtime.
   </description>
 
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub Manetu Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/manetu/policyengine</url>
-    </repository>
-  </distributionManagement>
+  <url>https://github.com/manetu/policyengine</url>
+
+  <licenses>
+    <license>
+      <name>BUSL-1.1</name>
+      <url>https://github.com/manetu/policyengine/blob/main/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/manetu/policyengine</url>
+    <connection>scm:git:git://github.com/manetu/policyengine.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/manetu/policyengine.git</developerConnection>
+  </scm>
 
   <build>
     <plugins>
       <!--
         There is intentionally no compile / source plugin here.
-        The jar is assembled by knowledge/Makefile (a subsequent issue)
-        which invokes:
-          mvn package -Dproject.version=<semver>
-        and uses the maven-assembly-plugin (or jar:jar) to bundle the
-        pre-built knowledge/ output directory.
+        The jar is assembled by knowledge/build.py, which bundles the
+        pre-built knowledge/ output directory into a data-only zip.
       -->
     </plugins>
   </build>
