@@ -34,20 +34,20 @@ knowledge-build: $(VENV)  ## Build the knowledge JAR
 knowledge-install: knowledge-build  ## Install JAR to ~/.m2 (for local iamlite dev)
 	mvn install:install-file \
 	  -Dfile=$(TARGET) \
-	  -DgroupId=com.manetu \
+	  -DgroupId=io.github.manetu \
 	  -DartifactId=mpe-knowledge \
 	  -Dversion=$(VERSION) \
 	  -Dpackaging=jar
 
-knowledge-deploy: knowledge-build  ## Deploy JAR to GitHub Packages (CI only)
+knowledge-deploy: knowledge-build  ## Deploy JAR to Clojars (CI only)
 	mvn deploy:deploy-file \
 	  -Dfile=$(TARGET) \
-	  -DgroupId=com.manetu \
+	  -DgroupId=io.github.manetu \
 	  -DartifactId=mpe-knowledge \
 	  -Dversion=$(VERSION) \
 	  -Dpackaging=jar \
-	  -DrepositoryId=github \
-	  -Durl=https://maven.pkg.github.com/manetu/policyengine
+	  -DrepositoryId=clojars \
+	  -Durl=https://repo.clojars.org/
 
 knowledge-clean:
 	rm -rf knowledge/target

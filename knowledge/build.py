@@ -597,7 +597,8 @@ def run_assemble() -> Path:
         zf.write(CHUNKS_FILE, "chunks.jsonl")
         zf.write(VECTORS_FILE, "vectors.bin")
         zf.write(LEXICAL_FILE, "lexical-index.bin")
-        zf.write(pom_file, "META-INF/maven/com.manetu/mpe-knowledge/pom.xml")
+        pom_text = pom_file.read_text(encoding="utf-8").replace("${project.version}", version)
+        zf.writestr("META-INF/maven/io.github.manetu/mpe-knowledge/pom.xml", pom_text)
 
     # Compute sha256 over sorted entry contents (deterministic, excludes timestamps)
     h = hashlib.sha256()
