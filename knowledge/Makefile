@@ -29,7 +29,7 @@ knowledge-build: $(VENV)  ## Build the knowledge JAR
 	  echo "Model $(OLLAMA_MODEL) not present locally, pulling..."; \
 	  curl -fsS $(OLLAMA_HOST)/api/pull -d '{"name":"$(OLLAMA_MODEL)","stream":false}' | tail -1; \
 	fi
-	OLLAMA_HOST=$(OLLAMA_HOST) MPE_OLLAMA_MODEL=$(OLLAMA_MODEL) $(PYTHON) knowledge/build.py
+	OLLAMA_HOST=$(OLLAMA_HOST) MPE_OLLAMA_MODEL=$(OLLAMA_MODEL) MPE_VERSION=$(VERSION) $(PYTHON) knowledge/build.py
 
 knowledge-install: knowledge-build  ## Install JAR to ~/.m2 (for local iamlite dev)
 	mvn install:install-file \

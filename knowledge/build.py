@@ -553,16 +553,19 @@ def run_assemble() -> Path:
         )
         sys.exit(1)
 
-    # Determine version from git
-    try:
-        version = subprocess.check_output(
-            ["git", "describe", "--tags", "--always", "--dirty"],
-            cwd=Path(__file__).parent.parent,
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-    except Exception:
-        version = "dev"
+    # Determine version: prefer MPE_VERSION env var (set by CI after stripping
+    # the 'v' prefix from the release tag) over git describe.
+    version = os.environ.get("MPE_VERSION") or ""
+    if not version:
+        try:
+            version = subprocess.check_output(
+                ["git", "describe", "--tags", "--always", "--dirty"],
+                cwd=Path(__file__).parent.parent,
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+        except Exception:
+            version = "dev"
 
     # Get doc commit sha
     try:
