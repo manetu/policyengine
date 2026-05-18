@@ -12,15 +12,17 @@ import (
 
 	"github.com/manetu/policyengine/cmd/mpe/common"
 	"github.com/manetu/policyengine/pkg/core"
+	"github.com/manetu/policyengine/pkg/core/auxdata"
 	"github.com/urfave/cli/v3"
 )
 
 type engine struct {
-	domain string
-	pe     core.PolicyEngine
-	cmd    *cli.Command
-	trace  bool
-	stdout *os.File
+	domain  string
+	pe      core.PolicyEngine
+	cmd     *cli.Command
+	trace   bool
+	stdout  *os.File
+	auxdata map[string]interface{}
 }
 
 func newEngine(cmd *cli.Command) (*engine, error) {
@@ -32,12 +34,19 @@ func newEngine(cmd *cli.Command) (*engine, error) {
 		return nil, err
 	}
 
+	// Load auxiliary data from CLI flag if provided
+	aux, err := auxdata.LoadAuxData(cmd.String("auxdata"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &engine{
-		domain: cmd.String("name"),
-		pe:     pe,
-		cmd:    cmd,
-		trace:  cmd.Root().Bool("trace"),
-		stdout: originalStdout,
+		domain:  cmd.String("name"),
+		pe:      pe,
+		cmd:     cmd,
+		trace:   cmd.Root().Bool("trace"),
+		stdout:  originalStdout,
+		auxdata: aux,
 	}, nil
 }
 
@@ -55,6 +64,8 @@ func (e *engine) executeMapper(ctx context.Context) (string, error) {
 	if err := json.Unmarshal([]byte(input), &envoyInputData); err != nil {
 		return "", fmt.Errorf("failed to parse Envoy input JSON: %w", err)
 	}
+
+	auxdata.MergeAuxData(envoyInputData, e.auxdata)
 
 	porcData, perr := mapper.Evaluate(ctx, envoyInputData)
 	if perr != nil {

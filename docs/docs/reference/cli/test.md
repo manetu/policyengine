@@ -241,11 +241,15 @@ Test mapper transformation of external input to PORC.
 | `--name` | `-n` | Domain name when using multiple bundles |
 | `--opa-flags` | | Additional OPA flags |
 | `--no-opa-flags` | | Disable OPA flags |
+| `--auxdata` | | Directory of auxiliary data files to merge into mapper input |
 
 ### Example
 
 ```bash
 mpe test mapper -b my-domain.yml -i envoy-input.json
+
+# With auxiliary data
+mpe test mapper -b my-domain.yml -i envoy-input.json --auxdata ./auxdata/
 ```
 
 ### Input Format (Envoy-style)
@@ -311,11 +315,15 @@ Execute the complete pipeline: Envoy input → mapper → PORC → decision.
 | `--name` | `-n` | Domain name when using multiple bundles |
 | `--opa-flags` | | Additional OPA flags |
 | `--no-opa-flags` | | Disable OPA flags |
+| `--auxdata` | | Directory of auxiliary data files to merge into mapper input |
 
 ### Example
 
 ```bash
 mpe test envoy -b my-domain.yml -i envoy-request.json
+
+# With auxiliary data
+mpe test envoy -b my-domain.yml -i envoy-request.json --auxdata ./auxdata/
 ```
 
 ### Output

@@ -1,0 +1,13 @@
+{
+    "request": {
+        "http": {
+            "method": "GET",
+            "path": "/api/test",
+            "headers": {
+                ":method": "GET",
+                ":path": "/api/test"
+            }
+        }
+    }
+}
+
