@@ -92,3 +92,17 @@ message AccessRecord {
   }
   Duration  duration                  = 11;  // execution latency, in nanoseconds
 }
+
+message Integrity {
+  bytes  leaf_hash = 1;
+  bytes  signature = 2;
+  string key_id    = 3;
+  string sig_alg   = 4;  // "Ed25519" / "ECDSA-RFC6979"
+}
+
+// Canonical bytes = verbatim record_pb bytes from the upstream accesslog topic.
+// leaf_hash = SHA-256(record_pb).  Do NOT re-encode.
+message SignedAccessRecord {
+  bytes     record_pb = 1;  // verbatim AccessRecord bytes, untouched
+  Integrity integrity  = 2;
+}
