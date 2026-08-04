@@ -48,9 +48,15 @@ const (
 	resource  string = "resource"
 	operation string = "operation"
 	principal string = "principal"
+	// contextKey is the PORC context ("C") key. Named contextKey (not context) to
+	// avoid shadowing the imported context package.
+	contextKey string = "context"
 
 	// Sub ...
 	Sub string = "sub"
+	// Act is the RFC 8693 delegation actor key: principal.act is the current
+	// actor, nested arbitrarily deep (act.act...), each level carrying its own sub.
+	Act string = "act"
 	// Mrealm ...
 	Mrealm string = "mrealm"
 	// Mroles ...
@@ -206,6 +212,58 @@ func (pe *PolicyEngine) resolveResource(ctx context.Context, mrn string) (*model
 	return res, nil
 }
 
+// flattenSubs builds the ordered delegation-chain subject list for the context
+// resolver: current actor first (principal.act.sub), walking the nested act chain
+// (act.act.sub, ...), with the subject (principal.sub) last. Empty subs are skipped.
+func flattenSubs(principalMap map[string]interface{}) []string {
+	var subs []string
+	node, _ := principalMap[Act].(map[string]interface{})
+	for node != nil {
+		if s, ok := node[Sub].(string); ok && s != "" {
+			subs = append(subs, s)
+		}
+		node, _ = node[Act].(map[string]interface{})
+	}
+	if s, ok := principalMap[Sub].(string); ok && s != "" {
+		subs = append(subs, s)
+	}
+	return subs
+}
+
+// flatMergeContext flat-merges the resolved context into the existing ambient
+// context (resolved values win on key collision), returning the combined map.
+func flatMergeContext(existing interface{}, resolved map[string]interface{}) map[string]interface{} {
+	out := map[string]interface{}{}
+	if m, ok := existing.(map[string]interface{}); ok {
+		for k, v := range m {
+			out[k] = v
+		}
+	}
+	for k, v := range resolved {
+		out[k] = v
+	}
+	return out
+}
+
+// resolveContext enriches the PORC context on the delegation-chain subs. A failed
+// or empty resolve contributes nothing (the contract: a failed call is treated
+// exactly like an empty result -- the engine attaches {} and evaluation proceeds).
+func (pe *PolicyEngine) resolveContext(ctx context.Context, input types.PORC, principalMap map[string]interface{}) {
+	subs := flattenSubs(principalMap)
+	if len(subs) == 0 {
+		return
+	}
+	resolved, ctxErr := pe.backend.GetContext(ctx, subs)
+	if ctxErr != nil {
+		logger.Debugf(agent, "resolveContext", "context resolution failed, attaching nothing: %+v", ctxErr)
+		return
+	}
+	if len(resolved) > 0 {
+		input[contextKey] = flatMergeContext(input[contextKey], resolved)
+		logger.Debugf(agent, "resolveContext", "context enriched: %+v", input[contextKey])
+	}
+}
+
 // Authorize is the main function that calls opa
 func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOptions *options.AuthzOptions) bool {
 	overallStart := time.Now()
@@ -266,6 +324,9 @@ func (pe *PolicyEngine) Authorize(ctx context.Context, input types.PORC, authOpt
 			Classification: classification,
 		}
 	}
+
+	// Context (C) resolution: enrich input[context] on the delegation-chain subs.
+	pe.resolveContext(ctx, input, principalMap)
 
 	op, _ := input[operation].(string)
 

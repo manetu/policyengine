@@ -288,6 +288,23 @@ func (b *Backend) GetScope(ctx context.Context, mrn string) (*model.PolicyRefere
 	return nil, common.NewError(events.AccessRecord_BundleReference_NOTFOUND_ERROR, fmt.Sprintf("scopes not found: %s", mrn))
 }
 
+// GetContext returns an empty context (the mock backend has no external context
+// resolver). Two sentinels drive the enrichment paths in tests: a sub containing
+// "networkerror" exercises the failure path, and one containing "withcontext"
+// returns a non-empty context so the resolve-and-merge path can be covered.
+func (b *Backend) GetContext(ctx context.Context, subs []string) (map[string]interface{}, *common.PolicyError) {
+	resolved := map[string]interface{}{}
+	for _, s := range subs {
+		if strings.Contains(s, "networkerror") {
+			return nil, &common.PolicyError{ReasonCode: events.AccessRecord_BundleReference_NETWORK_ERROR, Reason: "network error"}
+		}
+		if strings.Contains(s, "withcontext") {
+			resolved["resolved"] = true
+		}
+	}
+	return resolved, nil
+}
+
 // GetResource retrieves a resource by its MRN from the mock backend configuration.
 // Returns resource with RichAnnotations for merge support.
 func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource, *common.PolicyError) {

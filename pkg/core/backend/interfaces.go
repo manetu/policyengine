@@ -130,4 +130,10 @@ type Service interface {
 	// If domainName is empty, returns the mapper from the first domain
 	// that has one (error if multiple domains have mappers).
 	GetMapper(ctx context.Context, domainName string) (*model.Mapper, *common.PolicyError)
+
+	// GetContext resolves the request context (the "C" in PORC) for the ordered
+	// delegation-chain subjects (current actor first ... subject last). The returned
+	// map is flat-merged into the PORC context. Standalone/local backends return an
+	// empty map; the remote backend calls the external customer context resolver.
+	GetContext(ctx context.Context, subs []string) (map[string]interface{}, *common.PolicyError)
 }

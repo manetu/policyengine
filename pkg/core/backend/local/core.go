@@ -235,6 +235,13 @@ func (b *Backend) GetResource(ctx context.Context, mrn string) (*model.Resource,
 	}, nil
 }
 
+// GetContext returns an empty context: the local/standalone backend has no
+// external context resolver. The remote backend overrides this to call the
+// customer resolver.
+func (b *Backend) GetContext(ctx context.Context, subs []string) (map[string]interface{}, *common.PolicyError) {
+	return map[string]interface{}{}, nil
+}
+
 // GetResourceGroup retrieves a resource group by MRN from any domain
 func (b *Backend) GetResourceGroup(ctx context.Context, mrn string) (*model.PolicyReference, *common.PolicyError) {
 	logger.Tracef(actor, "Get", "GetResourceGroup: %v", mrn)
