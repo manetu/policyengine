@@ -16,6 +16,7 @@ import (
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	typev3 "github.com/envoyproxy/go-control-plane/envoy/type/v3"
 	"github.com/manetu/policyengine/internal/logging"
+	"github.com/manetu/policyengine/pkg/core/auxdata"
 	"github.com/manetu/policyengine/pkg/core/backend"
 	"github.com/manetu/policyengine/pkg/decisionpoint"
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -51,6 +52,7 @@ type ExtAuthzServer struct {
 	pe         core.PolicyEngine
 	be         backend.Service
 	domain     string
+	auxdata    map[string]interface{}
 
 	// For test only
 	grpcPort chan int
@@ -130,6 +132,8 @@ func (s *ExtAuthzServer) Check(ctx context.Context, request *authv3.CheckRequest
 		return nil, err
 	}
 
+	auxdata.MergeAuxData(mattrs, s.auxdata)
+
 	mapper, perr := s.be.GetMapper(ctx, s.domain)
 	if perr != nil {
 		return nil, perr
@@ -189,12 +193,14 @@ func (s *ExtAuthzServer) run(grpcAddr string) {
 
 // CreateServer creates and starts a new Envoy External Authorization server.
 // It returns a Server interface that implements the decisionpoint.Server interface.
-func CreateServer(pe core.PolicyEngine, port int, domain string) (decisionpoint.Server, error) {
+// The auxdata parameter, if non-nil, is merged into the mapper input under the "auxdata" key.
+func CreateServer(pe core.PolicyEngine, port int, domain string, aux map[string]interface{}) (decisionpoint.Server, error) {
 	s := &ExtAuthzServer{
 		grpcPort: make(chan int, 1),
 		pe:       pe,
 		be:       pe.GetBackend(),
 		domain:   domain,
+		auxdata:  aux,
 	}
 
 	go s.run(fmt.Sprintf(":%d", port))

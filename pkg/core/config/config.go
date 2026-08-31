@@ -170,6 +170,14 @@ const (
 	// Default: "/etc/podinfo"
 	// Set via environment: MPE_AUDIT_K8S_PODINFO=/custom/path
 	AuditK8sPodinfo string = "audit.k8s.podinfo"
+
+	// AuxDataPath specifies the directory where auxiliary data files are mounted.
+	// When set, all files in this directory are loaded and made available to
+	// the mapper as input.auxdata, allowing Rego policies to reference
+	// external configuration data.
+	//
+	// Set via environment: MPE_AUXDATA_PATH=/etc/mpe/auxdata
+	AuxDataPath string = "auxdata.path"
 )
 
 var (
